@@ -211,6 +211,36 @@
   .quest-btn b { display: block; }
   .quest-btn span { color: var(--muted); font-size: .78rem; }
 
+  .story-grid, .achievement-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .story-card, .achievement-card {
+    border: 1px solid var(--border);
+    background: linear-gradient(145deg, rgba(85,182,255,.12), rgba(28,33,53,.88));
+    border-radius: 10px;
+    padding: 14px;
+  }
+
+  .story-card b, .achievement-card b { display: block; margin-bottom: 5px; }
+  .story-card span, .achievement-card span { color: var(--muted); font-size: .86rem; line-height: 1.4; }
+  .achievement-card.unlocked { border-color: var(--gold); background: linear-gradient(145deg, rgba(245,197,66,.14), rgba(28,33,53,.9)); }
+  .story-stage {
+    border: 1px solid var(--border);
+    background: rgba(28,33,53,.84);
+    border-radius: 12px;
+    padding: 18px;
+    margin-top: 18px;
+  }
+
+  .story-scene {
+    font-size: 1.2rem;
+    line-height: 1.5;
+    margin: 12px 0 16px;
+  }
+
   .setup-panel {
     background: rgba(21, 25, 42, .88);
     border: 1px solid var(--border);
@@ -604,6 +634,7 @@
     <div class="brand"><strong>Vocab<span>Quest</span> Plus</strong><small>vocabulario real por niveles</small></div>
     <nav class="nav">
       <button class="nav-btn active" data-view="home">Inicio</button>
+      <button class="nav-btn" data-view="stories">Historias</button>
       <button class="nav-btn" data-view="stats">Estadisticas</button>
       <button class="nav-btn" data-view="review">Repaso</button>
       <button class="nav-btn" data-view="game">Practica</button>
@@ -651,6 +682,7 @@
         <button class="quest-btn" data-quest="daily"><b>Daily Challenge</b><span>20 preguntas con bonus</span></button>
         <button class="quest-btn" data-quest="speed"><b>Speed Round</b><span>responde sin romper racha</span></button>
         <button class="quest-btn" data-quest="boss"><b>Vocabulary Boss</b><span>mini jefe de nivel</span></button>
+        <button class="quest-btn" data-quest="survival"><b>Supervivencia</b><span>3 vidas, record personal</span></button>
       </div>
 
       <div class="start-row">
@@ -670,6 +702,15 @@
         </div>
       </div>
     </section>
+  </div>
+</main>
+
+<main id="stories" class="screen">
+  <div class="shell" style="padding:24px 0 40px">
+    <h2>Historias interactivas</h2>
+    <p style="color:var(--muted);line-height:1.55">Elige decisiones en ingles y avanza por escenas cortas. Cada historia premia contexto, memoria y comprension.</p>
+    <div class="story-grid" id="storyGrid"></div>
+    <div class="story-stage hidden" id="storyStage"></div>
   </div>
 </main>
 
@@ -730,6 +771,8 @@
     <div class="chart" id="weekChart"></div>
     <h3>Recomendacion</h3>
     <p id="statsAdvice" style="color:var(--muted);line-height:1.55"></p>
+    <h3>Logros y coleccionables</h3>
+    <div class="achievement-grid" id="achievementGrid"></div>
   </div>
 </main>
 
@@ -795,12 +838,13 @@ const TOPICS = {
 };
 
 const LEVELS = {1:"Principiante",2:"Basico",3:"Intermedio",4:"Avanzado"};
-const MODES = {solo:"Practica individual",duel:"Multijugador local",review:"Repaso inteligente",challenge:"Reto de 20 preguntas"};
+const MODES = {solo:"Practica individual",duel:"Multijugador local",review:"Repaso inteligente",challenge:"Reto de 20 preguntas",survival:"Supervivencia"};
 const EX_TYPES = ["esToEn","enToEs","type","listening","sentence","wordSearch","crossword"];
 const QUESTS = {
   daily: { mode: "challenge", levelBoost: 0, label: "Daily Challenge" },
   speed: { mode: "challenge", levelBoost: 1, label: "Speed Round" },
-  boss: { mode: "challenge", levelBoost: 2, label: "Vocabulary Boss" }
+  boss: { mode: "challenge", levelBoost: 2, label: "Vocabulary Boss" },
+  survival: { mode: "survival", levelBoost: 0, label: "Supervivencia" }
 };
 const OK_MESSAGES = ["Great job!", "Nice!", "Excellent!", "You are on fire!", "Amazing streak!", "Keep going!", "Quest cleared!"];
 const BAD_MESSAGES = ["Try again!", "Almost there!", "Good attempt!", "Let's learn it together.", "That one is tricky.", "New word unlocked!"];
@@ -811,6 +855,85 @@ const MINI_QUESTS = [
   { q: "What do you use to open a door?", options: ["key", "chair", "cloud"], answer: "key" },
   { q: "Which word is about work?", options: ["meeting", "beach", "soup"], answer: "meeting" },
   { q: "Which one means very good?", options: ["excellent", "angry", "late"], answer: "excellent" }
+];
+const STORY_SCENARIOS = {
+  airport: {
+    title: "Airport Dash",
+    icon: "AIR",
+    intro: "You arrive late at the airport. Your flight leaves soon.",
+    reward: 18,
+    scenes: [
+      { text: "The agent asks: 'Where are you flying today?'", choices: [
+        { label: "I am flying to Miami.", ok: true, next: 1 },
+        { label: "I am eating a ticket.", ok: false, next: 1 },
+        { label: "My chair is delayed.", ok: false, next: 1 }
+      ]},
+      { text: "Security says: 'Put your bag on the tray.' What do you do?", choices: [
+        { label: "I put my bag on the tray.", ok: true, next: 2 },
+        { label: "I open the hotel.", ok: false, next: 2 },
+        { label: "I board the soup.", ok: false, next: 2 }
+      ]},
+      { text: "At the gate, you hear: 'Boarding starts now.'", choices: [
+        { label: "I go to the gate.", ok: true, next: "complete" },
+        { label: "I take a shower.", ok: false, next: "complete" },
+        { label: "I buy a desk.", ok: false, next: "complete" }
+      ]}
+    ]
+  },
+  restaurant: {
+    title: "Restaurant Quest",
+    icon: "FOOD",
+    intro: "You are at a restaurant and need to order politely.",
+    reward: 18,
+    scenes: [
+      { text: "The server asks: 'Are you ready to order?'", choices: [
+        { label: "Yes, I would like soup, please.", ok: true, next: 1 },
+        { label: "Yes, I need a password.", ok: false, next: 1 },
+        { label: "No, the airport is spicy.", ok: false, next: 1 }
+      ]},
+      { text: "Your food is too spicy. What do you say?", choices: [
+        { label: "Could I have some water, please?", ok: true, next: 2 },
+        { label: "Could I have a screen, please?", ok: false, next: 2 },
+        { label: "The meeting is delicious.", ok: false, next: 2 }
+      ]},
+      { text: "You finish eating. What is the useful phrase?", choices: [
+        { label: "Could I have the bill, please?", ok: true, next: "complete" },
+        { label: "Could I have the luggage, please?", ok: false, next: "complete" },
+        { label: "I missed the deadline.", ok: false, next: "complete" }
+      ]}
+    ]
+  },
+  hotel: {
+    title: "Hotel Check-in",
+    icon: "HOTEL",
+    intro: "You arrive at a hotel and need your room.",
+    reward: 18,
+    scenes: [
+      { text: "Reception asks for your reservation.", choices: [
+        { label: "I have a reservation.", ok: true, next: 1 },
+        { label: "I have a cough.", ok: false, next: 1 },
+        { label: "I have a browser.", ok: false, next: 1 }
+      ]},
+      { text: "The room key does not work.", choices: [
+        { label: "My key is not working.", ok: true, next: 2 },
+        { label: "My soup is not flying.", ok: false, next: 2 },
+        { label: "My boss is boarding.", ok: false, next: 2 }
+      ]},
+      { text: "You need towels.", choices: [
+        { label: "Could I have more towels?", ok: true, next: "complete" },
+        { label: "Could I have more deadlines?", ok: false, next: "complete" },
+        { label: "Could I have more batteries?", ok: false, next: "complete" }
+      ]}
+    ]
+  }
+};
+const ACHIEVEMENTS = [
+  { id: "first_points", title: "First 100 Points", desc: "Reach 100 total session points.", test: () => progress.records.totalPoints >= 100 },
+  { id: "coin_collector", title: "Coin Collector", desc: "Collect 150 coins.", test: () => progress.rewards.coins >= 150 },
+  { id: "story_starter", title: "Story Starter", desc: "Complete one interactive story.", test: () => Object.keys(progress.stories.completed || {}).length >= 1 },
+  { id: "travel_expert", title: "Travel Expert", desc: "Complete Airport Dash.", test: () => !!progress.stories.completed?.airport },
+  { id: "survivor", title: "Survivor", desc: "Survive 10 questions.", test: () => progress.records.survivalBest >= 10 },
+  { id: "vocabulary_master", title: "Vocabulary Master", desc: "Master 20 words.", test: () => Object.keys(progress.mastered).length >= 20 }
 ];
 const STORE_KEY = "vocabquest_plus_progress_v1";
 const DAY_MS = 86400000;
@@ -835,6 +958,7 @@ let app = {
   player: 0,
   players: [{name:"Persona A",score:0,correct:0,attempts:0},{name:"Persona B",score:0,correct:0,attempts:0}],
   activeQuest: null,
+  lives: 3,
   pool: []
 };
 
@@ -844,7 +968,17 @@ let cloudReady = false;
 let syncing = false;
 
 function defaultProgress() {
-  return { days: {}, words: {}, mastered: {}, rewards: { coins: 40, energy: 10, stars: 0, chests: 0 }, quests: {}, lastSeen: null };
+  return {
+    days: {},
+    words: {},
+    mastered: {},
+    rewards: { coins: 40, energy: 10, stars: 0, chests: 0 },
+    quests: {},
+    stories: { completed: {} },
+    achievements: {},
+    records: { survivalBest: 0, totalPoints: 0 },
+    lastSeen: null
+  };
 }
 
 function loadProgress() {
@@ -864,6 +998,12 @@ function normalizeProgress() {
   progress.rewards.stars ??= 0;
   progress.rewards.chests ??= 0;
   progress.quests ||= {};
+  progress.stories ||= { completed: {} };
+  progress.stories.completed ||= {};
+  progress.achievements ||= {};
+  progress.records ||= { survivalBest: 0, totalPoints: 0 };
+  progress.records.survivalBest ??= 0;
+  progress.records.totalPoints ??= 0;
 }
 normalizeProgress();
 
@@ -934,6 +1074,9 @@ function mergeProgress(remote) {
   progress.mastered = {...(remote.mastered || {}), ...(progress.mastered || {})};
   progress.rewards = {...(remote.rewards || {}), ...(progress.rewards || {})};
   progress.quests = {...(remote.quests || {}), ...(progress.quests || {})};
+  progress.stories = { completed: {...(remote.stories?.completed || {}), ...(progress.stories?.completed || {})} };
+  progress.achievements = {...(remote.achievements || {}), ...(progress.achievements || {})};
+  progress.records = {...(remote.records || {}), ...(progress.records || {})};
   progress.lastSeen = Math.max(remote.lastSeen || 0, progress.lastSeen || 0);
   normalizeProgress();
 }
@@ -1078,7 +1221,75 @@ function showView(id) {
   document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.view === id));
   if (id === "stats") renderStats();
   if (id === "review") renderReview();
+  if (id === "stories") renderStories();
   if (id === "game" && !app.current) startGame();
+}
+
+function renderStories() {
+  normalizeProgress();
+  const grid = document.getElementById("storyGrid");
+  grid.innerHTML = Object.entries(STORY_SCENARIOS).map(([id, story]) => {
+    const done = !!progress.stories.completed[id];
+    return `<button class="story-card ${done ? "achievement-card unlocked" : ""}" data-story="${id}">
+      <b>${story.icon} ${story.title}</b>
+      <span>${story.intro}<br>${done ? "Completed" : `Reward: ${story.reward} coins`}</span>
+    </button>`;
+  }).join("");
+}
+
+function startStory(id) {
+  const story = STORY_SCENARIOS[id];
+  if (!story) return;
+  app.story = { id, index: 0, correct: 0 };
+  renderStoryScene();
+}
+
+function renderStoryScene() {
+  const story = STORY_SCENARIOS[app.story.id];
+  const scene = story.scenes[app.story.index];
+  const stage = document.getElementById("storyStage");
+  stage.classList.remove("hidden");
+  stage.innerHTML = `<span class="badge">${story.title} | Scene ${app.story.index + 1}/${story.scenes.length}</span>
+    <div class="story-scene">${scene.text}</div>
+    <div class="options">
+      ${scene.choices.map(choice => `<button class="option" onclick="chooseStory('${escapeAttr(choice.label)}')">${choice.label}</button>`).join("")}
+    </div>`;
+}
+
+function chooseStory(label) {
+  const story = STORY_SCENARIOS[app.story.id];
+  const scene = story.scenes[app.story.index];
+  const choice = scene.choices.find(c => c.label === label);
+  if (!choice) return;
+  if (choice.ok) {
+    app.story.correct++;
+    progress.rewards.coins += 5;
+    popReward("Story choice! +5 coins");
+  } else {
+    progress.rewards.energy = Math.max(0, progress.rewards.energy - 1);
+  }
+  if (choice.next === "complete") {
+    completeStory();
+  } else {
+    app.story.index = choice.next;
+    renderStoryScene();
+  }
+  saveProgress();
+}
+
+function completeStory() {
+  const story = STORY_SCENARIOS[app.story.id];
+  const perfect = app.story.correct === story.scenes.length;
+  progress.stories.completed[app.story.id] = { completedAt: Date.now(), correct: app.story.correct };
+  progress.rewards.coins += story.reward + (perfect ? 10 : 0);
+  progress.rewards.stars += perfect ? 1 : 0;
+  unlockAchievements();
+  saveProgress();
+  document.getElementById("storyStage").innerHTML = `<span class="badge">Story complete</span>
+    <div class="story-scene">${perfect ? "Perfect route!" : "Story cleared!"} You earned ${story.reward + (perfect ? 10 : 0)} coins${perfect ? " and 1 star" : ""}.</div>
+    <div class="options"><button class="primary-btn" onclick="renderStories()">Choose another story</button><button class="soft-btn" onclick="showView('home')">Back to map</button></div>`;
+  popReward(`${story.title} complete!`);
+  renderStories();
 }
 
 function startGame(placement = false) {
@@ -1089,6 +1300,7 @@ function startGame(placement = false) {
   app.correct = 0;
   app.questionCount = 0;
   app.player = 0;
+  app.lives = app.mode === "survival" ? 3 : app.lives;
   app.players = [{name:"Persona A",score:0,correct:0,attempts:0},{name:"Persona B",score:0,correct:0,attempts:0}];
   app.pool = placement ? shuffle(allWords()) : shuffle(flattenWords());
   app.current = { starting: true };
@@ -1102,9 +1314,13 @@ function nextQuestion() {
     showSummary();
     return;
   }
+  if (app.mode === "survival" && app.lives <= 0) {
+    showSurvivalSummary();
+    return;
+  }
   app.answered = false;
   app.questionCount++;
-  const word = app.mode === "challenge" ? (app.pool.pop() || shuffle(allWords()).pop()) : pickWord();
+  const word = (app.mode === "challenge" || app.mode === "survival") ? (app.pool.pop() || shuffle(allWords()).pop()) : pickWord();
   app.current = word;
   const unlockedTypes = ["esToEn","enToEs","type","listening","wordSearch"];
   if (app.level >= 2) unlockedTypes.push("sentence");
@@ -1362,6 +1578,9 @@ function checkCrossword() {
     if (ok) correct++;
   });
   if (correct === inputs.length) {
+    progress.rewards.chests += 1;
+    progress.rewards.coins += 15;
+    popReward("Crossword cleared! +1 chest");
     speakWord(app.current.puzzleWords[0].en);
     mark(true, null);
   } else {
@@ -1383,6 +1602,8 @@ function mark(correct, btn, skipped = false) {
   if (correct) app.correct++;
   app.streak = correct ? app.streak + 1 : 0;
   app.score += correct ? 10 + app.level * 4 + Math.min(app.streak, 5) : 0;
+  if (correct) progress.records.totalPoints += 10 + app.level * 4 + Math.min(app.streak, 5);
+  if (app.mode === "survival" && !correct) app.lives = Math.max(0, app.lives - 1);
   applyRewards(correct);
 
   if (app.mode === "duel") {
@@ -1408,12 +1629,16 @@ function mark(correct, btn, skipped = false) {
   });
   if (btn && !correct) btn.classList.add("wrong");
   document.getElementById("nextBtn").classList.remove("hidden");
+  if (app.mode === "survival" && app.lives <= 0) {
+    document.getElementById("nextBtn").textContent = "Ver resultado";
+  }
 
   if (app.mode === "duel") app.player = app.player === 0 ? 1 : 0;
   adaptLevel();
   updateHud();
   renderWeakMini();
   renderAdventureMap();
+  unlockAchievements();
 }
 
 function applyRewards(correct) {
@@ -1498,6 +1723,27 @@ function showSummary() {
     </div>`;
 }
 
+function showSurvivalSummary() {
+  const survived = Math.max(0, app.attempts);
+  const bestBefore = progress.records.survivalBest || 0;
+  const isRecord = survived > bestBefore;
+  if (isRecord) {
+    progress.records.survivalBest = survived;
+    progress.rewards.chests += 1;
+    progress.rewards.coins += 30;
+    popReward("New survival record! +1 chest");
+  }
+  unlockAchievements();
+  saveProgress();
+  document.getElementById("practiceCard").innerHTML = `
+    <div class="exercise-meta"><span class="badge">Supervivencia terminada</span><span>Best: ${progress.records.survivalBest}</span></div>
+    <h2 class="question">${survived} preguntas sobrevividas<small>${isRecord ? "Nuevo record personal." : "Intenta superar tu record personal."}</small></h2>
+    <div class="options">
+      <button class="primary-btn" onclick="startQuickQuest('survival')">Intentar de nuevo</button>
+      <button class="soft-btn" onclick="showView('stats')">Ver logros</button>
+    </div>`;
+}
+
 function summaryAdvice(acc) {
   if (acc >= 85) return "Excelente. Prueba un nivel mas alto o temas profesionales.";
   if (acc >= 65) return "Buen avance. Repite las palabras falladas antes de subir.";
@@ -1510,11 +1756,11 @@ function updateHud() {
   document.getElementById("scoreOut").textContent = app.score;
   document.getElementById("coinsOut").textContent = progress.rewards.coins;
   document.getElementById("energyOut").textContent = progress.rewards.energy;
-  document.getElementById("streakOut").textContent = app.streak;
+  document.getElementById("streakOut").textContent = app.mode === "survival" ? `♥ ${app.lives}` : app.streak;
   document.getElementById("weekOut").textContent = week;
   document.getElementById("sessionName").textContent = `${TOPICS[app.topic].name} - ${LEVELS[app.level]}`;
-  document.getElementById("sessionMode").textContent = MODES[app.mode];
-  document.getElementById("progressFill").style.width = `${Math.min(100, app.questionCount * (app.mode === "challenge" ? 5 : 8))}%`;
+  document.getElementById("sessionMode").textContent = app.mode === "survival" ? `Supervivencia | Record ${progress.records.survivalBest}` : MODES[app.mode];
+  document.getElementById("progressFill").style.width = `${Math.min(100, app.questionCount * ((app.mode === "challenge" || app.mode === "survival") ? 5 : 8))}%`;
   document.getElementById("dailyGoal").textContent = `${progress.days[todayKey()]?.correct || 0} / 20 correctas`;
   document.getElementById("treasureOut").textContent = `${progress.rewards.stars} estrellas | ${progress.rewards.chests} cofres`;
   updatePlayers();
@@ -1529,6 +1775,7 @@ function updatePlayers() {
 }
 
 function renderStats() {
+  unlockAchievements(false);
   const keys = getWeekKeys();
   const attempts = keys.reduce((sum, d) => sum + (progress.days[d]?.attempts || 0), 0);
   const correct = keys.reduce((sum, d) => sum + (progress.days[d]?.correct || 0), 0);
@@ -1545,6 +1792,32 @@ function renderStats() {
   document.getElementById("statsAdvice").textContent = weak.length
     ? `Tu proximo paso: repasar ${weak.slice(0,3).map(w => w.en).join(", ")}. Son las palabras que mas conviene rescatar esta semana.`
     : "Buen trabajo. No hay palabras debiles todavia; empieza un reto de 20 preguntas para crear una linea base.";
+  renderAchievements();
+}
+
+function unlockAchievements(showPop = true) {
+  normalizeProgress();
+  ACHIEVEMENTS.forEach(achievement => {
+    if (!progress.achievements[achievement.id] && achievement.test()) {
+      progress.achievements[achievement.id] = { unlockedAt: Date.now() };
+      progress.rewards.coins += 20;
+      if (showPop) popReward(`Achievement unlocked: ${achievement.title} +20 coins`);
+    }
+  });
+  localStorage.setItem(STORE_KEY, JSON.stringify(progress));
+  queueCloudSave();
+}
+
+function renderAchievements() {
+  const grid = document.getElementById("achievementGrid");
+  if (!grid) return;
+  grid.innerHTML = ACHIEVEMENTS.map(a => {
+    const unlocked = !!progress.achievements[a.id];
+    return `<div class="achievement-card ${unlocked ? "unlocked" : ""}">
+      <b>${unlocked ? "★" : "☆"} ${a.title}</b>
+      <span>${a.desc}${unlocked ? "<br>Unlocked" : ""}</span>
+    </div>`;
+  }).join("");
 }
 
 function renderReview() {
@@ -1610,6 +1883,8 @@ document.addEventListener("click", e => {
   }
   const quest = e.target.closest(".quest-btn");
   if (quest) startQuickQuest(quest.dataset.quest);
+  const story = e.target.closest(".story-card");
+  if (story) startStory(story.dataset.story);
 });
 
 function startQuickQuest(id) {
