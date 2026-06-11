@@ -490,6 +490,7 @@
     padding: 10px;
   }
   .crossword-clue span { color: var(--muted); }
+  .crossword-clue small { color: var(--muted); }
   .crossword-clue input {
     min-height: 42px;
     border: 1px solid var(--border);
@@ -1252,18 +1253,18 @@ function renderCrossword(words) {
   app.current = { ...words[0], puzzleWords: words, revealedLetters: words.map(() => new Set()), letterQuest: null };
   return `<h2 class="question">Mini crucigrama<small>Lee la pista en ingles. Usa la ayuda en espanol solo si la necesitas.</small></h2>
     <div class="crossword" id="crosswordBox">
-      ${words.map((w, i) => `<label class="crossword-clue">
-        <span class="clue-copy">
+      ${words.map((w, i) => `<div class="crossword-clue">
+        <div class="clue-copy">
           <b>${i + 1}. ${englishClue(w)}</b>
           <small>Help: ${w.es}. ${w.en.length} letters.</small>
           <em class="letter-pattern" data-pattern-index="${i}">${letterPattern(w.en, app.current.revealedLetters[i])}</em>
-          <span class="clue-actions">
+          <div class="clue-actions">
             <button type="button" class="soft-btn" onclick="startLetterQuest(${i})">Reveal letter -2 coins</button>
             <button type="button" class="soft-btn" onclick="showCrosswordExample(${i})">Example</button>
-          </span>
-        </span>
+          </div>
+        </div>
         <input data-answer="${escapeAttr(w.en.toLowerCase())}" autocomplete="off" spellcheck="false">
-      </label>`).join("")}
+      </div>`).join("")}
     </div>
     <div id="miniQuestBox"></div>
     <div class="nav-row"><button class="primary-btn" onclick="checkCrossword()">Revisar crucigrama</button></div>`;
@@ -1338,7 +1339,11 @@ function answerMiniQuest(option) {
 function showCrosswordExample(index) {
   const word = app.current.puzzleWords[index];
   const box = document.getElementById("miniQuestBox");
-  box.innerHTML = `<div class="mini-quest"><b>Example sentence</b><div>${word.sentence.replace(new RegExp(`\\b${escapeRegExp(word.en)}\\b`, "i"), `<strong>${word.en}</strong>`)}</div></div>`;
+  box.innerHTML = `<div class="mini-quest"><b>Example sentence for clue ${index + 1}</b><div>${highlightAnswer(word.sentence, word.en)}</div></div>`;
+}
+
+function highlightAnswer(sentence, answer) {
+  return sentence.replace(new RegExp(`\\b${escapeRegExp(answer)}\\b`, "i"), `<strong>${answer}</strong>`);
 }
 
 function attachCrosswordEvents() {
