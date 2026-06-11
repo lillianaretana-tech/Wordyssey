@@ -793,11 +793,10 @@
       </div>
       <p class="review-note" id="smartTip">Consejo: alterna entre elegir, escribir y escuchar. La memoria mejora cuando recuerdas la palabra de varias formas.</p>
       <div class="sync-panel">
-        <div class="sync-status" id="syncStatus">Registrate con tu correo para guardar records y progreso en Supabase.</div>
+        <div class="sync-status" id="syncStatus">Escribe un usuario o correo para guardar records y progreso en Supabase.</div>
         <div class="sync-row" id="syncLoginRow">
-          <input id="emailInput" type="email" placeholder="Correo">
-          <input id="passwordInput" type="password" placeholder="Clave" autocomplete="current-password">
-          <button class="soft-btn" id="loginBtn">Ingresar</button>
+          <input id="emailInput" type="text" placeholder="Usuario o correo">
+          <button class="soft-btn" id="loginBtn">Entrar</button>
         </div>
         <div class="sync-row hidden" id="syncUserRow">
           <button class="soft-btn" id="syncNowBtn">Sincronizar</button>
@@ -1302,9 +1301,9 @@ const DAY_MS = 86400000;
 // La anon key es publica; protege los datos con las politicas RLS del SQL adjunto.
 const SUPABASE_URL = "https://kotgtqihzctnqnsdlqqt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvdGd0cWloemN0bnFuc2RscXF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMzc5NDksImV4cCI6MjA5NjcxMzk0OX0.zNHh9R4wCKF_KVWAORcSf00S7ZutjtkMirBnDT8yCbU";
-const SUPABASE_TABLE = "vocabquest_progress";
-const AUTH_REDIRECT_URL = "https://lillianaretana-tech.github.io/Wordyssey/";
+const SUPABASE_TABLE = "wordyssey_simple_profiles";
 const REQUIRE_ACCOUNT_FOR_RECORDS = true;
+const PROFILE_KEY_STORE = `${STORE_KEY}:profile_key`;
 
 let app = {
   topic: "daily",
@@ -1404,39 +1403,27 @@ function closeAppModal() {
   document.getElementById("appModal").setAttribute("aria-hidden", "true");
 }
 
-function getAuthRedirectUrl() {
-  const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
-  if (isLocal || window.location.protocol === "file:") return AUTH_REDIRECT_URL;
-  return window.location.origin + window.location.pathname;
-}
-
 function openAccountModal(reason = "") {
-  const statusText = reason || (cloudReady ? `Sincronizado como ${currentUser.email || "usuario"}.` : "Ingresa con correo y clave para guardar tu avance y records en Supabase.");
+  const statusText = reason || (cloudReady ? `Perfil activo: ${currentUser.id}.` : "Escribe un usuario o correo para cargar tu historial.");
   openAppModal("Cuenta y sincronizacion", `
     <div class="sync-status" id="accountSyncStatus">${statusText}</div>
     <div class="field-grid">
       <input id="accountNameInput" placeholder="Nombre o apodo" value="${escapeAttr(progress.profile.displayName || "")}">
-      <input id="accountEmailInput" type="email" placeholder="Correo" value="${escapeAttr(currentUser?.email || document.getElementById("emailInput")?.value || "")}">
-      <input id="accountPasswordInput" type="password" placeholder="Clave" autocomplete="current-password">
+      <input id="accountEmailInput" type="text" placeholder="Usuario o correo" value="${escapeAttr(currentUser?.id || document.getElementById("emailInput")?.value || "")}">
     </div>
     <div class="sync-row">
-      <button class="primary-btn" onclick="loginWithPassword()">Ingresar</button>
-      <button class="soft-btn" onclick="registerWithPassword()">Crear cuenta</button>
-      <button class="soft-btn" onclick="updatePassword()">Guardar nueva clave</button>
+      <button class="primary-btn" onclick="selectSimpleProfile()">Entrar / crear perfil</button>
       <button class="soft-btn" onclick="saveProfileName(); pullCloudProgress()">Sincronizar</button>
       <button class="danger-btn" onclick="logout()">Salir</button>
     </div>
-    <div class="sync-row">
-      <button class="soft-btn" onclick="sendPasswordReset()">Crear o cambiar clave</button>
-    </div>
-    <p class="review-note">La confirmacion de correo solo se usa al crear la cuenta o cambiar clave. Despues entras con correo y clave.</p>
+    <p class="review-note">Solo necesitas recordar este usuario o correo. Si no existe, se crea; si ya existe, carga su historial.</p>
   `);
 }
 
 function requireCloudAccount(actionLabel = "guardar tu record") {
   if (!REQUIRE_ACCOUNT_FOR_RECORDS || cloudReady) return true;
   const message = supabaseClient
-    ? `Ingresa o crea tu cuenta para ${actionLabel} en Supabase.`
+    ? `Escribe tu usuario o correo para ${actionLabel}.`
     : "No se pudo cargar Supabase. Revisa la conexion y vuelve a intentar.";
   setSyncStatus(message);
   openAccountModal(message);
@@ -1469,7 +1456,7 @@ function saveProfileName() {
 function updateAccountButton() {
   const btn = document.getElementById("accountBtn");
   if (!btn) return;
-  btn.textContent = cloudReady ? (progress.profile.displayName || "Cuenta ok") : "Cuenta";
+  btn.textContent = cloudReady ? (progress.profile.displayName || currentUser.id || "Perfil ok") : "Cuenta";
 }
 
 function initSupabase() {
@@ -1479,129 +1466,50 @@ function initSupabase() {
     return;
   }
   supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  supabaseClient.auth.getSession().then(({ data }) => handleSession(data.session, true));
-  supabaseClient.auth.onAuthStateChange((_event, session) => handleSession(session, true));
-}
-
-async function handleSession(session, shouldPull) {
-  currentUser = session?.user || null;
-  cloudReady = !!currentUser;
-  document.getElementById("syncLoginRow")?.classList.toggle("hidden", cloudReady);
-  document.getElementById("syncUserRow")?.classList.toggle("hidden", !cloudReady);
-  if (!cloudReady) {
-    setSyncStatus(supabaseClient ? "Ingresa con correo y clave para sincronizar records en linea." : "Progreso guardado localmente.");
-    updateAccountButton();
-    return;
-  }
-  setSyncStatus(`Sincronizado como ${currentUser.email || "usuario"}.`);
-  updateAccountButton();
-  if (shouldPull) await pullCloudProgress();
-}
-
-function getAuthCredentials() {
-  const email = (document.getElementById("accountEmailInput")?.value || document.getElementById("emailInput")?.value || "").trim();
-  const password = (document.getElementById("accountPasswordInput")?.value || document.getElementById("passwordInput")?.value || "").trim();
-  const mainEmail = document.getElementById("emailInput");
-  const mainPassword = document.getElementById("passwordInput");
-  if (mainEmail) mainEmail.value = email;
-  if (mainPassword) mainPassword.value = password;
-  return { email, password };
-}
-
-async function loginWithPassword() {
-  if (!supabaseClient) {
-    setSyncStatus("Supabase aun no esta configurado en este archivo.");
-    return;
-  }
-  const { email, password } = getAuthCredentials();
-  if (!email || !password) {
-    setSyncStatus("Escribe tu correo y clave para ingresar.");
-    return;
-  }
-  saveProfileName();
-  setSyncStatus("Ingresando...");
-  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-  if (error) {
-    setSyncStatus(error.message.includes("Email not confirmed")
-      ? "Tu correo aun no esta confirmado. Abre el correo de confirmacion una sola vez y luego entra con clave."
-      : `No se pudo ingresar: ${error.message}`);
-    return;
-  }
-  closeAppModal();
-}
-
-async function registerWithPassword() {
-  if (!supabaseClient) {
-    setSyncStatus("Supabase aun no esta configurado en este archivo.");
-    return;
-  }
-  const { email, password } = getAuthCredentials();
-  if (!email || !password) {
-    setSyncStatus("Escribe correo y una clave para crear tu cuenta.");
-    return;
-  }
-  if (password.length < 6) {
-    setSyncStatus("La clave debe tener al menos 6 caracteres.");
-    return;
-  }
-  saveProfileName();
-  setSyncStatus("Creando cuenta...");
-  const { data, error } = await supabaseClient.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: getAuthRedirectUrl(),
-      data: { display_name: progress.profile.displayName || "" }
-    }
-  });
-  if (error) {
-    setSyncStatus(`No se pudo crear la cuenta: ${error.message}`);
-    return;
-  }
-  if (data.session) {
-    setSyncStatus(`Cuenta creada como ${email}.`);
-    closeAppModal();
+  const savedProfile = localStorage.getItem(PROFILE_KEY_STORE);
+  if (savedProfile) {
+    selectSimpleProfile(savedProfile, false);
   } else {
-    setSyncStatus("Cuenta creada. Confirma tu correo una sola vez y despues ingresa con tu clave.");
+    setSyncStatus("Escribe un usuario o correo para guardar tu historial en Supabase.");
   }
 }
 
-async function sendPasswordReset() {
+function normalizeProfileKey(value) {
+  return (value || "").trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9@._-]/g, "");
+}
+
+async function selectSimpleProfile(profileKey = "", shouldClose = true) {
   if (!supabaseClient) {
     setSyncStatus("Supabase aun no esta configurado en este archivo.");
     return;
   }
-  const { email } = getAuthCredentials();
-  if (!email) {
-    setSyncStatus("Escribe tu correo para crear o cambiar la clave.");
+  const rawKey = profileKey || document.getElementById("accountEmailInput")?.value || document.getElementById("emailInput")?.value || "";
+  const key = normalizeProfileKey(rawKey);
+  if (key.length < 3) {
+    setSyncStatus("Escribe un usuario o correo de al menos 3 caracteres.");
     return;
   }
-  setSyncStatus("Enviando correo para crear o cambiar clave...");
-  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: getAuthRedirectUrl() });
-  setSyncStatus(error ? `No se pudo enviar: ${error.message}` : "Revisa tu correo para crear o cambiar tu clave.");
-}
-
-async function updatePassword() {
-  if (!supabaseClient) {
-    setSyncStatus("Supabase aun no esta configurado en este archivo.");
-    return;
-  }
-  const { password } = getAuthCredentials();
-  if (!password || password.length < 6) {
-    setSyncStatus("Escribe una nueva clave de al menos 6 caracteres.");
-    return;
-  }
-  setSyncStatus("Guardando nueva clave...");
-  const { error } = await supabaseClient.auth.updateUser({ password });
-  setSyncStatus(error ? `No se pudo guardar la clave: ${error.message}` : "Clave guardada. Desde ahora puedes ingresar con correo y clave.");
+  const mainInput = document.getElementById("emailInput");
+  if (mainInput) mainInput.value = key;
+  currentUser = { id: key };
+  cloudReady = true;
+  localStorage.setItem(PROFILE_KEY_STORE, key);
+  document.getElementById("syncLoginRow")?.classList.add("hidden");
+  document.getElementById("syncUserRow")?.classList.remove("hidden");
+  saveProfileName();
+  setSyncStatus(`Perfil activo: ${key}. Leyendo historial...`);
+  await pullCloudProgress();
+  updateAccountButton();
+  if (shouldClose) closeAppModal();
 }
 
 async function logout() {
-  if (!supabaseClient) return;
-  await supabaseClient.auth.signOut();
+  localStorage.removeItem(PROFILE_KEY_STORE);
   currentUser = null;
   cloudReady = false;
-  handleSession(null, false);
+  document.getElementById("syncLoginRow")?.classList.remove("hidden");
+  document.getElementById("syncUserRow")?.classList.add("hidden");
+  setSyncStatus("Perfil cerrado. Escribe un usuario o correo para entrar.");
   closeAppModal();
 }
 
@@ -1628,13 +1536,16 @@ async function pullCloudProgress() {
   setSyncStatus("Leyendo progreso en linea...");
   const { data, error } = await supabaseClient
     .from(SUPABASE_TABLE)
-    .select("progress")
-    .eq("user_id", currentUser.id)
+    .select("progress,display_name")
+    .eq("profile_key", currentUser.id)
     .maybeSingle();
   if (error) {
     setSyncStatus(`No se pudo leer Supabase: ${error.message}`);
     syncing = false;
     return;
+  }
+  if (data?.display_name && !progress.profile.displayName) {
+    progress.profile.displayName = data.display_name;
   }
   mergeProgress(data?.progress);
   localStorage.setItem(STORE_KEY, JSON.stringify(progress));
@@ -1655,71 +1566,16 @@ async function pushCloudProgress() {
   syncing = true;
   setSyncStatus("Guardando progreso en linea...");
   const payload = {
-    user_id: currentUser.id,
+    profile_key: currentUser.id,
+    display_name: progress.profile.displayName || currentUser.id,
     progress,
     updated_at: new Date().toISOString()
   };
   const { error } = await supabaseClient
     .from(SUPABASE_TABLE)
-    .upsert(payload, { onConflict: "user_id" });
-  const structuredErrors = error ? [] : await pushStructuredProgress();
-  const okMessage = structuredErrors.length
-    ? `Progreso principal guardado. Faltan tablas auxiliares en Supabase: ${structuredErrors[0]}`
-    : `Progreso guardado en linea como ${currentUser.email || "usuario"}.`;
-  setSyncStatus(error ? `No se pudo guardar: ${error.message}` : okMessage);
+    .upsert(payload, { onConflict: "profile_key" });
+  setSyncStatus(error ? `No se pudo guardar: ${error.message}` : `Historial guardado para ${currentUser.id}.`);
   syncing = false;
-}
-
-async function pushStructuredProgress() {
-  if (!cloudReady || !supabaseClient) return [];
-  const errors = [];
-  const saveStructured = async (label, query) => {
-    const { error } = await query;
-    if (error) errors.push(`${label}: ${error.message}`);
-  };
-  const week = getWeekKeys().reduce((sum, d) => sum + (progress.days[d]?.correct || 0), 0);
-  const todayCorrect = progress.days[todayKey()]?.correct || 0;
-  const unlockedWorlds = Object.keys(TOPICS).filter(topic => topic === "daily" || topicStars(topic) > 0);
-  await saveStructured("vocabquest_profiles", supabaseClient.from("vocabquest_profiles").upsert({
-    user_id: currentUser.id,
-    email: currentUser.email || null,
-    display_name: progress.profile.displayName || null,
-    current_level: app.level || 1,
-    updated_at: new Date().toISOString()
-  }, { onConflict: "user_id" }));
-  await saveStructured("vocabquest_user_progress", supabaseClient.from("vocabquest_user_progress").upsert({
-    user_id: currentUser.id,
-    points: progress.records.totalPoints || 0,
-    coins: progress.rewards.coins || 0,
-    stars: progress.rewards.stars || 0,
-    energy: progress.rewards.energy || 0,
-    streak: app.streak || 0,
-    daily_goal_correct: todayCorrect,
-    weekly_correct: week,
-    unlocked_worlds: unlockedWorlds,
-    bosses_defeated: Object.keys(progress.quests || {}),
-    chests_opened: progress.rewards.chests || 0,
-    bruno: progress.bruno || {},
-    last_activity_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  }, { onConflict: "user_id" }));
-  const achievementRows = Object.keys(progress.achievements || {}).map(id => ({
-    user_id: currentUser.id,
-    achievement_id: id,
-    unlocked_at: new Date(progress.achievements[id].unlockedAt || Date.now()).toISOString()
-  }));
-  if (achievementRows.length) await saveStructured("vocabquest_user_achievements", supabaseClient.from("vocabquest_user_achievements").upsert(achievementRows, { onConflict: "user_id,achievement_id" }));
-  const storyRows = Object.keys(progress.stories.completed || {}).map(id => ({
-    user_id: currentUser.id,
-    story_id: id,
-    completed: true,
-    best_correct: progress.stories.completed[id].correct || 0,
-    attempts: 1,
-    last_played_at: new Date(progress.stories.completed[id].completedAt || Date.now()).toISOString(),
-    story_state: progress.stories.completed[id]
-  }));
-  if (storyRows.length) await saveStructured("vocabquest_user_story_progress", supabaseClient.from("vocabquest_user_story_progress").upsert(storyRows, { onConflict: "user_id,story_id" }));
-  return errors;
 }
 
 function todayKey(offset = 0) {
@@ -2575,7 +2431,7 @@ document.getElementById("placementBtn").addEventListener("click", () => {
   app.pool = shuffle(allWords());
   startGame(true);
 });
-document.getElementById("loginBtn").addEventListener("click", loginWithPassword);
+document.getElementById("loginBtn").addEventListener("click", () => selectSimpleProfile());
 document.getElementById("syncNowBtn").addEventListener("click", pullCloudProgress);
 document.getElementById("logoutBtn").addEventListener("click", logout);
 document.getElementById("accountBtn").addEventListener("click", openAccountModal);
