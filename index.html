@@ -2,1228 +2,1258 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#6c63ff">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="VocabQuest">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
-<title>VocabQuest — Aprende inglés jugando</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#171a2d">
+<title>VocabQuest Plus - Ingles por niveles</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap');
 
   :root {
-    --bg: #0d0f1a; --surface: #151827; --card: #1c2035; --border: #252a40;
-    --accent: #6c63ff; --accent2: #00e5a0; --accent3: #ff6b6b; --accent4: #ffd166;
-    --text: #e8eaf0; --muted: #7880a0;
-    --success: #00e5a0; --error: #ff6b6b; --warn: #ffd166;
+    --bg: #0e111f;
+    --surface: #15192a;
+    --panel: #1c2135;
+    --panel-2: #222844;
+    --border: #303750;
+    --text: #f4f6fb;
+    --muted: #9aa3bd;
+    --accent: #6c63ff;
+    --mint: #00d7a7;
+    --rose: #ff6680;
+    --gold: #f5c542;
+    --blue: #55b6ff;
+    --ink: #080a12;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { font-size: 16px; -webkit-tap-highlight-color: transparent; }
-  body { background: var(--bg); color: var(--text); font-family: 'Space Grotesk', sans-serif; min-height: 100vh; overflow-x: hidden; }
 
-  /* SCREENS */
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 10% 10%, rgba(108, 99, 255, .16), transparent 28rem),
+      radial-gradient(circle at 88% 12%, rgba(0, 215, 167, .12), transparent 24rem),
+      linear-gradient(135deg, #0e111f 0%, #111626 54%, #121827 100%);
+    color: var(--text);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+  }
+
+  button, input, select { font: inherit; }
+  button { cursor: pointer; }
   .screen { display: none; min-height: 100vh; }
-  .screen.active { display: flex; flex-direction: column; }
+  .screen.active { display: block; }
+  .shell { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
 
-  /* WELCOME */
-  #welcome {
-    align-items: center; justify-content: center; padding: 2rem;
-    background: radial-gradient(ellipse at 30% 20%, #1a1545 0%, var(--bg) 60%),
-                radial-gradient(ellipse at 70% 80%, #0a1f1a 0%, transparent 50%);
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(14, 17, 31, .86);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgba(255,255,255,.08);
   }
-  .welcome-inner { max-width: 520px; width: 100%; text-align: center; }
-  .logo { font-size: 2.8rem; font-weight: 700; letter-spacing: -1px; margin-bottom: 0.2rem; }
-  .logo span { color: var(--accent2); }
-  .tagline { color: var(--muted); font-size: 1rem; margin-bottom: 0.5rem; }
-  .install-banner {
-    display: none; background: #12103a; border: 1px solid #2a2860;
-    border-radius: 10px; padding: 0.6rem 1rem; margin-bottom: 1.5rem;
-    font-size: 0.82rem; color: var(--accent); cursor: pointer;
-    align-items: center; gap: 0.5rem; justify-content: center;
+
+  .topbar-inner {
+    width: min(1180px, calc(100% - 32px));
+    margin: 0 auto;
+    min-height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
   }
-  .install-banner.show { display: flex; }
-  .section-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 0.8rem; margin-top: 1.2rem; }
-  .topic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; margin-bottom: 0.5rem; }
+
+  .brand { display: flex; align-items: baseline; gap: 10px; }
+  .brand strong { font-size: 1.35rem; letter-spacing: 0; }
+  .brand span { color: var(--mint); }
+  .brand small { color: var(--muted); font-size: .78rem; }
+  .nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+
+  .icon-btn, .nav-btn, .soft-btn, .primary-btn, .danger-btn {
+    border: 1px solid var(--border);
+    color: var(--text);
+    background: var(--panel);
+    border-radius: 8px;
+    min-height: 42px;
+    padding: 0 14px;
+    transition: transform .15s, border-color .15s, background .15s;
+  }
+
+  .nav-btn.active, .soft-btn:hover, .nav-btn:hover, .icon-btn:hover {
+    border-color: var(--accent);
+    background: #202747;
+  }
+
+  .primary-btn {
+    border: 0;
+    background: var(--mint);
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .danger-btn {
+    border-color: rgba(255, 102, 128, .42);
+    color: var(--rose);
+  }
+
+  .primary-btn:hover, .soft-btn:hover { transform: translateY(-1px); }
+  .primary-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+  .welcome {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(340px, .95fr);
+    gap: 28px;
+    padding: 34px 0 42px;
+    align-items: start;
+  }
+
+  .hero {
+    padding: 10px 0 0;
+  }
+
+  .hero h1 {
+    margin: 0;
+    font-size: clamp(2.2rem, 6vw, 5.4rem);
+    line-height: .95;
+    letter-spacing: 0;
+  }
+
+  .hero h1 span { color: var(--mint); }
+  .hero p {
+    color: var(--muted);
+    font-size: 1.08rem;
+    line-height: 1.65;
+    max-width: 680px;
+  }
+
+  .skill-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 28px;
+  }
+
+  .skill-tile {
+    background: rgba(28, 33, 53, .84);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    min-height: 112px;
+  }
+
+  .skill-tile b { display: block; font-size: 1.45rem; color: var(--gold); }
+  .skill-tile span { color: var(--muted); font-size: .86rem; line-height: 1.35; }
+
+  .setup-panel {
+    background: rgba(21, 25, 42, .88);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .22);
+  }
+
+  .section-title {
+    margin: 18px 0 10px;
+    color: var(--muted);
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+  }
+
+  .topic-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
   .topic-btn {
-    background: var(--card); border: 2px solid var(--border);
-    border-radius: 12px; padding: 1rem 0.8rem; cursor: pointer;
-    color: var(--text); font-family: inherit; font-size: 0.9rem; font-weight: 500;
-    transition: all 0.2s; text-align: left; display: flex; align-items: center; gap: 0.6rem;
-  }
-  .topic-btn:hover { border-color: var(--accent); background: #1e2140; }
-  .topic-btn.selected { border-color: var(--accent2); background: #0d1f1a; color: var(--accent2); }
-  .topic-icon { font-size: 1.4rem; }
-  .level-row { display: flex; gap: 0.5rem; margin-bottom: 1.2rem; justify-content: center; flex-wrap: wrap; }
-  .level-chip {
-    padding: 0.5rem 1rem; border-radius: 30px; cursor: pointer;
-    border: 2px solid var(--border); background: var(--card);
-    font-family: inherit; font-size: 0.82rem; font-weight: 600; color: var(--muted); transition: all 0.2s;
-  }
-  .level-chip:hover { border-color: var(--accent); color: var(--text); }
-  .level-chip.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .btn-primary {
-    background: var(--accent); color: #fff; border: none;
-    padding: 1rem 2.5rem; border-radius: 12px; font-family: inherit;
-    font-size: 1rem; font-weight: 600; cursor: pointer;
-    transition: all 0.2s; width: 100%;
-  }
-  .btn-primary:hover { background: #5a52e0; transform: translateY(-1px); }
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-  .review-btn-wrap { margin-top: 0.8rem; }
-  .btn-secondary {
-    background: none; border: 1px solid var(--border); color: var(--muted);
-    padding: 0.8rem 2rem; border-radius: 12px; font-family: inherit;
-    font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; width: 100%;
-  }
-  .btn-secondary:hover { border-color: var(--accent2); color: var(--accent2); }
-  .btn-secondary:disabled { opacity: 0.3; cursor: not-allowed; }
-  .failed-count {
-    font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
-    color: var(--error); background: #1f0d0d; padding: 0.2rem 0.5rem;
-    border-radius: 5px; margin-left: 0.4rem;
+    min-height: 68px;
+    border: 2px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: left;
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    align-items: center;
+    gap: 9px;
   }
 
-  /* GAME HEADER */
-  #game { flex-direction: column; background: var(--bg); }
-  .game-header {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 0.8rem 1.2rem; display: flex; align-items: center; gap: 0.8rem;
-  }
-  .hdr-left { display: flex; align-items: center; gap: 0.7rem; flex: 1; }
-  .back-btn {
-    background: none; border: 1px solid var(--border); color: var(--muted);
-    padding: 0.3rem 0.7rem; border-radius: 8px; cursor: pointer; font-size: 0.82rem;
-    transition: all 0.15s; font-family: inherit;
-  }
-  .back-btn:hover { border-color: var(--accent); color: var(--text); }
-  .topic-badge {
-    font-size: 0.72rem; font-weight: 600; color: var(--accent2);
-    background: #0d1f1a; padding: 0.22rem 0.6rem; border-radius: 6px; border: 1px solid #1a3d30;
-  }
-  .review-mode-badge {
-    font-size: 0.72rem; font-weight: 600; color: var(--error);
-    background: #1f0d0d; padding: 0.22rem 0.6rem; border-radius: 6px; border: 1px solid #3d1a1a;
-  }
-  .hdr-stats { display: flex; align-items: center; gap: 1rem; }
-  .streak-counter { display: flex; align-items: center; gap: 0.3rem; font-size: 0.85rem; font-weight: 700; color: var(--warn); }
-  .streak-count { font-family: 'JetBrains Mono', monospace; }
-  .score-display { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--muted); }
-  .score-display span { color: var(--accent2); font-weight: 600; }
-  .level-bar {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 0.45rem 1.2rem; display: flex; align-items: center; gap: 0.8rem;
-  }
-  .level-label { font-size: 0.72rem; font-weight: 700; color: var(--accent); min-width: 85px; }
-  .progress-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 3px; transition: width 0.4s ease; }
-  .progress-text { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--muted); min-width: 36px; text-align: right; }
+  .topic-btn strong { display: block; font-size: .95rem; }
+  .topic-btn small { color: var(--muted); font-size: .74rem; }
+  .topic-btn.selected { border-color: var(--mint); background: #10271f; }
+  .topic-icon { font-size: 1.35rem; }
 
-  /* EXERCISE ZONE */
-  .exercise-zone {
-    flex: 1; padding: 1.2rem; max-width: 700px; width: 100%; margin: 0 auto;
-    display: flex; flex-direction: column; gap: 1rem;
+  .segmented {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
   }
-  .ex-type-row { display: flex; justify-content: space-between; align-items: center; }
-  .ex-type-badge {
-    font-size: 0.68rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
-    padding: 0.22rem 0.6rem; border-radius: 6px; color: var(--accent); background: #12103a; border: 1px solid #2a2860;
-  }
-  .ex-num { font-size: 0.72rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-  .ex-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 1.4rem; display: flex; flex-direction: column; gap: 1rem;
-  }
-  .ex-card.correct { border-color: var(--success); background: #0d1f1a; }
-  .ex-card.wrong { border-color: var(--error); background: #1f0d0d; }
-  .ex-question { font-size: 1.05rem; font-weight: 500; line-height: 1.5; display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
-  .ex-question .word-highlight { color: var(--accent2); font-weight: 700; }
-  .ex-question .blank { display: inline-block; min-width: 90px; border-bottom: 2px solid var(--accent); color: var(--accent); font-weight: 600; text-align: center; padding: 0 4px; }
 
-  /* AUDIO BUTTON */
-  .audio-btn {
-    background: #12103a; border: 1px solid #2a2860; color: var(--accent);
-    border-radius: 8px; padding: 0.3rem 0.7rem; cursor: pointer;
-    font-size: 0.85rem; transition: all 0.15s; display: inline-flex; align-items: center; gap: 0.3rem;
-    font-family: inherit; white-space: nowrap;
+  .level-btn, .mode-btn {
+    border: 2px solid var(--border);
+    background: var(--panel);
+    color: var(--muted);
+    border-radius: 8px;
+    min-height: 46px;
+    font-weight: 700;
   }
-  .audio-btn:hover { background: #1e1a5a; border-color: var(--accent); }
-  .audio-btn.playing { color: var(--accent2); border-color: var(--accent2); background: #0d1f1a; }
-  .audio-btn-large {
-    background: none; border: 2px solid var(--border); color: var(--muted);
-    border-radius: 50%; width: 44px; height: 44px; cursor: pointer;
-    font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s; flex-shrink: 0;
-  }
-  .audio-btn-large:hover { border-color: var(--accent); color: var(--accent); }
-  .audio-btn-large.playing { border-color: var(--accent2); color: var(--accent2); }
 
-  /* MCQ */
-  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; }
-  .option-btn {
-    background: var(--surface); border: 2px solid var(--border);
-    border-radius: 10px; padding: 0.75rem 0.9rem; cursor: pointer;
-    color: var(--text); font-family: inherit; font-size: 0.88rem; font-weight: 500;
-    transition: all 0.15s; text-align: left;
+  .level-btn.selected, .mode-btn.selected {
+    color: #fff;
+    border-color: var(--accent);
+    background: #26215f;
   }
-  .option-btn:hover:not(:disabled) { border-color: var(--accent); background: #16183a; }
-  .option-btn.selected-correct { border-color: var(--success); background: #0d1f1a; color: var(--success); }
-  .option-btn.selected-wrong { border-color: var(--error); background: #1f0d0d; color: var(--error); }
-  .option-btn.reveal-correct { border-color: var(--success); }
-  .option-btn:disabled { cursor: default; }
 
-  /* TEXT INPUT */
-  .text-input-area { display: flex; gap: 0.55rem; }
-  .ex-input {
-    flex: 1; background: var(--surface); border: 2px solid var(--border);
-    border-radius: 10px; padding: 0.75rem 0.9rem; color: var(--text);
-    font-family: 'Space Grotesk', sans-serif; font-size: 1rem; outline: none; transition: border-color 0.15s;
-  }
-  .ex-input:focus { border-color: var(--accent); }
-  .ex-input.correct { border-color: var(--success); }
-  .ex-input.wrong { border-color: var(--error); }
-  .submit-btn {
-    background: var(--accent); border: none; border-radius: 10px;
-    padding: 0.75rem 1.1rem; color: #fff; cursor: pointer; font-size: 1rem; transition: all 0.15s;
-  }
-  .submit-btn:hover { background: #5a52e0; }
+  .start-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+  .review-note { margin-top: 12px; color: var(--muted); font-size: .85rem; line-height: 1.4; }
 
-  /* FEEDBACK */
-  .feedback-row { display: flex; align-items: flex-start; gap: 0.6rem; min-height: 24px; flex-wrap: wrap; }
-  .feedback-msg { font-size: 0.88rem; font-weight: 600; }
-  .feedback-msg.ok { color: var(--success); }
-  .feedback-msg.bad { color: var(--error); }
-  .feedback-hint { font-size: 0.8rem; color: var(--muted); }
+  .game-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 330px;
+    gap: 18px;
+    padding: 22px 0 32px;
+    align-items: start;
+  }
 
-  /* NAV ROW */
-  .nav-row { display: flex; gap: 0.55rem; justify-content: flex-end; margin-top: 0.2rem; }
-  .btn-next {
-    background: var(--accent2); color: #000; font-weight: 700;
-    border: none; padding: 0.65rem 1.4rem; border-radius: 10px; cursor: pointer;
-    font-family: inherit; font-size: 0.88rem; transition: all 0.15s;
+  .hud, .side-panel, .practice-card, .stats-panel {
+    background: rgba(21, 25, 42, .9);
+    border: 1px solid var(--border);
+    border-radius: 8px;
   }
-  .btn-next:hover { background: #00cc8a; }
-  .btn-skip {
-    background: none; color: var(--muted); border: 1px solid var(--border);
-    padding: 0.65rem 0.9rem; border-radius: 10px; cursor: pointer;
-    font-family: inherit; font-size: 0.82rem; transition: all 0.15s;
+
+  .hud {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    overflow: hidden;
+    margin-bottom: 14px;
   }
-  .btn-skip:hover { color: var(--text); border-color: var(--accent); }
+
+  .hud-item {
+    background: rgba(28, 33, 53, .72);
+    padding: 14px;
+    min-height: 76px;
+  }
+
+  .hud-item span { color: var(--muted); font-size: .75rem; display: block; margin-bottom: 6px; }
+  .hud-item b { font-family: "JetBrains Mono", monospace; font-size: 1.1rem; }
+
+  .practice-card {
+    padding: 20px;
+    min-height: 430px;
+  }
+
+  .exercise-meta { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: .8rem; }
+  .badge {
+    color: var(--mint);
+    background: rgba(0, 215, 167, .09);
+    border: 1px solid rgba(0, 215, 167, .24);
+    border-radius: 8px;
+    padding: 5px 9px;
+    font-weight: 700;
+  }
+
+  .question {
+    margin: 24px 0 18px;
+    font-size: clamp(1.45rem, 4vw, 2.45rem);
+    line-height: 1.16;
+    letter-spacing: 0;
+  }
+
+  .question small {
+    display: block;
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: .95rem;
+    line-height: 1.45;
+  }
+
+  .word {
+    color: var(--mint);
+    font-weight: 800;
+  }
+
+  .options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .option {
+    border: 2px solid var(--border);
+    background: var(--panel-2);
+    color: var(--text);
+    border-radius: 8px;
+    min-height: 62px;
+    padding: 12px;
+    text-align: left;
+    font-weight: 700;
+  }
+
+  .option:hover { border-color: var(--blue); }
+  .option.correct { border-color: var(--mint); background: #10271f; color: var(--mint); }
+  .option.wrong { border-color: var(--rose); background: #2b1720; color: var(--rose); }
+  .type-row { display: flex; gap: 10px; }
+  .type-row input {
+    width: 100%;
+    background: var(--panel-2);
+    color: var(--text);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    min-height: 54px;
+    padding: 0 14px;
+    outline: none;
+  }
+
+  .type-row input:focus { border-color: var(--accent); }
+  .feedback {
+    min-height: 54px;
+    margin-top: 16px;
+    color: var(--muted);
+    line-height: 1.45;
+  }
+
+  .feedback.ok { color: var(--mint); }
+  .feedback.bad { color: var(--rose); }
+  .nav-row { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+
+  .word-search {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 180px;
+    gap: 16px;
+    align-items: start;
+  }
+  .letter-grid {
+    display: grid;
+    gap: 4px;
+    justify-content: start;
+    overflow-x: auto;
+  }
+  .letter-cell {
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--panel-2);
+    color: var(--text);
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 800;
+  }
+  .letter-cell.selected { border-color: var(--accent); background: #26215f; color: #fff; }
+  .letter-cell.found { border-color: var(--mint); background: #10271f; color: var(--mint); }
+  .word-bank { display: grid; gap: 8px; }
+  .word-bank span {
+    border: 1px solid var(--border);
+    background: rgba(28,33,53,.82);
+    color: var(--muted);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-weight: 700;
+  }
+  .word-bank span.found { color: var(--mint); border-color: var(--mint); text-decoration: line-through; }
+  .crossword {
+    display: grid;
+    gap: 10px;
+  }
+  .crossword-clue {
+    display: grid;
+    grid-template-columns: 1fr minmax(170px, 260px);
+    gap: 10px;
+    align-items: center;
+    border: 1px solid var(--border);
+    background: rgba(28,33,53,.72);
+    border-radius: 8px;
+    padding: 10px;
+  }
+  .crossword-clue span { color: var(--muted); }
+  .crossword-clue input {
+    min-height: 42px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel-2);
+    color: var(--text);
+    padding: 0 10px;
+    text-transform: lowercase;
+  }
+  .crossword-clue.solved { border-color: var(--mint); }
+
+  .side-panel { padding: 16px; display: grid; gap: 14px; }
+  .mini-title { margin: 0 0 9px; font-size: .95rem; }
+  .player-card, .goal-row, .review-chip {
+    border: 1px solid var(--border);
+    background: rgba(28, 33, 53, .78);
+    border-radius: 8px;
+    padding: 11px;
+  }
+
+  .player-card.active { border-color: var(--gold); }
+  .player-card b { display: flex; justify-content: space-between; gap: 10px; }
+  .player-card span, .goal-row span { color: var(--muted); font-size: .82rem; }
+  .meter { height: 8px; background: #101421; border-radius: 999px; overflow: hidden; margin-top: 8px; }
+  .meter div { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--mint)); border-radius: inherit; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 22px 0;
+  }
+
+  .stats-panel { padding: 16px; }
+  .stats-number { font-family: "JetBrains Mono", monospace; font-size: 2rem; font-weight: 800; color: var(--mint); }
+  .chart {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    align-items: end;
+    gap: 10px;
+    height: 220px;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(21,25,42,.8);
+  }
+
+  .bar-wrap { display: grid; align-items: end; gap: 8px; height: 100%; text-align: center; color: var(--muted); font-size: .72rem; }
+  .bar { min-height: 5px; background: linear-gradient(180deg, var(--mint), var(--accent)); border-radius: 7px 7px 2px 2px; }
+  .list { display: grid; gap: 10px; }
+  .review-chip { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .review-chip strong { display: block; }
+  .review-chip small { color: var(--muted); }
+  .sync-panel {
+    margin-top: 14px;
+    border: 1px solid var(--border);
+    background: rgba(28, 33, 53, .72);
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .sync-row { display: flex; gap: 8px; margin-top: 9px; }
+  .sync-row input {
+    width: 100%;
+    min-height: 42px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #15192a;
+    color: var(--text);
+    padding: 0 12px;
+    outline: none;
+  }
+  .sync-status { color: var(--muted); font-size: .82rem; line-height: 1.35; }
   .hidden { display: none !important; }
 
-  /* WORD SEARCH */
-  .word-search-wrap { display: flex; flex-direction: column; gap: 0.8rem; }
-  .word-list { display: flex; flex-wrap: wrap; gap: 0.45rem; }
-  .word-tag {
-    font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 600;
-    padding: 0.28rem 0.6rem; border-radius: 6px;
-    background: var(--surface); border: 1px solid var(--border); color: var(--muted); transition: all 0.2s;
+  @media (max-width: 860px) {
+    .welcome, .game-layout { grid-template-columns: 1fr; }
+    .skill-strip, .hud, .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .topbar-inner { align-items: flex-start; flex-direction: column; padding: 12px 0; }
   }
-  .word-tag.found { background: #0d1f1a; border-color: var(--success); color: var(--success); text-decoration: line-through; }
-  .ws-grid-wrap { overflow-x: auto; }
-  .ws-grid { display: inline-grid; gap: 2px; user-select: none; }
-  .ws-cell {
-    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
-    font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; font-weight: 600;
-    background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
-    cursor: pointer; transition: all 0.08s; text-transform: uppercase; color: var(--text);
-  }
-  .ws-cell:hover { background: #1e2140; }
-  .ws-cell.selecting { background: #1a1645; border-color: var(--accent); color: var(--accent); }
-  .ws-cell.found-cell { background: #0d1f1a; border-color: var(--success); color: var(--success); }
 
-  /* REVIEW SCREEN */
-  #review { flex-direction: column; background: var(--bg); }
-  .review-header {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 1rem 1.2rem; display: flex; align-items: center; justify-content: space-between;
-  }
-  .review-header h2 { font-size: 1.1rem; font-weight: 700; }
-  .review-header .back-btn { font-size: 0.82rem; }
-  .review-list { flex: 1; padding: 1.2rem; max-width: 700px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 0.7rem; }
-  .review-empty { text-align: center; padding: 3rem 1rem; color: var(--muted); }
-  .review-empty .review-empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
-  .review-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; padding: 1rem 1.2rem;
-    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  }
-  .review-card-info { flex: 1; }
-  .review-word-en { font-size: 1.1rem; font-weight: 700; color: var(--text); }
-  .review-word-es { font-size: 0.85rem; color: var(--muted); margin-top: 0.1rem; }
-  .review-meta { font-size: 0.72rem; color: var(--error); margin-top: 0.2rem; font-family: 'JetBrains Mono', monospace; }
-  .review-card-actions { display: flex; gap: 0.5rem; align-items: center; }
-  .review-clear-btn {
-    background: none; border: 1px solid var(--border); color: var(--muted);
-    padding: 0.3rem 0.6rem; border-radius: 7px; cursor: pointer; font-size: 0.75rem;
-    transition: all 0.15s; font-family: inherit;
-  }
-  .review-clear-btn:hover { border-color: var(--error); color: var(--error); }
-  .review-practice-btn {
-    background: var(--accent); color: #fff; border: none;
-    padding: 0.7rem 1.5rem; border-radius: 10px; cursor: pointer;
-    font-family: inherit; font-size: 0.9rem; font-weight: 600; transition: all 0.15s;
-    width: 100%; margin-top: 0.5rem;
-  }
-  .review-practice-btn:hover { background: #5a52e0; }
-
-  /* LEVEL UP OVERLAY */
-  #levelup-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.85); z-index: 100; align-items: center; justify-content: center;
-  }
-  #levelup-overlay.show { display: flex; }
-  .levelup-card {
-    background: var(--card); border: 2px solid var(--accent2);
-    border-radius: 20px; padding: 2.2rem; max-width: 380px; width: 90%; text-align: center;
-  }
-  .levelup-icon { font-size: 2.8rem; margin-bottom: 0.4rem; }
-  .levelup-title { font-size: 1.7rem; font-weight: 700; color: var(--accent2); margin-bottom: 0.3rem; }
-  .levelup-sub { color: var(--muted); margin-bottom: 1.4rem; font-size: 0.95rem; }
-  .levelup-btns { display: flex; flex-direction: column; gap: 0.6rem; }
-  .btn-levelup-confirm {
-    background: var(--accent2); color: #000; border: none; padding: 0.85rem;
-    border-radius: 10px; cursor: pointer; font-family: inherit; font-size: 0.95rem; font-weight: 700;
-  }
-  .btn-levelup-confirm:hover { background: #00cc8a; }
-  .btn-levelup-stay {
-    background: none; border: 1px solid var(--border); color: var(--muted);
-    padding: 0.7rem; border-radius: 10px; cursor: pointer; font-family: inherit; font-size: 0.88rem;
-  }
-  .btn-levelup-stay:hover { border-color: var(--accent); color: var(--text); }
-
-  /* PLACEMENT */
-  #placement { align-items: center; justify-content: center; padding: 1.5rem; background: var(--bg); }
-  .placement-inner { max-width: 540px; width: 100%; }
-  .placement-inner h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.3rem; }
-  .placement-inner p { color: var(--muted); margin-bottom: 1.2rem; font-size: 0.88rem; }
-  .placement-progress { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.2rem; }
-  .placement-bar { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-  .placement-fill { height: 100%; background: var(--warn); border-radius: 3px; transition: width 0.3s; }
-  .placement-q-count { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--muted); }
-
-  /* TOAST */
-  .toast {
-    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(60px);
-    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-    padding: 0.65rem 1.3rem; font-size: 0.88rem; font-weight: 600;
-    transition: transform 0.25s ease, opacity 0.25s ease; opacity: 0; z-index: 200;
-    pointer-events: none; white-space: nowrap;
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-  .toast.success { border-color: var(--success); color: var(--success); }
-  .toast.info { border-color: var(--accent); color: var(--accent); }
-  .toast.warn { border-color: var(--warn); color: var(--warn); }
-  .toast.error { border-color: var(--error); color: var(--error); }
-
-  @media (max-width: 480px) {
-    .options-grid { grid-template-columns: 1fr; }
-    .ws-cell { width: 27px; height: 27px; font-size: 0.72rem; }
-    .hdr-stats { gap: 0.7rem; }
-    .logo { font-size: 2.2rem; }
-    .topic-grid { grid-template-columns: 1fr; }
-    .level-row { gap: 0.4rem; }
-    .level-chip { font-size: 0.75rem; padding: 0.45rem 0.8rem; }
+  @media (max-width: 520px) {
+    .shell, .topbar-inner { width: min(100% - 22px, 1180px); }
+    .topic-grid, .segmented, .start-row, .options, .skill-strip, .hud, .stats-grid { grid-template-columns: 1fr; }
+    .word-search, .crossword-clue { grid-template-columns: 1fr; }
+    .letter-cell { width: 29px; height: 29px; }
+    .type-row, .nav-row { flex-direction: column; }
   }
 </style>
 </head>
 <body>
-
-<!-- WELCOME -->
-<div id="welcome" class="screen active">
-  <div class="welcome-inner">
-    <div class="logo">Vocab<span>Quest</span></div>
-    <div class="tagline">Aprende vocabulario en inglés jugando</div>
-    <div class="install-banner" id="install-banner" onclick="installPWA()">
-      📲 Instalar app en tu celular — funciona sin internet
-    </div>
-
-    <div class="section-label">Tema a practicar</div>
-    <div class="topic-grid" id="topic-grid">
-      <button class="topic-btn" data-topic="daily"><span class="topic-icon">🏠</span>Vida cotidiana</button>
-      <button class="topic-btn" data-topic="food"><span class="topic-icon">🍕</span>Comida y bebida</button>
-      <button class="topic-btn" data-topic="work"><span class="topic-icon">💼</span>Trabajo y negocios</button>
-      <button class="topic-btn" data-topic="travel"><span class="topic-icon">✈️</span>Viajes y lugares</button>
-      <button class="topic-btn" data-topic="body"><span class="topic-icon">🧍</span>Cuerpo y salud</button>
-      <button class="topic-btn" data-topic="tech"><span class="topic-icon">💻</span>Tecnología</button>
-    </div>
-
-    <div class="section-label">Nivel de inicio</div>
-    <div class="level-row" id="level-row">
-      <button class="level-chip" data-level="1">Principiante</button>
-      <button class="level-chip" data-level="2">Básico</button>
-      <button class="level-chip" data-level="3">Intermedio</button>
-      <button class="level-chip" data-level="4">Avanzado</button>
-      <button class="level-chip" data-level="0">Evaluar</button>
-    </div>
-
-    <button class="btn-primary" id="start-btn" disabled>Empezar →</button>
-
-    <div class="review-btn-wrap">
-      <button class="btn-secondary" id="review-btn" disabled onclick="showReviewScreen()">
-        📋 Repasar palabras fallidas <span class="failed-count hidden" id="failed-count">0</span>
-      </button>
-    </div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><strong>Vocab<span>Quest</span> Plus</strong><small>vocabulario real por niveles</small></div>
+    <nav class="nav">
+      <button class="nav-btn active" data-view="home">Inicio</button>
+      <button class="nav-btn" data-view="stats">Estadisticas</button>
+      <button class="nav-btn" data-view="review">Repaso</button>
+      <button class="nav-btn" data-view="game">Practica</button>
+    </nav>
   </div>
-</div>
+</header>
 
-<!-- PLACEMENT -->
-<div id="placement" class="screen">
-  <div class="placement-inner">
-    <h2>Evaluación de nivel</h2>
-    <p>Responde estas preguntas para colocarte en el nivel correcto. Sin penalización por error.</p>
-    <div class="placement-progress">
-      <div class="placement-bar"><div class="placement-fill" id="placement-fill" style="width:0%"></div></div>
-      <div class="placement-q-count" id="placement-q-count">0/10</div>
+<main id="home" class="screen active">
+  <div class="shell welcome">
+    <section class="hero">
+      <h1>Vocabulario que se queda <span>en la memoria.</span></h1>
+      <p>Practica ingles con temas cotidianos, profesionales y academicos. La app adapta las preguntas, guarda tu avance semanal y permite competir en el mismo dispositivo.</p>
+      <div class="skill-strip">
+        <div class="skill-tile"><b>16</b><span>temas con palabras utiles para la vida real.</span></div>
+        <div class="skill-tile"><b>4</b><span>niveles: principiante, basico, intermedio y avanzado.</span></div>
+        <div class="skill-tile"><b>2P</b><span>modo multijugador local por turnos.</span></div>
+        <div class="skill-tile"><b>7d</b><span>estadisticas semanales y racha diaria.</span></div>
+      </div>
+    </section>
+
+    <section class="setup-panel">
+      <div class="section-title">Tema</div>
+      <div class="topic-grid" id="topicGrid"></div>
+
+      <div class="section-title">Nivel</div>
+      <div class="segmented" id="levelGrid">
+        <button class="level-btn selected" data-level="1">Principiante</button>
+        <button class="level-btn" data-level="2">Basico</button>
+        <button class="level-btn" data-level="3">Intermedio</button>
+        <button class="level-btn" data-level="4">Avanzado</button>
+      </div>
+
+      <div class="section-title">Modo</div>
+      <div class="segmented" id="modeGrid">
+        <button class="mode-btn selected" data-mode="solo">Solo</button>
+        <button class="mode-btn" data-mode="duel">2 personas</button>
+        <button class="mode-btn" data-mode="review">Repaso</button>
+        <button class="mode-btn" data-mode="challenge">Reto</button>
+      </div>
+
+      <div class="start-row">
+        <button class="primary-btn" id="startBtn">Empezar</button>
+        <button class="soft-btn" id="placementBtn">Evaluar nivel</button>
+      </div>
+      <p class="review-note" id="smartTip">Consejo: alterna entre elegir, escribir y escuchar. La memoria mejora cuando recuerdas la palabra de varias formas.</p>
+      <div class="sync-panel">
+        <div class="sync-status" id="syncStatus">Progreso guardado en este dispositivo. Configura Supabase para sincronizar en linea.</div>
+        <div class="sync-row" id="syncLoginRow">
+          <input id="emailInput" type="email" placeholder="Correo para guardar en linea">
+          <button class="soft-btn" id="loginBtn">Enviar enlace</button>
+        </div>
+        <div class="sync-row hidden" id="syncUserRow">
+          <button class="soft-btn" id="syncNowBtn">Sincronizar</button>
+          <button class="danger-btn" id="logoutBtn">Salir</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<main id="game" class="screen">
+  <div class="shell game-layout">
+    <section>
+      <div class="hud">
+        <div class="hud-item"><span>Puntos</span><b id="scoreOut">0</b></div>
+        <div class="hud-item"><span>Precision</span><b id="accuracyOut">0%</b></div>
+        <div class="hud-item"><span>Racha</span><b id="streakOut">0</b></div>
+        <div class="hud-item"><span>Semana</span><b id="weekOut">0</b></div>
+      </div>
+      <article class="practice-card" id="practiceCard"></article>
+    </section>
+
+    <aside class="side-panel">
+      <section>
+        <h3 class="mini-title">Sesion</h3>
+        <div class="goal-row">
+          <b id="sessionName">Vida diaria - Principiante</b><br>
+          <span id="sessionMode">Practica individual</span>
+          <div class="meter"><div id="progressFill"></div></div>
+        </div>
+      </section>
+      <section id="playersBox" class="hidden">
+        <h3 class="mini-title">Multijugador</h3>
+        <div class="player-card active" id="playerA"><b>Persona A <span>0</span></b><span>Turno actual</span></div>
+        <div class="player-card" id="playerB"><b>Persona B <span>0</span></b><span>Esperando</span></div>
+      </section>
+      <section>
+        <h3 class="mini-title">Objetivo de hoy</h3>
+        <div class="goal-row"><b id="dailyGoal">0 / 20 correctas</b><br><span>La meta diaria se reinicia cada dia.</span></div>
+      </section>
+      <section>
+        <h3 class="mini-title">Palabras por reforzar</h3>
+        <div class="list" id="weakMini"></div>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<main id="stats" class="screen">
+  <div class="shell" style="padding:24px 0 40px">
+    <h2>Progreso semanal</h2>
+    <div class="stats-grid">
+      <div class="stats-panel"><span>Respuestas esta semana</span><div class="stats-number" id="statAttempts">0</div></div>
+      <div class="stats-panel"><span>Correctas esta semana</span><div class="stats-number" id="statCorrect">0</div></div>
+      <div class="stats-panel"><span>Palabras dominadas</span><div class="stats-number" id="statMastered">0</div></div>
     </div>
-    <div id="placement-exercise"></div>
+    <div class="chart" id="weekChart"></div>
+    <h3>Recomendacion</h3>
+    <p id="statsAdvice" style="color:var(--muted);line-height:1.55"></p>
   </div>
-</div>
+</main>
 
-<!-- GAME -->
-<div id="game" class="screen">
-  <div class="game-header">
-    <div class="hdr-left">
-      <button class="back-btn" id="back-btn">← Menú</button>
-      <div class="topic-badge" id="topic-label">Daily Life</div>
-      <div class="review-mode-badge hidden" id="review-mode-badge">🔁 Repaso</div>
-    </div>
-    <div class="hdr-stats">
-      <div class="streak-counter">🔥 <span class="streak-count" id="streak-count">0</span></div>
-      <div class="score-display"><span id="score-display">0</span></div>
-    </div>
+<main id="review" class="screen">
+  <div class="shell" style="padding:24px 0 40px">
+    <h2>Repaso inteligente</h2>
+    <p style="color:var(--muted)">Estas palabras aparecen porque tuvieron errores o poca practica. Cuando las aciertas varias veces, salen de esta lista.</p>
+    <div class="list" id="reviewList"></div>
   </div>
-  <div class="level-bar">
-    <div class="level-label" id="level-label">Nivel 1</div>
-    <div class="progress-track"><div class="progress-fill" id="level-progress" style="width:0%"></div></div>
-    <div class="progress-text" id="progress-text">0/5</div>
-  </div>
-  <div class="exercise-zone" id="exercise-zone"></div>
-</div>
+</main>
 
-<!-- REVIEW SCREEN -->
-<div id="review" class="screen">
-  <div class="review-header">
-    <h2>📋 Palabras para repasar</h2>
-    <button class="back-btn" onclick="backToMenu()">← Menú</button>
-  </div>
-  <div class="review-list" id="review-list"></div>
-</div>
-
-<!-- LEVEL UP OVERLAY -->
-<div id="levelup-overlay">
-  <div class="levelup-card">
-    <div class="levelup-icon">🎉</div>
-    <div class="levelup-title" id="levelup-title">¡Subiste de nivel!</div>
-    <div class="levelup-sub" id="levelup-sub">Nivel 2 — Básico</div>
-    <div class="levelup-btns">
-      <button class="btn-levelup-confirm" id="levelup-confirm">Continuar al siguiente nivel</button>
-      <button class="btn-levelup-stay" id="levelup-stay">Practicar más aquí</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ═══════════════════════════════════════════════
-// PWA INSTALL
-// ═══════════════════════════════════════════════
-let deferredInstall = null;
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
+const TOPICS = {
+  daily: { icon: "H", name: "Vida diaria", desc: "casa, rutinas, objetos", words: {
+    1: [["door","puerta","The door is open."],["chair","silla","Please sit on the chair."],["window","ventana","Open the window."],["kitchen","cocina","She is in the kitchen."],["bed","cama","I make my bed."],["key","llave","I lost my key."],["mirror","espejo","Look in the mirror."],["clothes","ropa","These clothes are clean."]],
+    2: [["drawer","gaveta","The keys are in the drawer."],["blanket","cobija","The blanket is warm."],["schedule","horario","My schedule is busy."],["laundry","lavanderia","I do laundry on Sundays."],["receipt","recibo","Keep the receipt."],["neighbor","vecino","My neighbor is friendly."],["stairs","escaleras","Take the stairs."],["garbage","basura","Take out the garbage."]],
+    3: [["household","hogar","Household tasks take time."],["appliance","electrodomestico","The appliance is new."],["errand","mandado","I have an errand to run."],["maintenance","mantenimiento","Maintenance prevents problems."],["clutter","desorden","Clear the clutter."],["storage","almacenamiento","We need more storage."],["commute","viaje al trabajo","My commute is long."],["budget","presupuesto","Set a monthly budget."]],
+    4: [["upkeep","mantenimiento","Home upkeep is expensive."],["renovation","renovacion","The renovation took months."],["amenities","comodidades","The building has great amenities."],["lease","contrato de alquiler","Read the lease carefully."],["mortgage","hipoteca","They applied for a mortgage."],["inventory","inventario","Make a home inventory."],["utilities","servicios publicos","Utilities are due today."],["housekeeping","gestion domestica","Housekeeping requires routines."]]
+  }},
+  food: { icon: "F", name: "Comida", desc: "supermercado y cocina", words: {
+    1: [["rice","arroz","Rice is ready."],["bread","pan","I want bread."],["water","agua","Drink water."],["apple","manzana","The apple is red."],["egg","huevo","Boil an egg."],["cheese","queso","Cheese tastes good."],["soup","sopa","The soup is hot."],["salt","sal","Add salt."]],
+    2: [["flavor","sabor","The flavor is sweet."],["grilled","a la parrilla","I ordered grilled fish."],["recipe","receta","Follow the recipe."],["leftovers","sobras","Save the leftovers."],["spicy","picante","This sauce is spicy."],["dessert","postre","Dessert is included."],["fresh","fresco","The salad is fresh."],["portion","porcion","The portion is small."]],
+    3: [["ingredient","ingrediente","Sugar is an ingredient."],["seasoning","condimento","This seasoning is strong."],["simmer","hervir a fuego lento","Let it simmer."],["craving","antojo","I have a craving."],["nutrition","nutricion","Nutrition affects energy."],["organic","organico","Organic food costs more."],["cuisine","cocina gastronomica","Italian cuisine is popular."],["appetizer","entrada","We shared an appetizer."]],
+    4: [["aftertaste","sabor residual","The coffee has a bitter aftertaste."],["savory","salado","I prefer savory snacks."],["fermented","fermentado","Kimchi is fermented."],["culinary","culinario","She studied culinary arts."],["sustainable","sostenible","Choose sustainable seafood."],["dietary","alimentario","He has dietary restrictions."],["palate","paladar","Her palate is refined."],["delicacy","manjar","It is a local delicacy."]]
+  }},
+  work: { icon: "W", name: "Trabajo", desc: "oficina y negocios", words: {
+    1: [["job","trabajo","I need a job."],["boss","jefe","My boss is kind."],["email","correo","Send an email."],["meeting","reunion","The meeting starts now."],["team","equipo","Our team is small."],["desk","escritorio","The desk is clean."],["salary","salario","The salary is fair."],["break","descanso","Take a break."]],
+    2: [["deadline","fecha limite","The deadline is Friday."],["task","tarea","Finish the task."],["hire","contratar","They will hire two people."],["training","capacitacion","Training starts today."],["customer","cliente","The customer called."],["report","informe","Write the report."],["shift","turno","My shift ends at six."],["skills","habilidades","Improve your skills."]],
+    3: [["proposal","propuesta","The proposal was approved."],["performance","desempeno","Performance improved."],["workflow","flujo de trabajo","The workflow is faster."],["negotiate","negociar","We need to negotiate."],["stakeholder","interesado","Stakeholders joined the call."],["revenue","ingresos","Revenue increased."],["onboarding","integracion laboral","Onboarding takes a week."],["productivity","productividad","Productivity rose."]],
+    4: [["benchmark","punto de referencia","Use a benchmark for comparison."],["forecast","pronostico","The forecast is optimistic."],["procurement","adquisiciones","Procurement approved the purchase."],["compliance","cumplimiento","Compliance is mandatory."],["retention","retencion","Retention improved this quarter."],["leverage","aprovechar","Leverage your strengths."],["scalability","escalabilidad","Scalability matters."],["deliverable","entregable","The deliverable is ready."]]
+  }},
+  travel: { icon: "T", name: "Viajes", desc: "lugares y transporte", words: {
+    1: [["ticket","boleto","Buy a ticket."],["hotel","hotel","The hotel is near."],["bus","autobus","Take the bus."],["map","mapa","Use the map."],["beach","playa","The beach is beautiful."],["airport","aeropuerto","Go to the airport."],["street","calle","Cross the street."],["bag","bolso","Pack your bag."]],
+    2: [["luggage","equipaje","My luggage is heavy."],["boarding","abordaje","Boarding starts soon."],["delay","retraso","The flight has a delay."],["landmark","punto de referencia","That tower is a landmark."],["reservation","reservacion","I made a reservation."],["itinerary","itinerario","Check the itinerary."],["customs","aduana","Customs was quick."],["currency","moneda","Exchange currency here."]],
+    3: [["destination","destino","Paris is our destination."],["accommodation","alojamiento","Accommodation is included."],["commuter","viajero frecuente","Commuters filled the train."],["sightseeing","turismo","We went sightseeing."],["departure","salida","Departure is at noon."],["arrival","llegada","Arrival was late."],["connecting flight","vuelo de conexion","We missed the connecting flight."],["travel insurance","seguro de viaje","Travel insurance helps."]],
+    4: [["layover","escala","The layover is six hours."],["expedition","expedicion","The expedition was demanding."],["immigration","migracion","Immigration checked my passport."],["off-season","temporada baja","Travel off-season to save money."],["jet lag","desfase horario","Jet lag made me tired."],["hospitality","hospitalidad","Hospitality was excellent."],["excursion","excursion","The excursion leaves early."],["remote","remoto","The village is remote."]]
+  }},
+  health: { icon: "M", name: "Salud", desc: "cuerpo y bienestar", words: {
+    1: [["head","cabeza","My head hurts."],["hand","mano","Wash your hands."],["doctor","doctor","Call the doctor."],["pain","dolor","I feel pain."],["tired","cansado","I am tired."],["sleep","dormir","Sleep well."],["cold","resfriado","I have a cold."],["medicine","medicina","Take medicine."]],
+    2: [["symptom","sintoma","Fever is a symptom."],["appointment","cita","Book an appointment."],["healthy","saludable","Eat healthy food."],["exercise","ejercicio","Exercise helps."],["injury","lesion","The injury healed."],["cough","tos","The cough stopped."],["blood","sangre","Blood pressure is normal."],["nurse","enfermero","The nurse helped me."]],
+    3: [["diagnosis","diagnostico","The diagnosis was clear."],["treatment","tratamiento","Treatment begins today."],["recovery","recuperacion","Recovery takes time."],["immune system","sistema inmune","The immune system protects you."],["prescription","receta medica","The prescription is ready."],["anxiety","ansiedad","Anxiety can be treated."],["nutritionist","nutricionista","A nutritionist made a plan."],["checkup","revision medica","I need a checkup."]],
+    4: [["preventive","preventivo","Preventive care is important."],["chronic","cronico","Diabetes can be chronic."],["rehabilitation","rehabilitacion","Rehabilitation improved mobility."],["inflammation","inflamacion","Inflammation causes pain."],["screening","tamizaje","Screening detects risk."],["wellness","bienestar","Wellness includes mental health."],["dosage","dosis","Follow the dosage."],["side effect","efecto secundario","A side effect appeared."]]
+  }},
+  tech: { icon: "D", name: "Tecnologia", desc: "computadoras y apps", words: {
+    1: [["phone","telefono","My phone is new."],["screen","pantalla","The screen is bright."],["mouse","mouse","Use the mouse."],["file","archivo","Open the file."],["app","aplicacion","Install the app."],["password","contrasena","Change your password."],["camera","camara","The camera works."],["message","mensaje","Send a message."]],
+    2: [["device","dispositivo","This device is fast."],["download","descargar","Download the document."],["upload","subir","Upload the photo."],["settings","configuracion","Open settings."],["battery","bateria","The battery is low."],["browser","navegador","Use the browser."],["account","cuenta","Create an account."],["update","actualizacion","Install the update."]],
+    3: [["software","programa","The software is reliable."],["hardware","equipo fisico","Hardware can fail."],["database","base de datos","The database stores data."],["network","red","The network is slow."],["privacy","privacidad","Privacy matters."],["shortcut","atajo","Use a shortcut."],["backup","respaldo","Make a backup."],["interface","interfaz","The interface is simple."]],
+    4: [["encryption","cifrado","Encryption protects data."],["authentication","autenticacion","Authentication failed."],["bandwidth","ancho de banda","Bandwidth is limited."],["deployment","despliegue","Deployment happens tonight."],["framework","marco de trabajo","React is a framework."],["latency","latencia","Latency affects calls."],["vulnerability","vulnerabilidad","Patch the vulnerability."],["automation","automatizacion","Automation saves time."]]
+  }},
+  emotions: { icon: "E", name: "Emociones", desc: "sentimientos y personalidad", words: {
+    1: [["happy","feliz","I am happy."],["sad","triste","She feels sad."],["angry","enojado","He is angry."],["afraid","asustado","Do not be afraid."],["calm","tranquilo","Stay calm."],["kind","amable","Be kind."],["shy","timido","He is shy."],["proud","orgulloso","I am proud."]],
+    2: [["excited","emocionado","They are excited."],["worried","preocupado","I am worried."],["confident","seguro","She feels confident."],["lonely","solo","He feels lonely."],["grateful","agradecido","I am grateful."],["jealous","celoso","She felt jealous."],["embarrassed","avergonzado","I was embarrassed."],["relaxed","relajado","I feel relaxed."]],
+    3: [["overwhelmed","abrumado","I feel overwhelmed."],["resilient","resiliente","She is resilient."],["thoughtful","considerado","That was thoughtful."],["frustrated","frustrado","He got frustrated."],["relieved","aliviado","I was relieved."],["curious","curioso","Children are curious."],["sincere","sincero","His apology was sincere."],["supportive","solidario","My family is supportive."]],
+    4: [["apprehensive","inquieto","She felt apprehensive."],["composed","sereno","He remained composed."],["resentful","resentido","She sounded resentful."],["compassionate","compasivo","A compassionate leader listens."],["nostalgic","nostalgico","The song made me nostalgic."],["vulnerable","vulnerable","It is hard to be vulnerable."],["assertive","asertivo","Be assertive, not rude."],["bewildered","desconcertado","I was bewildered."]]
+  }},
+  academic: { icon: "A", name: "Academico", desc: "estudio y pensamiento", words: {
+    1: [["book","libro","Read the book."],["class","clase","Class starts now."],["test","examen","The test is easy."],["answer","respuesta","Write the answer."],["teacher","profesor","The teacher explains."],["learn","aprender","I want to learn."],["paper","papel","Use this paper."],["grade","nota","My grade is good."]],
+    2: [["subject","materia","Math is my favorite subject."],["assignment","tarea escolar","The assignment is due."],["research","investigacion","Research takes time."],["library","biblioteca","Study at the library."],["question","pregunta","Ask a question."],["summary","resumen","Write a summary."],["chapter","capitulo","Read chapter five."],["practice","practica","Practice every day."]],
+    3: [["evidence","evidencia","Use evidence."],["argument","argumento","The argument is strong."],["analysis","analisis","The analysis is clear."],["source","fuente","Cite the source."],["hypothesis","hipotesis","Test the hypothesis."],["concept","concepto","The concept is abstract."],["method","metodo","Explain the method."],["outcome","resultado","The outcome was positive."]],
+    4: [["scholarship","beca","She won a scholarship."],["peer-reviewed","revisado por pares","Use peer-reviewed articles."],["framework","marco teorico","The framework guides the study."],["thesis","tesis","Her thesis was excellent."],["literature review","revision bibliografica","The literature review is long."],["validity","validez","Validity matters in research."],["bias","sesgo","Avoid bias."],["inference","inferencia","The inference is reasonable."]]
+  }}
+};
+
+const LEVELS = {1:"Principiante",2:"Basico",3:"Intermedio",4:"Avanzado"};
+const MODES = {solo:"Practica individual",duel:"Multijugador local",review:"Repaso inteligente",challenge:"Reto de 20 preguntas"};
+const EX_TYPES = ["esToEn","enToEs","type","listening","sentence","wordSearch","crossword"];
+const STORE_KEY = "vocabquest_plus_progress_v1";
+const DAY_MS = 86400000;
+
+// Pega aqui las credenciales publicas de tu proyecto Supabase.
+// La anon key es publica; protege los datos con las politicas RLS del SQL adjunto.
+const SUPABASE_URL = "https://kotgtqihzctnqnsdlqqt.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvdGd0cWloemN0bnFuc2RscXF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMzc5NDksImV4cCI6MjA5NjcxMzk0OX0.zNHh9R4wCKF_KVWAORcSf00S7ZutjtkMirBnDT8yCbU";
+const SUPABASE_TABLE = "vocabquest_progress";
+
+let app = {
+  topic: "daily",
+  level: 1,
+  mode: "solo",
+  score: 0,
+  streak: 0,
+  attempts: 0,
+  correct: 0,
+  questionCount: 0,
+  current: null,
+  answered: false,
+  player: 0,
+  players: [{name:"Persona A",score:0,correct:0,attempts:0},{name:"Persona B",score:0,correct:0,attempts:0}],
+  pool: []
+};
+
+let supabaseClient = null;
+let currentUser = null;
+let cloudReady = false;
+let syncing = false;
+
+function defaultProgress() {
+  return { days: {}, words: {}, mastered: {}, lastSeen: null };
+}
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || defaultProgress(); }
+  catch { return defaultProgress(); }
+}
+
+let progress = loadProgress();
+
+function saveProgress() {
+  localStorage.setItem(STORE_KEY, JSON.stringify(progress));
+  queueCloudSave();
+}
+
+function setSyncStatus(message) {
+  const el = document.getElementById("syncStatus");
+  if (el) el.textContent = message;
+}
+
+function initSupabase() {
+  const hasConfig = SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase;
+  if (!hasConfig) {
+    setSyncStatus("Progreso guardado localmente. Pega tu SUPABASE_URL y SUPABASE_ANON_KEY para activar nube.");
+    return;
+  }
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  supabaseClient.auth.getSession().then(({ data }) => handleSession(data.session, true));
+  supabaseClient.auth.onAuthStateChange((_event, session) => handleSession(session, true));
+}
+
+async function handleSession(session, shouldPull) {
+  currentUser = session?.user || null;
+  cloudReady = !!currentUser;
+  document.getElementById("syncLoginRow")?.classList.toggle("hidden", cloudReady);
+  document.getElementById("syncUserRow")?.classList.toggle("hidden", !cloudReady);
+  if (!cloudReady) {
+    setSyncStatus(supabaseClient ? "Entra con tu correo para sincronizar en linea." : "Progreso guardado localmente.");
+    return;
+  }
+  setSyncStatus(`Sincronizado como ${currentUser.email || "usuario"}.`);
+  if (shouldPull) await pullCloudProgress();
+}
+
+async function sendLoginLink() {
+  if (!supabaseClient) {
+    setSyncStatus("Supabase aun no esta configurado en este archivo.");
+    return;
+  }
+  const email = document.getElementById("emailInput").value.trim();
+  if (!email) {
+    setSyncStatus("Escribe un correo para enviar el enlace de acceso.");
+    return;
+  }
+  setSyncStatus("Enviando enlace de acceso...");
+  const { error } = await supabaseClient.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: window.location.href.split("#")[0] }
   });
-}
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredInstall = e;
-  document.getElementById('install-banner').classList.add('show');
-});
-window.addEventListener('appinstalled', () => {
-  document.getElementById('install-banner').classList.remove('show');
-  deferredInstall = null;
-});
-function installPWA() {
-  if (!deferredInstall) return;
-  deferredInstall.prompt();
-  deferredInstall.userChoice.then(() => { deferredInstall = null; });
+  setSyncStatus(error ? `No se pudo enviar: ${error.message}` : "Revisa tu correo y abre el enlace para activar la sincronizacion.");
 }
 
-// ═══════════════════════════════════════════════
-// SPEECH / AUDIO
-// ═══════════════════════════════════════════════
-function speak(text, btn) {
-  if (!window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const utt = new SpeechSynthesisUtterance(text);
-  utt.lang = 'en-US'; utt.rate = 0.85; utt.pitch = 1;
-  // Try to get a native English voice
-  const voices = window.speechSynthesis.getVoices();
-  const enVoice = voices.find(v => v.lang.startsWith('en') && v.localService) ||
-                  voices.find(v => v.lang.startsWith('en'));
-  if (enVoice) utt.voice = enVoice;
+async function logout() {
+  if (!supabaseClient) return;
+  await supabaseClient.auth.signOut();
+  currentUser = null;
+  cloudReady = false;
+  handleSession(null, false);
+}
 
-  if (btn) {
-    btn.classList.add('playing');
-    utt.onend = () => btn.classList.remove('playing');
-    utt.onerror = () => btn.classList.remove('playing');
+function mergeProgress(remote) {
+  if (!remote) return;
+  progress.days = {...(remote.days || {}), ...(progress.days || {})};
+  progress.words = {...(remote.words || {}), ...(progress.words || {})};
+  progress.mastered = {...(remote.mastered || {}), ...(progress.mastered || {})};
+  progress.lastSeen = Math.max(remote.lastSeen || 0, progress.lastSeen || 0);
+}
+
+async function pullCloudProgress() {
+  if (!cloudReady || syncing) return;
+  syncing = true;
+  setSyncStatus("Leyendo progreso en linea...");
+  const { data, error } = await supabaseClient
+    .from(SUPABASE_TABLE)
+    .select("progress")
+    .eq("user_id", currentUser.id)
+    .maybeSingle();
+  if (error) {
+    setSyncStatus(`No se pudo leer Supabase: ${error.message}`);
+    syncing = false;
+    return;
   }
-  window.speechSynthesis.speak(utt);
-}
-// Preload voices
-if (window.speechSynthesis) {
-  window.speechSynthesis.getVoices();
-  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
-}
-
-// ═══════════════════════════════════════════════
-// VOCAB DATABASE
-// ═══════════════════════════════════════════════
-const VOCAB = {
-  daily: {
-    1: [
-      {en:"house",es:"casa",hint:"Where you live"},{en:"door",es:"puerta",hint:"You open and close it"},
-      {en:"window",es:"ventana",hint:"You see through it"},{en:"table",es:"mesa",hint:"You eat at it"},
-      {en:"chair",es:"silla",hint:"You sit on it"},{en:"bed",es:"cama",hint:"You sleep in it"},
-      {en:"water",es:"agua",hint:"You drink it"},{en:"book",es:"libro",hint:"You read it"},
-      {en:"car",es:"carro",hint:"A vehicle"},{en:"phone",es:"teléfono",hint:"You call people with it"},
-    ],
-    2: [
-      {en:"kitchen",es:"cocina",hint:"Room where you cook"},{en:"bathroom",es:"baño",hint:"Room with a shower"},
-      {en:"bedroom",es:"cuarto",hint:"Room where you sleep"},{en:"neighbor",es:"vecino",hint:"Person next to you"},
-      {en:"schedule",es:"horario",hint:"Plan of activities"},{en:"grocery",es:"supermercado",hint:"Where you buy food"},
-      {en:"laundry",es:"lavandería",hint:"Where you wash clothes"},{en:"exercise",es:"ejercicio",hint:"Physical activity"},
-      {en:"weekend",es:"fin de semana",hint:"Saturday and Sunday"},{en:"routine",es:"rutina",hint:"Daily habits"},
-    ],
-    3: [
-      {en:"appliance",es:"electrodoméstico",hint:"Electrical home device"},{en:"mortgage",es:"hipoteca",hint:"Loan to buy a house"},
-      {en:"furniture",es:"muebles",hint:"Tables, chairs, sofas"},{en:"utilities",es:"servicios públicos",hint:"Electricity, water bills"},
-      {en:"commute",es:"trayecto al trabajo",hint:"Daily travel to work"},{en:"household",es:"hogar",hint:"People living together"},
-      {en:"chores",es:"quehaceres",hint:"Cleaning, cooking tasks"},{en:"neighborhood",es:"vecindario",hint:"Area where you live"},
-      {en:"landlord",es:"arrendador",hint:"Owner of rental property"},{en:"renovation",es:"renovación",hint:"Remodeling a space"},
-    ],
-    4: [
-      {en:"acquaintance",es:"conocido",hint:"Someone you know slightly"},{en:"ambiance",es:"ambiente",hint:"Mood of a place"},
-      {en:"dwelling",es:"morada",hint:"A place where someone lives"},{en:"infrastructure",es:"infraestructura",hint:"Basic systems of a city"},
-      {en:"etiquette",es:"etiqueta",hint:"Rules of polite behavior"},{en:"nuisance",es:"molestia",hint:"Something annoying"},
-      {en:"predicament",es:"dilema",hint:"Difficult situation"},{en:"livelihood",es:"sustento",hint:"Means of supporting oneself"},
-      {en:"subsistence",es:"subsistencia",hint:"Minimum to survive"},{en:"tenure",es:"tenencia",hint:"Period of holding a position"},
-    ]
-  },
-  food: {
-    1: [
-      {en:"apple",es:"manzana",hint:"Red or green fruit"},{en:"bread",es:"pan",hint:"Made from flour, baked"},
-      {en:"milk",es:"leche",hint:"White drink from cows"},{en:"egg",es:"huevo",hint:"Chickens lay them"},
-      {en:"rice",es:"arroz",hint:"Common Latin staple"},{en:"chicken",es:"pollo",hint:"Common bird we eat"},
-      {en:"orange",es:"naranja",hint:"Citrus fruit"},{en:"coffee",es:"café",hint:"Hot morning drink"},
-      {en:"sugar",es:"azúcar",hint:"Makes things sweet"},{en:"salt",es:"sal",hint:"Makes things salty"},
-    ],
-    2: [
-      {en:"breakfast",es:"desayuno",hint:"First meal of the day"},{en:"vegetable",es:"vegetal",hint:"Healthy plant food"},
-      {en:"dessert",es:"postre",hint:"Sweet after meal"},{en:"ingredient",es:"ingrediente",hint:"Part of a recipe"},
-      {en:"portion",es:"porción",hint:"Amount of food served"},{en:"beverage",es:"bebida",hint:"Something you drink"},
-      {en:"seafood",es:"mariscos",hint:"Fish and shellfish"},{en:"spicy",es:"picante",hint:"Hot and flavorful"},
-      {en:"grilled",es:"a la parrilla",hint:"Cooked on a grill"},{en:"frozen",es:"congelado",hint:"Kept very cold"},
-    ],
-    3: [
-      {en:"cuisine",es:"gastronomía",hint:"Style of cooking"},{en:"marinate",es:"marinar",hint:"Soak in seasoning"},
-      {en:"garnish",es:"decorar el plato",hint:"Decorative addition to food"},{en:"sauté",es:"saltear",hint:"Fry in a little oil"},
-      {en:"fermented",es:"fermentado",hint:"Made with bacteria/yeast"},{en:"dietary",es:"dietético",hint:"Related to diet"},
-      {en:"wholesome",es:"nutritivo",hint:"Good and healthy food"},{en:"palate",es:"paladar",hint:"Ability to taste"},
-      {en:"catering",es:"servicio de comidas",hint:"Providing food for events"},{en:"staple",es:"alimento básico",hint:"Main food in a diet"},
-    ],
-    4: [
-      {en:"gastronomy",es:"gastronomía alta",hint:"Art of good eating"},{en:"umami",es:"umami",hint:"The fifth basic taste"},
-      {en:"provenance",es:"procedencia",hint:"Origin of ingredients"},{en:"artisanal",es:"artesanal",hint:"Made by hand"},
-      {en:"dehydrate",es:"deshidratar",hint:"Remove water from food"},{en:"emulsify",es:"emulsionar",hint:"Blend two liquids"},
-      {en:"macerate",es:"macerar",hint:"Soften food in liquid"},{en:"julienne",es:"corte juliana",hint:"Cut into thin strips"},
-      {en:"blanch",es:"blanquear",hint:"Briefly boil then cool"},{en:"braise",es:"brasear",hint:"Slow cook in liquid"},
-    ]
-  },
-  work: {
-    1: [
-      {en:"office",es:"oficina",hint:"Place where you work"},{en:"boss",es:"jefe",hint:"Person in charge"},
-      {en:"meeting",es:"reunión",hint:"Group discussion"},{en:"email",es:"correo",hint:"Electronic message"},
-      {en:"salary",es:"salario",hint:"Monthly pay"},{en:"team",es:"equipo",hint:"Group of coworkers"},
-      {en:"job",es:"trabajo",hint:"Your employment"},{en:"task",es:"tarea",hint:"Something to do"},
-      {en:"report",es:"informe",hint:"Written summary"},{en:"deadline",es:"fecha límite",hint:"When it must be done"},
-    ],
-    2: [
-      {en:"colleague",es:"colega",hint:"A coworker"},{en:"project",es:"proyecto",hint:"Planned piece of work"},
-      {en:"budget",es:"presupuesto",hint:"Available money"},{en:"proposal",es:"propuesta",hint:"Plan suggestion"},
-      {en:"training",es:"capacitación",hint:"Learning new skills"},{en:"feedback",es:"retroalimentación",hint:"Comments on work"},
-      {en:"client",es:"cliente",hint:"Person you work for"},{en:"contract",es:"contrato",hint:"Legal agreement"},
-      {en:"promotion",es:"ascenso",hint:"Moving higher"},{en:"overtime",es:"tiempo extra",hint:"Working extra hours"},
-    ],
-    3: [
-      {en:"productivity",es:"productividad",hint:"How much you accomplish"},{en:"stakeholder",es:"parte interesada",hint:"Affected by project"},
-      {en:"benchmark",es:"punto de referencia",hint:"Standard for comparison"},{en:"delegation",es:"delegación",hint:"Assigning tasks"},
-      {en:"accountability",es:"responsabilidad",hint:"Answerable for results"},{en:"incentive",es:"incentivo",hint:"Reward for performance"},
-      {en:"workforce",es:"fuerza laboral",hint:"All workers"},{en:"compliance",es:"cumplimiento",hint:"Following rules"},
-      {en:"outsource",es:"subcontratar",hint:"Hire external company"},{en:"revenue",es:"ingresos",hint:"Money company earns"},
-    ],
-    4: [
-      {en:"synergy",es:"sinergia",hint:"Combined efforts more effective"},{en:"scalability",es:"escalabilidad",hint:"Ability to grow"},
-      {en:"leverage",es:"apalancar",hint:"Use resources for advantage"},{en:"fiduciary",es:"fiduciario",hint:"Manage others' assets"},
-      {en:"arbitration",es:"arbitraje",hint:"Resolving disputes"},{en:"procurement",es:"adquisición",hint:"Obtaining supplies"},
-      {en:"liability",es:"responsabilidad legal",hint:"Legal obligation"},{en:"equity",es:"capital",hint:"Ownership in a company"},
-      {en:"mitigation",es:"mitigación",hint:"Reducing risk"},{en:"incumbent",es:"titular",hint:"Current holder of position"},
-    ]
-  },
-  travel: {
-    1: [
-      {en:"airport",es:"aeropuerto",hint:"Where planes take off"},{en:"hotel",es:"hotel",hint:"Where you sleep traveling"},
-      {en:"ticket",es:"boleto",hint:"Document to travel"},{en:"passport",es:"pasaporte",hint:"Travel ID document"},
-      {en:"map",es:"mapa",hint:"Shows you where to go"},{en:"beach",es:"playa",hint:"Sand and ocean"},
-      {en:"mountain",es:"montaña",hint:"Very tall landform"},{en:"city",es:"ciudad",hint:"Large urban area"},
-      {en:"bus",es:"autobús",hint:"Public transport"},{en:"tour",es:"tour",hint:"Guided visit"},
-    ],
-    2: [
-      {en:"boarding pass",es:"tarjeta de embarque",hint:"Document to board a plane"},{en:"luggage",es:"equipaje",hint:"Bags when traveling"},
-      {en:"reservation",es:"reservación",hint:"Booking in advance"},{en:"customs",es:"aduana",hint:"Border control"},
-      {en:"currency",es:"moneda",hint:"Money of a country"},{en:"destination",es:"destino",hint:"Where you are going"},
-      {en:"itinerary",es:"itinerario",hint:"Travel plan"},{en:"layover",es:"escala",hint:"Stop between flights"},
-      {en:"souvenir",es:"recuerdo",hint:"Item from a place"},{en:"hostel",es:"hostal",hint:"Cheap accommodation"},
-    ],
-    3: [
-      {en:"expedition",es:"expedición",hint:"Journey to explore"},{en:"excursion",es:"excursión",hint:"Short trip"},
-      {en:"landmark",es:"punto de referencia",hint:"Famous feature"},{en:"embark",es:"embarcarse",hint:"Begin a journey"},
-      {en:"depart",es:"partir",hint:"Leave a place"},{en:"accommodation",es:"alojamiento",hint:"Where you stay"},
-      {en:"immigration",es:"inmigración",hint:"Official entry process"},{en:"transit",es:"tránsito",hint:"Passing through"},
-      {en:"valid",es:"vigente",hint:"Still in effect"},{en:"domestic",es:"nacional",hint:"Within your country"},
-    ],
-    4: [
-      {en:"nomadic",es:"nómada",hint:"Moving place to place"},{en:"expatriate",es:"expatriado",hint:"Living abroad"},
-      {en:"pilgrimage",es:"peregrinaje",hint:"Journey to sacred place"},{en:"circumnavigate",es:"circunnavegar",hint:"Travel all the way around"},
-      {en:"indigenous",es:"indígena",hint:"Originally from region"},{en:"diaspora",es:"diáspora",hint:"Scattered population"},
-      {en:"traverse",es:"atravesar",hint:"Cross or travel across"},{en:"remote",es:"remoto",hint:"Far from populated areas"},
-      {en:"sovereignty",es:"soberanía",hint:"Independent territory control"},{en:"antiquity",es:"antigüedad",hint:"Very ancient times"},
-    ]
-  },
-  body: {
-    1: [
-      {en:"head",es:"cabeza",hint:"Top of your body"},{en:"hand",es:"mano",hint:"End of your arm"},
-      {en:"eye",es:"ojo",hint:"You see with it"},{en:"ear",es:"oreja",hint:"You hear with it"},
-      {en:"mouth",es:"boca",hint:"You eat and speak with it"},{en:"foot",es:"pie",hint:"You walk with it"},
-      {en:"heart",es:"corazón",hint:"Pumps blood"},{en:"back",es:"espalda",hint:"Rear of your torso"},
-      {en:"knee",es:"rodilla",hint:"Joint in your leg"},{en:"teeth",es:"dientes",hint:"You chew with them"},
-    ],
-    2: [
-      {en:"shoulder",es:"hombro",hint:"Top of your arm"},{en:"stomach",es:"estómago",hint:"Where food is digested"},
-      {en:"wrist",es:"muñeca",hint:"Between hand and arm"},{en:"ankle",es:"tobillo",hint:"Between foot and leg"},
-      {en:"elbow",es:"codo",hint:"Middle joint of arm"},{en:"forehead",es:"frente",hint:"Above your eyes"},
-      {en:"thumb",es:"pulgar",hint:"Biggest finger"},{en:"spine",es:"columna",hint:"Backbone"},
-      {en:"lungs",es:"pulmones",hint:"You breathe with them"},{en:"liver",es:"hígado",hint:"Filters blood"},
-    ],
-    3: [
-      {en:"immune system",es:"sistema inmune",hint:"Body's defense"},{en:"cardiovascular",es:"cardiovascular",hint:"Heart and blood vessels"},
-      {en:"metabolism",es:"metabolismo",hint:"Food to energy"},{en:"symptom",es:"síntoma",hint:"Sign of illness"},
-      {en:"diagnosis",es:"diagnóstico",hint:"Identifying illness"},{en:"prescription",es:"receta médica",hint:"Doctor's medicine order"},
-      {en:"fracture",es:"fractura",hint:"Broken bone"},{en:"inflammation",es:"inflamación",hint:"Redness and swelling"},
-      {en:"allergy",es:"alergia",hint:"Reaction to substance"},{en:"rehabilitation",es:"rehabilitación",hint:"Recovery after injury"},
-    ],
-    4: [
-      {en:"physiology",es:"fisiología",hint:"Study of body functions"},{en:"neurological",es:"neurológico",hint:"Nervous system"},
-      {en:"pathogen",es:"patógeno",hint:"Disease-causing organism"},{en:"antibody",es:"anticuerpo",hint:"Fights infection"},
-      {en:"chronic",es:"crónico",hint:"Long-lasting condition"},{en:"prognosis",es:"pronóstico",hint:"Predicted outcome"},
-      {en:"hypertension",es:"hipertensión",hint:"High blood pressure"},{en:"malignant",es:"maligno",hint:"Dangerous, likely to spread"},
-      {en:"benign",es:"benigno",hint:"Not harmful"},{en:"platelet",es:"plaqueta",hint:"Blood clotting cell"},
-    ]
-  },
-  tech: {
-    1: [
-      {en:"computer",es:"computadora",hint:"Electronic machine"},{en:"screen",es:"pantalla",hint:"You look at it"},
-      {en:"keyboard",es:"teclado",hint:"You type on it"},{en:"mouse",es:"ratón",hint:"You click with it"},
-      {en:"file",es:"archivo",hint:"Document stored digitally"},{en:"folder",es:"carpeta",hint:"Contains files"},
-      {en:"password",es:"contraseña",hint:"Secret access code"},{en:"internet",es:"internet",hint:"Global network"},
-      {en:"battery",es:"batería",hint:"Powers your device"},{en:"charger",es:"cargador",hint:"Refills battery"},
-    ],
-    2: [
-      {en:"software",es:"software",hint:"Programs and apps"},{en:"database",es:"base de datos",hint:"Organized data storage"},
-      {en:"network",es:"red",hint:"Connected computers"},{en:"update",es:"actualización",hint:"New software version"},
-      {en:"download",es:"descargar",hint:"Get data from internet"},{en:"upload",es:"subir",hint:"Send data to internet"},
-      {en:"backup",es:"respaldo",hint:"Copy of your data"},{en:"firewall",es:"cortafuegos",hint:"Security barrier"},
-      {en:"bandwidth",es:"ancho de banda",hint:"Internet speed capacity"},{en:"browser",es:"navegador",hint:"App to visit websites"},
-    ],
-    3: [
-      {en:"algorithm",es:"algoritmo",hint:"Step-by-step instructions"},{en:"encryption",es:"cifrado",hint:"Securing with code"},
-      {en:"deployment",es:"despliegue",hint:"Publishing an application"},{en:"repository",es:"repositorio",hint:"Stored code collection"},
-      {en:"API",es:"API",hint:"Interface connecting software"},{en:"authentication",es:"autenticación",hint:"Verifying identity"},
-      {en:"server",es:"servidor",hint:"Computer providing services"},{en:"framework",es:"marco de trabajo",hint:"Base structure for apps"},
-      {en:"debugging",es:"depuración",hint:"Finding and fixing errors"},{en:"latency",es:"latencia",hint:"Delay in data transfer"},
-    ],
-    4: [
-      {en:"abstraction",es:"abstracción",hint:"Hiding complexity"},{en:"scalability",es:"escalabilidad",hint:"Handle growth"},
-      {en:"concurrency",es:"concurrencia",hint:"Multiple tasks at once"},{en:"middleware",es:"middleware",hint:"Connecting components"},
-      {en:"containerization",es:"contenedorización",hint:"Packaging in containers"},{en:"microservices",es:"microservicios",hint:"Small independent services"},
-      {en:"orchestration",es:"orquestación",hint:"Managing services"},{en:"throughput",es:"rendimiento",hint:"Amount processed per time"},
-      {en:"idempotent",es:"idempotente",hint:"Same result regardless of calls"},{en:"deprecation",es:"obsolescencia",hint:"Phasing out old features"},
-    ]
-  }
-};
-
-const LEVEL_NAMES = ['','Principiante','Básico','Intermedio','Avanzado'];
-const TOPIC_NAMES = {daily:'Vida Diaria',food:'Comida',work:'Trabajo',travel:'Viajes',body:'Cuerpo & Salud',tech:'Tecnología'};
-
-// ═══════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════
-let state = {
-  topic: null, level: 1, streak: 0, score: 0,
-  levelProgress: 0, usedWords: new Set(), exNum: 0, answered: false, currentWord: null,
-  isReviewMode: false, reviewQueue: []
-};
-
-// Failed words stored in localStorage
-function getFailedWords() {
-  try { return JSON.parse(localStorage.getItem('vq_failed') || '[]'); } catch { return []; }
-}
-function saveFailedWords(arr) {
-  try { localStorage.setItem('vq_failed', JSON.stringify(arr)); } catch {}
-}
-function addFailedWord(word, topic, level) {
-  const arr = getFailedWords();
-  const key = word.en;
-  if (!arr.find(w => w.en === key)) {
-    arr.push({...word, topic, level, failCount: 1, ts: Date.now()});
-  } else {
-    const w = arr.find(w => w.en === key);
-    w.failCount = (w.failCount || 1) + 1;
-    w.ts = Date.now();
-  }
-  saveFailedWords(arr);
-  updateFailedBadge();
-}
-function removeFailedWord(en) {
-  const arr = getFailedWords().filter(w => w.en !== en);
-  saveFailedWords(arr);
-  updateFailedBadge();
-}
-function updateFailedBadge() {
-  const arr = getFailedWords();
-  const cnt = document.getElementById('failed-count');
-  const btn = document.getElementById('review-btn');
-  if (arr.length > 0) {
-    cnt.textContent = arr.length;
-    cnt.classList.remove('hidden');
-    btn.disabled = false;
-  } else {
-    cnt.classList.add('hidden');
-    btn.disabled = true;
-  }
+  mergeProgress(data?.progress);
+  localStorage.setItem(STORE_KEY, JSON.stringify(progress));
+  renderWeakMini();
+  renderStats();
+  await pushCloudProgress();
+  syncing = false;
 }
 
-// ═══════════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════════
-function shuffle(arr) { return [...arr].sort(() => Math.random()-0.5); }
-function getWords(topic, level) { return VOCAB[topic]?.[level] || []; }
-
-function pickWord(topic, level) {
-  const pool = getWords(topic, level);
-  const available = pool.filter(w => !state.usedWords.has(w.en));
-  if (available.length === 0) { state.usedWords.clear(); return pickWord(topic, level); }
-  const w = available[Math.floor(Math.random() * available.length)];
-  state.usedWords.add(w.en);
-  return w;
+function queueCloudSave() {
+  if (!cloudReady || syncing) return;
+  clearTimeout(queueCloudSave.timer);
+  queueCloudSave.timer = setTimeout(pushCloudProgress, 600);
 }
 
-function pickWrongOptions(topic, level, correctEn, count=3) {
-  const pool = [];
-  [1,2,3,4].forEach(l => { if (VOCAB[topic]?.[l]) pool.push(...VOCAB[topic][l].filter(w => w.en !== correctEn)); });
-  return shuffle(pool).slice(0, count);
+async function pushCloudProgress() {
+  if (!cloudReady || syncing) return;
+  syncing = true;
+  setSyncStatus("Guardando progreso en linea...");
+  const payload = {
+    user_id: currentUser.id,
+    progress,
+    updated_at: new Date().toISOString()
+  };
+  const { error } = await supabaseClient
+    .from(SUPABASE_TABLE)
+    .upsert(payload, { onConflict: "user_id" });
+  setSyncStatus(error ? `No se pudo guardar: ${error.message}` : `Progreso guardado en linea como ${currentUser.email || "usuario"}.`);
+  syncing = false;
 }
 
-function showToast(msg, type='info', dur=1800) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = `toast show ${type}`;
-  setTimeout(() => { t.className = 'toast'; }, dur);
+function todayKey(offset = 0) {
+  const d = new Date(Date.now() + offset * DAY_MS);
+  return d.toISOString().slice(0, 10);
 }
 
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+function getWeekKeys() {
+  return Array.from({length: 7}, (_, i) => todayKey(i - 6));
 }
 
-function updateHUD() {
-  document.getElementById('streak-count').textContent = state.streak;
-  document.getElementById('score-display').textContent = state.score + ' pts';
-  document.getElementById('level-label').textContent = `Nivel ${state.level} — ${LEVEL_NAMES[state.level]}`;
-  const pct = Math.min((state.levelProgress / 5) * 100, 100);
-  document.getElementById('level-progress').style.width = pct + '%';
-  document.getElementById('progress-text').textContent = `${Math.min(state.levelProgress,5)}/5`;
-  document.getElementById('topic-label').textContent = TOPIC_NAMES[state.topic] || '';
-  const reviewBadge = document.getElementById('review-mode-badge');
-  if (state.isReviewMode) reviewBadge.classList.remove('hidden');
-  else reviewBadge.classList.add('hidden');
+function recordAnswer(word, correct) {
+  const day = todayKey();
+  progress.days[day] ||= { attempts: 0, correct: 0, minutes: 0 };
+  progress.days[day].attempts++;
+  if (correct) progress.days[day].correct++;
+
+  const id = `${word.topic}:${word.level}:${word.en}`;
+  progress.words[id] ||= { en: word.en, es: word.es, topic: word.topic, level: word.level, attempts: 0, correct: 0, wrong: 0, last: null };
+  progress.words[id].attempts++;
+  progress.words[id].last = Date.now();
+  if (correct) progress.words[id].correct++; else progress.words[id].wrong++;
+  if (progress.words[id].correct >= 3 && progress.words[id].wrong <= 1) progress.mastered[id] = true;
+  if (!correct) delete progress.mastered[id];
+  progress.lastSeen = Date.now();
+  saveProgress();
 }
 
-// ═══════════════════════════════════════════════
-// EXERCISE ENGINE
-// ═══════════════════════════════════════════════
-function pickExerciseType() {
-  const types = ['mcq_es_to_en','mcq_en_to_es','fill_blank','type_word'];
-  if (state.level >= 2) types.push('fill_blank','type_word');
-  if (state.level >= 3) types.push('word_search');
-  return types[Math.floor(Math.random() * types.length)];
+function flattenWords(topic = app.topic, level = app.level) {
+  const source = TOPICS[topic].words[level] || [];
+  return source.map(([en, es, sentence]) => ({ en, es, sentence, topic, level }));
 }
 
-function renderExercise() {
-  const zone = document.getElementById('exercise-zone');
+function allWords() {
+  return Object.keys(TOPICS).flatMap(topic => [1,2,3,4].flatMap(level => flattenWords(topic, level)));
+}
 
-  // Review mode: pick from review queue
-  let word;
-  if (state.isReviewMode) {
-    if (state.reviewQueue.length === 0) {
-      zone.innerHTML = `
-        <div class="ex-card" style="text-align:center;padding:2rem">
-          <div style="font-size:2rem;margin-bottom:0.5rem">🎓</div>
-          <div style="font-size:1.1rem;font-weight:700;color:var(--accent2)">¡Repaso completado!</div>
-          <div style="color:var(--muted);margin:0.5rem 0 1.2rem">Practicaste todas las palabras fallidas.</div>
-          <button class="btn-next" onclick="backToMenu()">← Volver al menú</button>
-        </div>`;
-      return;
+function weakWords() {
+  return Object.values(progress.words)
+    .filter(w => w.wrong > 0 || (w.attempts > 0 && w.correct / w.attempts < .7))
+    .sort((a,b) => (b.wrong - a.wrong) || (a.correct - b.correct));
+}
+
+function shuffle(items) {
+  return [...items].sort(() => Math.random() - .5);
+}
+
+function pickWord() {
+  if (app.mode === "review") {
+    const weak = weakWords();
+    if (weak.length) {
+      const picked = weak[Math.floor(Math.random() * weak.length)];
+      return {...picked};
     }
-    word = state.reviewQueue.shift();
+  }
+  if (!app.pool.length) app.pool = shuffle(flattenWords());
+  return app.pool.pop();
+}
+
+function renderTopics() {
+  const grid = document.getElementById("topicGrid");
+  grid.innerHTML = Object.entries(TOPICS).map(([id, t]) => `
+    <button class="topic-btn ${id === app.topic ? "selected" : ""}" data-topic="${id}">
+      <span class="topic-icon">${t.icon}</span>
+      <span><strong>${t.name}</strong><small>${t.desc}</small></span>
+    </button>`).join("");
+}
+
+function showView(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.view === id));
+  if (id === "stats") renderStats();
+  if (id === "review") renderReview();
+  if (id === "game" && !app.current) startGame();
+}
+
+function startGame(placement = false) {
+  app.score = 0;
+  app.streak = 0;
+  app.attempts = 0;
+  app.correct = 0;
+  app.questionCount = 0;
+  app.player = 0;
+  app.players = [{name:"Persona A",score:0,correct:0,attempts:0},{name:"Persona B",score:0,correct:0,attempts:0}];
+  app.pool = placement ? shuffle(allWords()) : shuffle(flattenWords());
+  app.current = { starting: true };
+  document.getElementById("playersBox").classList.toggle("hidden", app.mode !== "duel");
+  showView("game");
+  nextQuestion();
+}
+
+function nextQuestion() {
+  if (app.mode === "challenge" && app.questionCount >= 20) {
+    showSummary();
+    return;
+  }
+  app.answered = false;
+  app.questionCount++;
+  const word = app.mode === "challenge" ? (app.pool.pop() || shuffle(allWords()).pop()) : pickWord();
+  app.current = word;
+  const unlockedTypes = ["esToEn","enToEs","type","listening","wordSearch"];
+  if (app.level >= 2) unlockedTypes.push("sentence");
+  if (app.level >= 3) unlockedTypes.push("crossword");
+  const type = unlockedTypes[Math.floor(Math.random() * unlockedTypes.length)];
+  renderExercise(word, type);
+  updateHud();
+}
+
+function renderExercise(word, type) {
+  const card = document.getElementById("practiceCard");
+  const all = allWords().filter(w => w.en !== word.en && w.level <= Math.max(2, app.level + 1));
+  const wrongs = shuffle(all).slice(0, 3);
+  let body = "";
+
+  if (type === "esToEn") {
+    const opts = shuffle([word, ...wrongs]).map(w => `<button class="option" data-answer="${escapeAttr(w.en)}">${w.en}</button>`).join("");
+    body = `<h2 class="question">Como se dice <span class="word">${word.es}</span> en ingles?</h2><div class="options">${opts}</div>`;
+  } else if (type === "enToEs") {
+    const opts = shuffle([word, ...wrongs]).map(w => `<button class="option" data-answer="${escapeAttr(w.en)}">${w.es}</button>`).join("");
+    body = `<h2 class="question">Que significa <span class="word">${word.en}</span>?<small>${word.sentence}</small></h2><div class="options">${opts}</div>`;
+  } else if (type === "listening") {
+    const opts = shuffle([word, ...wrongs]).map(w => `<button class="option" data-answer="${escapeAttr(w.en)}">${w.en}</button>`).join("");
+    body = `<h2 class="question">Escucha y elige la palabra correcta.<small><button class="soft-btn" onclick="speakWord('${escapeAttr(word.en)}')">Escuchar</button></small></h2><div class="options">${opts}</div>`;
+    setTimeout(() => speakWord(word.en), 250);
+  } else if (type === "sentence") {
+    const sentence = word.sentence.replace(new RegExp(word.en, "i"), "_____");
+    body = `<h2 class="question">${sentence}<small>Completa la frase con la palabra en ingles.</small></h2>${typeInput()}`;
+  } else if (type === "wordSearch") {
+    const words = shuffle([word, ...wrongs]).slice(0, Math.min(4, app.level + 2));
+    body = renderWordSearch(words);
+  } else if (type === "crossword") {
+    const words = shuffle([word, ...wrongs]).slice(0, Math.min(5, app.level + 2));
+    body = renderCrossword(words);
   } else {
-    word = pickWord(state.topic, state.level);
+    body = `<h2 class="question">Escribe en ingles: <span class="word">${word.es}</span><small>Pista: ${word.sentence.replace(word.en, "_____")}</small></h2>${typeInput()}`;
   }
 
-  state.currentWord = word;
-  state.answered = false;
-  state.exNum++;
-
-  const type = state.isReviewMode ? shuffle(['mcq_es_to_en','mcq_en_to_es','type_word'])[0] : pickExerciseType();
-
-  if (type === 'word_search' && !state.isReviewMode) {
-    return renderWordSearch(zone);
-  }
-
-  let html = `
-    <div class="ex-type-row">
-      <span class="ex-type-badge">${exTypeLabel(type)}</span>
-      <span class="ex-num">#${state.exNum}</span>
+  card.innerHTML = `
+    <div class="exercise-meta">
+      <span class="badge">${TOPICS[word.topic].name} - ${LEVELS[word.level]}</span>
+      <span>#${app.questionCount}${app.mode === "challenge" ? " / 20" : ""}</span>
     </div>
-    <div class="ex-card" id="ex-card">
-  `;
-
-  if (type === 'mcq_es_to_en') {
-    const wrongs = pickWrongOptions(state.topic || word.topic, state.level, word.en);
-    const options = shuffle([word, ...wrongs]);
-    html += `
-      <div class="ex-question">
-        ¿Cómo se dice <span class="word-highlight">"${word.es}"</span> en inglés?
-        <button class="audio-btn" onclick="speak('${word.en.replace(/'/g,"\\'")}', this)" title="Escuchar pronunciación">🔊 Escuchar</button>
-      </div>
-      <div class="options-grid" id="options-grid">
-        ${options.map(o => `<button class="option-btn" data-val="${o.en}">${o.en}</button>`).join('')}
-      </div>`;
-  } else if (type === 'mcq_en_to_es') {
-    const wrongs = pickWrongOptions(state.topic || word.topic, state.level, word.en);
-    const options = shuffle([word, ...wrongs]);
-    html += `
-      <div class="ex-question">
-        ¿Qué significa <span class="word-highlight">"${word.en}"</span>?
-        <button class="audio-btn" onclick="speak('${word.en.replace(/'/g,"\\'")}', this)" title="Escuchar">🔊</button>
-      </div>
-      <div class="options-grid" id="options-grid">
-        ${options.map(o => `<button class="option-btn" data-val="${o.en}">${o.es}</button>`).join('')}
-      </div>`;
-  } else if (type === 'fill_blank') {
-    const sentence = makeSentence(word);
-    html += `
-      <div class="ex-question">${sentence.display}</div>
-      <div style="font-size:0.8rem;color:var(--muted)">Pista: ${word.hint}</div>
-      <div class="text-input-area">
-        <input type="text" id="fill-input" class="ex-input" placeholder="Escribe la palabra..." autocomplete="off" autocorrect="off" spellcheck="false">
-        <button class="submit-btn" id="submit-fill">→</button>
-        <button class="audio-btn-large" onclick="speak('${word.en.replace(/'/g,"\\'")}', this)" title="Pronunciar">🔊</button>
-      </div>`;
-  } else if (type === 'type_word') {
-    html += `
-      <div class="ex-question">
-        Escribe en inglés: <span class="word-highlight">"${word.es}"</span>
-      </div>
-      <div style="font-size:0.8rem;color:var(--muted);margin-top:-0.3rem">Pista: ${word.hint}</div>
-      <div class="text-input-area">
-        <input type="text" id="fill-input" class="ex-input" placeholder="Type in English..." autocomplete="off" autocorrect="off" spellcheck="false">
-        <button class="submit-btn" id="submit-fill">→</button>
-        <button class="audio-btn-large" onclick="speak('${word.en.replace(/'/g,"\\'")}', this)" title="Pronunciar">🔊</button>
-      </div>`;
-  }
-
-  html += `
-      <div class="feedback-row" id="feedback-row"></div>
-      <div class="nav-row hidden" id="nav-row">
-        <button class="btn-skip" id="skip-btn">Saltar</button>
-        <button class="btn-next" id="next-btn">Siguiente →</button>
-      </div>
+    ${body}
+    <div class="feedback" id="feedback"></div>
+    <div class="nav-row">
+      <button class="soft-btn" onclick="speakWord('${escapeAttr(word.en)}')">Escuchar</button>
+      <button class="soft-btn" onclick="mark(false, null, true)">No lo se</button>
+      <button class="primary-btn hidden" id="nextBtn" onclick="nextQuestion()">Siguiente</button>
     </div>`;
 
-  zone.innerHTML = html;
-  updateHUD();
-
-  // Attach events
-  if (type === 'mcq_es_to_en' || type === 'mcq_en_to_es') {
-    document.querySelectorAll('.option-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (state.answered) return;
-        handleAnswer(btn.dataset.val === word.en, word, btn, document.querySelectorAll('.option-btn'));
-      });
-    });
-  } else {
-    const inp = document.getElementById('fill-input');
-    const sub = document.getElementById('submit-fill');
-    const check = () => {
-      if (state.answered) return;
-      const val = inp.value.trim().toLowerCase();
-      const correct = val === word.en.toLowerCase();
-      inp.classList.add(correct ? 'correct' : 'wrong');
-      handleAnswer(correct, word, null, null);
-    };
-    sub.addEventListener('click', check);
-    inp.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
-    setTimeout(() => inp.focus(), 80);
+  card.querySelectorAll(".option").forEach(btn => btn.addEventListener("click", () => mark(btn.dataset.answer === word.en, btn)));
+  const input = document.getElementById("typeAnswer");
+  if (input) {
+    input.focus();
+    input.addEventListener("keydown", e => { if (e.key === "Enter") checkTyped(); });
   }
-
-  document.getElementById('skip-btn')?.addEventListener('click', () => renderExercise());
-  document.getElementById('next-btn')?.addEventListener('click', () => renderExercise());
+  if (type === "wordSearch") attachWordSearchEvents();
+  if (type === "crossword") attachCrosswordEvents();
 }
 
-function exTypeLabel(t) {
-  return {
-    mcq_es_to_en:'Elige en inglés', mcq_en_to_es:'Elige la traducción',
-    fill_blank:'Completa la oración', type_word:'Escribe la palabra', word_search:'Sopa de letras'
-  }[t] || t;
+function typeInput() {
+  return `<div class="type-row"><input id="typeAnswer" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Escribe la palabra..."><button class="primary-btn" onclick="checkTyped()">Revisar</button></div>`;
 }
 
-function makeSentence(word) {
-  const templates = [
-    `The <span class="blank">___</span> is very important.`,
-    `I need to buy a <span class="blank">___</span>.`,
-    `She has a nice <span class="blank">___</span>.`,
-    `Can you see the <span class="blank">___</span>?`,
-    `We use a <span class="blank">___</span> every day.`,
-    `There is a <span class="blank">___</span> near here.`,
-  ];
-  return { answer: word.en, display: templates[Math.floor(Math.random() * templates.length)] };
-}
-
-function handleAnswer(correct, word, clickedBtn, allBtns) {
-  state.answered = true;
-  const card = document.getElementById('ex-card');
-  const fb = document.getElementById('feedback-row');
-
-  if (correct) {
-    state.streak++;
-    state.score += (10 + state.level * 5);
-    state.levelProgress++;
-    card.classList.add('correct');
-    speak(word.en);
-    fb.innerHTML = `<span class="feedback-msg ok">✓ ¡Correcto!</span>
-      <button class="audio-btn" onclick="speak('${word.en.replace(/'/g,"\\'")}', this)">🔊 ${word.en}</button>`;
-    if (clickedBtn) clickedBtn.classList.add('selected-correct');
-    // Remove from failed if was there
-    removeFailedWord(word.en);
-    if (state.levelProgress >= 5 && state.level < 4 && !state.isReviewMode) {
-      setTimeout(showLevelUp, 700);
-    }
-  } else {
-    state.streak = 0;
-    state.levelProgress = Math.max(0, state.levelProgress - 1);
-    card.classList.add('wrong');
-    addFailedWord(word, state.isReviewMode ? (word.topic || state.topic) : state.topic, state.level);
-    fb.innerHTML = `<span class="feedback-msg bad">✗ Incorrecto.</span>
-      <span class="feedback-hint">Respuesta: <strong>${word.en}</strong> — ${word.es}</span>
-      <button class="audio-btn" onclick="speak('${word.en.replace(/'/g,"\\'")}', this)">🔊 Escuchar</button>`;
-    if (clickedBtn) {
-      clickedBtn.classList.add('selected-wrong');
-      if (allBtns) { allBtns.forEach(b => { if(b.dataset.val===word.en) b.classList.add('reveal-correct'); b.disabled=true; }); }
-    }
-  }
-
-  document.getElementById('nav-row').classList.remove('hidden');
-  updateHUD();
-}
-
-// ═══════════════════════════════════════════════
-// WORD SEARCH
-// ═══════════════════════════════════════════════
-let wsState = {};
-
-function renderWordSearch(zone) {
-  const wordPool = getWords(state.topic, state.level);
-  const selected = shuffle(wordPool).slice(0, Math.min(5 + state.level, 8));
-  const words = selected.map(w => w.en.toUpperCase().replace(/\s/g,''));
-  const gridSize = state.level <= 2 ? 10 : 12;
-  const grid = buildWSGrid(words, gridSize);
-  wsState = {grid, words, found:[], selected};
-
-  let html = `
-    <div class="ex-type-row">
-      <span class="ex-type-badge">Sopa de letras</span>
-      <span class="ex-num">#${state.exNum}</span>
-    </div>
-    <div class="ex-card" id="ex-card">
-      <div class="ex-question">Encuentra estas palabras:</div>
-      <div class="word-search-wrap">
-        <div class="word-list" id="ws-word-list">
-          ${selected.map(w=>`<div class="word-tag" id="tag-${w.en.replace(/[\s]/g,'_')}">${w.en}</div>`).join('')}
-        </div>
-        <div class="ws-grid-wrap">
-          <div class="ws-grid" id="ws-grid" style="grid-template-columns: repeat(${gridSize}, 32px);">
-            ${grid.map((row,r)=>row.map((cell,c)=>`<div class="ws-cell" data-r="${r}" data-c="${c}">${cell}</div>`).join('')).join('')}
-          </div>
-        </div>
+function renderWordSearch(words) {
+  const clean = words.map(w => ({...w, puzzle: w.en.toUpperCase().replace(/[^A-Z]/g, "")})).filter(w => w.puzzle.length <= 10);
+  const grid = buildLetterGrid(clean.map(w => w.puzzle), app.level >= 3 ? 11 : 9);
+  app.current = { ...clean[0], puzzleWords: clean, puzzleFound: [] };
+  return `<h2 class="question">Sopa de letras<small>Encuentra las palabras en ingles. Puedes marcarlas en horizontal, vertical o diagonal.</small></h2>
+    <div class="word-search">
+      <div class="letter-grid" id="letterGrid" style="grid-template-columns: repeat(${grid.length}, 34px)">
+        ${grid.flatMap((row, r) => row.map((letter, c) => `<button class="letter-cell" data-r="${r}" data-c="${c}">${letter}</button>`)).join("")}
       </div>
-      <div class="feedback-row" id="feedback-row"></div>
-      <div class="nav-row hidden" id="nav-row">
-        <button class="btn-skip" id="skip-btn">Saltar</button>
-        <button class="btn-next" id="next-btn">Siguiente →</button>
+      <div class="word-bank" id="wordBank">
+        ${clean.map(w => `<span data-word="${w.puzzle}">${w.en}</span>`).join("")}
+        <button class="soft-btn" onclick="clearWordSearchSelection()">Limpiar</button>
       </div>
     </div>`;
-  zone.innerHTML = html;
-  updateHUD();
-  attachWSEvents(words, selected, gridSize);
-  document.getElementById('skip-btn')?.addEventListener('click', ()=>renderExercise());
-  document.getElementById('next-btn')?.addEventListener('click', ()=>renderExercise());
 }
 
-function buildWSGrid(words, size) {
-  const grid = Array.from({length:size}, ()=>Array(size).fill(''));
-  const dirs = [[0,1],[1,0],[1,1],[0,-1],[-1,0],[-1,-1],[1,-1],[-1,1]];
-  for (const word of words) {
-    let tries = 0;
-    while (tries++ < 120) {
-      const dir = dirs[Math.floor(Math.random()*dirs.length)];
-      const r = Math.floor(Math.random()*size), c = Math.floor(Math.random()*size);
-      if (canPlace(grid, word, r, c, dir, size)) { placeWord(grid, word, r, c, dir); break; }
+function buildLetterGrid(words, size) {
+  const grid = Array.from({length: size}, () => Array(size).fill(""));
+  const dirs = [[0,1],[1,0],[1,1],[-1,1]];
+  words.forEach(word => {
+    let placed = false;
+    for (let tries = 0; tries < 120 && !placed; tries++) {
+      const [dr, dc] = dirs[Math.floor(Math.random() * dirs.length)];
+      const r = Math.floor(Math.random() * size);
+      const c = Math.floor(Math.random() * size);
+      if (canPlaceWord(grid, word, r, c, dr, dc)) {
+        [...word].forEach((letter, i) => grid[r + dr * i][c + dc * i] = letter);
+        placed = true;
+      }
     }
-  }
-  const letters = 'ABCDEFGHIJKLMNOPRSTUVWXY';
-  for (let r=0;r<size;r++) for (let c=0;c<size;c++) if (!grid[r][c]) grid[r][c]=letters[Math.floor(Math.random()*letters.length)];
-  return grid;
+  });
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  return grid.map(row => row.map(cell => cell || letters[Math.floor(Math.random() * letters.length)]));
 }
-function canPlace(grid, word, r, c, [dr,dc], size) {
-  for (let i=0;i<word.length;i++) {
-    const nr=r+dr*i, nc=c+dc*i;
-    if (nr<0||nr>=size||nc<0||nc>=size) return false;
-    if (grid[nr][nc] && grid[nr][nc]!==word[i]) return false;
+
+function canPlaceWord(grid, word, r, c, dr, dc) {
+  const size = grid.length;
+  for (let i = 0; i < word.length; i++) {
+    const nr = r + dr * i;
+    const nc = c + dc * i;
+    if (nr < 0 || nc < 0 || nr >= size || nc >= size) return false;
+    if (grid[nr][nc] && grid[nr][nc] !== word[i]) return false;
   }
   return true;
 }
-function placeWord(grid, word, r, c, [dr,dc]) {
-  for (let i=0;i<word.length;i++) grid[r+dr*i][c+dc*i]=word[i];
-}
 
-function attachWSEvents(words, selected, gridSize) {
-  const gridEl = document.getElementById('ws-grid');
-  let selecting=false, startR=-1, startC=-1, highlighted=[];
-
-  function getLine(r1,c1,r2,c2) {
-    if (r1===r2&&c1===c2) return [[r1,c1]];
-    const dr=Math.sign(r2-r1), dc=Math.sign(c2-c1);
-    const line=[]; let r=r1,c=c1, steps=0;
-    while(steps++<gridSize*2) { line.push([r,c]); if(r===r2&&c===c2) break; r+=dr; c+=dc; }
-    return line;
-  }
-  function clearHL() {
-    highlighted.forEach(([r,c])=>{ const el=gridEl.querySelector(`[data-r="${r}"][data-c="${c}"]`); if(el&&!wsState.found.some(f=>f.cells.some(([fr,fc])=>fr===r&&fc===c))) el.classList.remove('selecting'); });
-    highlighted=[];
-  }
-  function hl(line) {
-    clearHL();
-    line.forEach(([r,c])=>{ const el=gridEl.querySelector(`[data-r="${r}"][data-c="${c}"]`); if(el){el.classList.add('selecting');highlighted.push([r,c]);} });
-  }
-  function checkWord(line) {
-    const str=line.map(([r,c])=>wsState.grid[r][c]).join('');
-    return words.find(w=>w===str||w===str.split('').reverse().join(''))||null;
-  }
-  function markFound(found, line) {
-    const origWord = selected.find(w=>w.en.toUpperCase().replace(/\s/g,'')=== found);
-    if (!origWord||wsState.found.some(f=>f.word===found)) return;
-    wsState.found.push({word:found, cells:line});
-    line.forEach(([fr,fc])=>{ const fcell=gridEl.querySelector(`[data-r="${fr}"][data-c="${fc}"]`); if(fcell){fcell.classList.remove('selecting');fcell.classList.add('found-cell');} });
-    const tag=document.getElementById(`tag-${origWord.en.replace(/[\s]/g,'_')}`);
-    if(tag) tag.classList.add('found');
-    speak(origWord.en);
-    state.score+=(8+state.level*3); state.streak++; state.levelProgress=Math.min(state.levelProgress+0.5,5);
-    updateHUD();
-    showToast(`✓ "${origWord.en}" encontrado!`,'success');
-    if(wsState.found.length===words.length) {
-      state.score+=20; state.levelProgress=Math.min(5,state.levelProgress+1);
-      document.getElementById('feedback-row').innerHTML=`<span class="feedback-msg ok">🎉 ¡Todas encontradas! +20 pts</span>`;
-      document.getElementById('nav-row').classList.remove('hidden');
-      state.answered=true; updateHUD();
-      if(state.levelProgress>=5&&state.level<4) setTimeout(showLevelUp,600);
-    }
-  }
-
-  gridEl.addEventListener('mousedown',e=>{ const cell=e.target.closest('.ws-cell'); if(!cell)return; selecting=true; startR=+cell.dataset.r;startC=+cell.dataset.c; hl([[startR,startC]]); });
-  gridEl.addEventListener('mousemove',e=>{ if(!selecting)return; const cell=e.target.closest('.ws-cell'); if(!cell)return; hl(getLine(startR,startC,+cell.dataset.r,+cell.dataset.c)); });
-  gridEl.addEventListener('mouseup',e=>{ if(!selecting)return; selecting=false; const cell=e.target.closest('.ws-cell'); if(!cell){clearHL();return;} const line=getLine(startR,startC,+cell.dataset.r,+cell.dataset.c); const found=checkWord(line); if(found) markFound(found,line); else clearHL(); });
-
-  const tc=(e)=>{ e.preventDefault(); const t=e.touches[0]||e.changedTouches[0]; return document.elementFromPoint(t.clientX,t.clientY)?.closest('.ws-cell'); };
-  gridEl.addEventListener('touchstart',e=>{const cell=tc(e);if(!cell)return;selecting=true;startR=+cell.dataset.r;startC=+cell.dataset.c;hl([[startR,startC]]);},{passive:false});
-  gridEl.addEventListener('touchmove',e=>{if(!selecting)return;const cell=tc(e);if(!cell)return;hl(getLine(startR,startC,+cell.dataset.r,+cell.dataset.c));},{passive:false});
-  gridEl.addEventListener('touchend',e=>{if(!selecting)return;selecting=false;const cell=tc(e);if(!cell){clearHL();return;}const line=getLine(startR,startC,+cell.dataset.r,+cell.dataset.c);const found=checkWord(line);if(found)markFound(found,line);else clearHL();},{passive:false});
-}
-
-// ═══════════════════════════════════════════════
-// LEVEL UP
-// ═══════════════════════════════════════════════
-function showLevelUp() {
-  document.getElementById('levelup-title').textContent = '¡Subiste de nivel!';
-  document.getElementById('levelup-sub').textContent = `${LEVEL_NAMES[state.level]} → ${LEVEL_NAMES[Math.min(4,state.level+1)]}`;
-  document.getElementById('levelup-overlay').classList.add('show');
-}
-document.getElementById('levelup-confirm').addEventListener('click',()=>{
-  state.level=Math.min(4,state.level+1); state.levelProgress=0; state.usedWords.clear();
-  document.getElementById('levelup-overlay').classList.remove('show');
-  showToast(`🆙 Nivel ${state.level} — ${LEVEL_NAMES[state.level]}`,'info',2200);
-  renderExercise();
-});
-document.getElementById('levelup-stay').addEventListener('click',()=>{
-  state.levelProgress=4;
-  document.getElementById('levelup-overlay').classList.remove('show');
-  renderExercise();
-});
-
-// ═══════════════════════════════════════════════
-// REVIEW SCREEN
-// ═══════════════════════════════════════════════
-function showReviewScreen() {
-  const arr = getFailedWords();
-  const list = document.getElementById('review-list');
-  if (arr.length === 0) {
-    list.innerHTML = `<div class="review-empty"><div class="review-empty-icon">🎉</div><div>No hay palabras para repasar.</div><div style="font-size:0.85rem;color:var(--muted);margin-top:0.3rem">¡Sigue practicando!</div></div>`;
-  } else {
-    const sorted = [...arr].sort((a,b)=>b.failCount-a.failCount);
-    list.innerHTML = sorted.map(w=>`
-      <div class="review-card" id="rcard-${w.en.replace(/\s/g,'_')}">
-        <div class="review-card-info">
-          <div class="review-word-en">${w.en}
-            <button class="audio-btn" style="margin-left:0.4rem" onclick="speak('${w.en.replace(/'/g,"\\'")}',this)">🔊</button>
-          </div>
-          <div class="review-word-es">${w.es}</div>
-          <div class="review-meta">Fallada ${w.failCount}x · ${TOPIC_NAMES[w.topic]||w.topic} · Nivel ${w.level}</div>
-        </div>
-        <div class="review-card-actions">
-          <button class="review-clear-btn" onclick="removeReviewCard('${w.en.replace(/'/g,"\\'")}')">✕</button>
-        </div>
-      </div>`).join('') +
-      `<button class="review-practice-btn" onclick="startReviewMode()">🔁 Practicar todas estas palabras</button>`;
-  }
-  showScreen('review');
-}
-
-function removeReviewCard(en) {
-  removeFailedWord(en);
-  const card = document.getElementById(`rcard-${en.replace(/\s/g,'_')}`);
-  if (card) card.remove();
-  const arr = getFailedWords();
-  if (arr.length === 0) showReviewScreen();
-}
-
-function startReviewMode() {
-  const arr = getFailedWords();
-  if (arr.length === 0) return;
-  state.isReviewMode = true;
-  state.reviewQueue = shuffle([...arr]);
-  state.streak = 0; state.score = 0; state.levelProgress = 0; state.exNum = 0;
-  state.topic = arr[0].topic || 'daily';
-  state.level = arr[0].level || 1;
-  showScreen('game');
-  renderExercise();
-}
-
-// ═══════════════════════════════════════════════
-// PLACEMENT TEST
-// ═══════════════════════════════════════════════
-const PLACEMENT_POOL = [];
-[1,2,3,4].forEach(l=>{ Object.keys(VOCAB).forEach(topic=>{ VOCAB[topic][l].slice(0,2).forEach(w=>PLACEMENT_POOL.push({...w,level:l,topic})); }); });
-
-let placementQ=[],placementIdx=0,placementCorrect=0;
-
-function startPlacement(topic) {
-  placementIdx=0; placementCorrect=0;
-  const pool=PLACEMENT_POOL.filter(w=>w.topic===topic);
-  placementQ=shuffle(pool).slice(0,10);
-  showScreen('placement'); renderPlacementQ();
-}
-
-function renderPlacementQ() {
-  const zone=document.getElementById('placement-exercise');
-  document.getElementById('placement-fill').style.width=(placementIdx/placementQ.length*100)+'%';
-  document.getElementById('placement-q-count').textContent=`${placementIdx}/${placementQ.length}`;
-  if(placementIdx>=placementQ.length) {
-    const pct=placementCorrect/placementQ.length;
-    state.level = pct>=0.8?4:pct>=0.6?3:pct>=0.4?2:1;
-    showToast(`Nivel asignado: ${LEVEL_NAMES[state.level]}`,'info',2500);
-    setTimeout(()=>startGame(),900); return;
-  }
-  const word=placementQ[placementIdx];
-  const wrongs=shuffle(PLACEMENT_POOL.filter(w=>w.en!==word.en&&w.topic===word.topic)).slice(0,3);
-  const opts=shuffle([word,...wrongs]);
-  zone.innerHTML=`
-    <div class="ex-card">
-      <div class="ex-question">¿Cómo se dice <span class="word-highlight">"${word.es}"</span> en inglés?</div>
-      <div class="options-grid">
-        ${opts.map(o=>`<button class="option-btn placement-opt" data-val="${o.en}">${o.en}</button>`).join('')}
-      </div>
-    </div>`;
-  document.querySelectorAll('.placement-opt').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      if(btn.dataset.val===word.en){placementCorrect++;btn.classList.add('selected-correct');}
-      else btn.classList.add('selected-wrong');
-      document.querySelectorAll('.placement-opt').forEach(b=>{b.disabled=true;if(b.dataset.val===word.en)b.classList.add('reveal-correct');});
-      placementIdx++; setTimeout(renderPlacementQ,650);
-    });
+function attachWordSearchEvents() {
+  const grid = document.getElementById("letterGrid");
+  if (!grid) return;
+  let selected = [];
+  grid.addEventListener("click", e => {
+    const cell = e.target.closest(".letter-cell");
+    if (!cell || app.answered) return;
+    cell.classList.toggle("selected");
+    selected = [...grid.querySelectorAll(".letter-cell.selected")].map(el => ({ el, r: Number(el.dataset.r), c: Number(el.dataset.c), letter: el.textContent }));
+    checkWordSearchSelection(selected);
   });
 }
 
-// ═══════════════════════════════════════════════
-// WELCOME SCREEN
-// ═══════════════════════════════════════════════
-document.getElementById('topic-grid').addEventListener('click',e=>{
-  const btn=e.target.closest('.topic-btn'); if(!btn)return;
-  document.querySelectorAll('.topic-btn').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected'); state.topic=btn.dataset.topic; checkStartReady();
-});
-document.getElementById('level-row').addEventListener('click',e=>{
-  const btn=e.target.closest('.level-chip'); if(!btn)return;
-  document.querySelectorAll('.level-chip').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected'); state.level=+btn.dataset.level; checkStartReady();
-});
-function checkStartReady() {
-  const ok=document.querySelector('.topic-btn.selected')&&document.querySelector('.level-chip.selected');
-  document.getElementById('start-btn').disabled=!ok;
-}
-document.getElementById('start-btn').addEventListener('click',()=>{
-  if(!state.topic)return;
-  if(state.level===0) startPlacement(state.topic); else startGame();
-});
-document.getElementById('back-btn').addEventListener('click',backToMenu);
-
-function backToMenu() {
-  state.isReviewMode=false; state.reviewQueue=[];
-  state.streak=0;state.score=0;state.levelProgress=0;state.usedWords.clear();state.exNum=0;
-  document.querySelectorAll('.topic-btn,.level-chip').forEach(b=>b.classList.remove('selected'));
-  state.topic=null; state.level=1;
-  document.getElementById('start-btn').disabled=true;
-  updateFailedBadge();
-  showScreen('welcome');
+function checkWordSearchSelection(selected) {
+  if (!selected.length) return;
+  const ordered = [...selected].sort((a,b) => a.r - b.r || a.c - b.c);
+  const attempt = ordered.map(x => x.letter).join("");
+  const reversed = [...ordered].reverse().map(x => x.letter).join("");
+  const found = app.current.puzzleWords.find(w => !app.current.puzzleFound.includes(w.puzzle) && (w.puzzle === attempt || w.puzzle === reversed));
+  if (!found) return;
+  app.current.puzzleFound.push(found.puzzle);
+  ordered.forEach(x => { x.el.classList.remove("selected"); x.el.classList.add("found"); });
+  document.querySelector(`#wordBank [data-word="${found.puzzle}"]`)?.classList.add("found");
+  speakWord(found.en);
+  document.getElementById("feedback").className = "feedback ok";
+  document.getElementById("feedback").innerHTML = `Encontraste <strong>${found.en}</strong> - ${found.es}.`;
+  if (app.current.puzzleFound.length === app.current.puzzleWords.length) mark(true, null);
 }
 
-function startGame() {
-  state.isReviewMode=false; state.streak=0;state.score=0;state.levelProgress=0;state.usedWords.clear();state.exNum=0;
-  showScreen('game'); renderExercise();
+function clearWordSearchSelection() {
+  document.querySelectorAll(".letter-cell.selected").forEach(cell => cell.classList.remove("selected"));
 }
 
-// Init
-updateFailedBadge();
+function renderCrossword(words) {
+  app.current = { ...words[0], puzzleWords: words };
+  return `<h2 class="question">Mini crucigrama<small>Escribe cada palabra en ingles usando la pista en espanol.</small></h2>
+    <div class="crossword" id="crosswordBox">
+      ${words.map((w, i) => `<label class="crossword-clue">
+        <span>${i + 1}. ${w.es} <small>(${w.en.length} letras)</small></span>
+        <input data-answer="${escapeAttr(w.en.toLowerCase())}" autocomplete="off" spellcheck="false">
+      </label>`).join("")}
+    </div>
+    <div class="nav-row"><button class="primary-btn" onclick="checkCrossword()">Revisar crucigrama</button></div>`;
+}
+
+function attachCrosswordEvents() {
+  document.querySelectorAll("#crosswordBox input").forEach(input => {
+    input.addEventListener("keydown", e => { if (e.key === "Enter") checkCrossword(); });
+  });
+}
+
+function checkCrossword() {
+  if (app.answered) return;
+  const inputs = [...document.querySelectorAll("#crosswordBox input")];
+  let correct = 0;
+  inputs.forEach(input => {
+    const ok = input.value.trim().toLowerCase() === input.dataset.answer;
+    input.closest(".crossword-clue").classList.toggle("solved", ok);
+    if (ok) correct++;
+  });
+  if (correct === inputs.length) {
+    speakWord(app.current.puzzleWords[0].en);
+    mark(true, null);
+  } else {
+    document.getElementById("feedback").className = "feedback bad";
+    document.getElementById("feedback").textContent = `Tienes ${correct} de ${inputs.length}. Revisa las que faltan.`;
+  }
+}
+
+function checkTyped() {
+  if (app.answered) return;
+  const val = document.getElementById("typeAnswer").value.trim().toLowerCase();
+  mark(val === app.current.en.toLowerCase(), null);
+}
+
+function mark(correct, btn, skipped = false) {
+  if (app.answered) return;
+  app.answered = true;
+  app.attempts++;
+  if (correct) app.correct++;
+  app.streak = correct ? app.streak + 1 : 0;
+  app.score += correct ? 10 + app.level * 4 + Math.min(app.streak, 5) : 0;
+
+  if (app.mode === "duel") {
+    const p = app.players[app.player];
+    p.attempts++;
+    if (correct) p.correct++;
+    p.score += correct ? 10 + app.level * 5 : 0;
+  }
+
+  recordAnswer(app.current, correct);
+  const feedback = document.getElementById("feedback");
+  feedback.className = `feedback ${correct ? "ok" : "bad"}`;
+  feedback.innerHTML = correct
+    ? `Correcto: <strong>${app.current.en}</strong> - ${app.current.es}.`
+    : `${skipped ? "Sin problema." : "Casi."} Respuesta: <strong>${app.current.en}</strong> - ${app.current.es}. ${app.current.sentence}`;
+  if (correct) speakWord(app.current.en);
+
+  document.querySelectorAll(".option").forEach(o => {
+    o.disabled = true;
+    if (o.dataset.answer === app.current.en) o.classList.add("correct");
+  });
+  if (btn && !correct) btn.classList.add("wrong");
+  document.getElementById("nextBtn").classList.remove("hidden");
+
+  if (app.mode === "duel") app.player = app.player === 0 ? 1 : 0;
+  adaptLevel();
+  updateHud();
+  renderWeakMini();
+}
+
+function adaptLevel() {
+  if (app.mode === "review") return;
+  if (app.correct >= 8 && app.attempts >= 10 && app.correct / app.attempts >= .85 && app.level < 4) {
+    app.level++;
+    app.pool = shuffle(flattenWords());
+    toast(`Subiste a ${LEVELS[app.level]}`);
+  }
+  if (app.attempts >= 8 && app.correct / app.attempts < .45 && app.level > 1) {
+    app.level--;
+    app.pool = shuffle(flattenWords());
+    toast(`Bajamos a ${LEVELS[app.level]} para reforzar bases`);
+  }
+}
+
+function showSummary() {
+  const acc = app.attempts ? Math.round(app.correct / app.attempts * 100) : 0;
+  document.getElementById("practiceCard").innerHTML = `
+    <div class="exercise-meta"><span class="badge">Reto terminado</span><span>20 preguntas</span></div>
+    <h2 class="question">Resultado: ${app.score} puntos<small>Precision: ${acc}%. ${summaryAdvice(acc)}</small></h2>
+    <div class="options">
+      <button class="primary-btn" onclick="startGame()">Repetir reto</button>
+      <button class="soft-btn" onclick="showView('stats')">Ver progreso</button>
+    </div>`;
+}
+
+function summaryAdvice(acc) {
+  if (acc >= 85) return "Excelente. Prueba un nivel mas alto o temas profesionales.";
+  if (acc >= 65) return "Buen avance. Repite las palabras falladas antes de subir.";
+  return "Conviene practicar 10 minutos con nivel menor y volver al reto.";
+}
+
+function updateHud() {
+  const acc = app.attempts ? Math.round(app.correct / app.attempts * 100) : 0;
+  const week = getWeekKeys().reduce((sum, d) => sum + (progress.days[d]?.correct || 0), 0);
+  document.getElementById("scoreOut").textContent = app.score;
+  document.getElementById("accuracyOut").textContent = `${acc}%`;
+  document.getElementById("streakOut").textContent = app.streak;
+  document.getElementById("weekOut").textContent = week;
+  document.getElementById("sessionName").textContent = `${TOPICS[app.topic].name} - ${LEVELS[app.level]}`;
+  document.getElementById("sessionMode").textContent = MODES[app.mode];
+  document.getElementById("progressFill").style.width = `${Math.min(100, app.questionCount * (app.mode === "challenge" ? 5 : 8))}%`;
+  document.getElementById("dailyGoal").textContent = `${progress.days[todayKey()]?.correct || 0} / 20 correctas`;
+  updatePlayers();
+}
+
+function updatePlayers() {
+  const cards = [document.getElementById("playerA"), document.getElementById("playerB")];
+  app.players.forEach((p, i) => {
+    cards[i].classList.toggle("active", app.player === i);
+    cards[i].innerHTML = `<b>${p.name} <span>${p.score}</span></b><span>${app.player === i ? "Turno actual" : `${p.correct}/${p.attempts} correctas`}</span>`;
+  });
+}
+
+function renderStats() {
+  const keys = getWeekKeys();
+  const attempts = keys.reduce((sum, d) => sum + (progress.days[d]?.attempts || 0), 0);
+  const correct = keys.reduce((sum, d) => sum + (progress.days[d]?.correct || 0), 0);
+  document.getElementById("statAttempts").textContent = attempts;
+  document.getElementById("statCorrect").textContent = correct;
+  document.getElementById("statMastered").textContent = Object.keys(progress.mastered).length;
+  const max = Math.max(1, ...keys.map(d => progress.days[d]?.correct || 0));
+  document.getElementById("weekChart").innerHTML = keys.map(d => {
+    const val = progress.days[d]?.correct || 0;
+    const label = new Date(`${d}T12:00:00`).toLocaleDateString("es", { weekday: "short" });
+    return `<div class="bar-wrap"><div class="bar" style="height:${Math.max(5, val / max * 180)}px"></div><span>${label}<br>${val}</span></div>`;
+  }).join("");
+  const weak = weakWords();
+  document.getElementById("statsAdvice").textContent = weak.length
+    ? `Tu proximo paso: repasar ${weak.slice(0,3).map(w => w.en).join(", ")}. Son las palabras que mas conviene rescatar esta semana.`
+    : "Buen trabajo. No hay palabras debiles todavia; empieza un reto de 20 preguntas para crear una linea base.";
+}
+
+function renderReview() {
+  const list = document.getElementById("reviewList");
+  const weak = weakWords();
+  if (!weak.length) {
+    list.innerHTML = `<div class="review-chip"><div><strong>No hay palabras pendientes.</strong><small>Practica un tema para generar recomendaciones.</small></div><button class="primary-btn" onclick="showView('home')">Ir al inicio</button></div>`;
+    return;
+  }
+  list.innerHTML = weak.map(w => `
+    <div class="review-chip">
+      <div><strong>${w.en} - ${w.es}</strong><small>${TOPICS[w.topic]?.name || w.topic} | ${LEVELS[w.level]} | errores: ${w.wrong}</small></div>
+      <button class="soft-btn" onclick="speakWord('${escapeAttr(w.en)}')">Escuchar</button>
+    </div>`).join("") + `<button class="primary-btn" onclick="app.mode='review'; startGame()">Practicar lista</button>`;
+}
+
+function renderWeakMini() {
+  const box = document.getElementById("weakMini");
+  const weak = weakWords().slice(0, 3);
+  box.innerHTML = weak.length ? weak.map(w => `<div class="review-chip"><div><strong>${w.en}</strong><small>${w.es}</small></div></div>`).join("") : `<div class="goal-row"><span>Sin palabras debiles por ahora.</span></div>`;
+}
+
+function speakWord(word) {
+  if (!("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(word);
+  u.lang = "en-US";
+  u.rate = .88;
+  speechSynthesis.speak(u);
+}
+
+function toast(message) {
+  const el = document.createElement("div");
+  el.textContent = message;
+  el.style.cssText = "position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1c2135;border:1px solid #00d7a7;color:#00d7a7;border-radius:8px;padding:12px 16px;z-index:50;font-weight:700";
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2400);
+}
+
+function escapeAttr(value) {
+  return String(value).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+}
+
+document.addEventListener("click", e => {
+  const nav = e.target.closest(".nav-btn");
+  if (nav) showView(nav.dataset.view);
+  const topic = e.target.closest(".topic-btn");
+  if (topic) {
+    app.topic = topic.dataset.topic;
+    app.pool = [];
+    renderTopics();
+  }
+  const level = e.target.closest(".level-btn");
+  if (level) {
+    app.level = Number(level.dataset.level);
+    document.querySelectorAll(".level-btn").forEach(b => b.classList.toggle("selected", b === level));
+  }
+  const mode = e.target.closest(".mode-btn");
+  if (mode) {
+    app.mode = mode.dataset.mode;
+    document.querySelectorAll(".mode-btn").forEach(b => b.classList.toggle("selected", b === mode));
+  }
+});
+
+document.getElementById("startBtn").addEventListener("click", () => startGame());
+document.getElementById("placementBtn").addEventListener("click", () => {
+  app.mode = "challenge";
+  app.pool = shuffle(allWords());
+  startGame(true);
+});
+document.getElementById("loginBtn").addEventListener("click", sendLoginLink);
+document.getElementById("syncNowBtn").addEventListener("click", pullCloudProgress);
+document.getElementById("logoutBtn").addEventListener("click", logout);
+
+renderTopics();
+renderWeakMini();
+renderStats();
+initSupabase();
 </script>
 </body>
 </html>
