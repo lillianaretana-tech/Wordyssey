@@ -1302,6 +1302,7 @@ const DAY_MS = 86400000;
 const SUPABASE_URL = "https://kotgtqihzctnqnsdlqqt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvdGd0cWloemN0bnFuc2RscXF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMzc5NDksImV4cCI6MjA5NjcxMzk0OX0.zNHh9R4wCKF_KVWAORcSf00S7ZutjtkMirBnDT8yCbU";
 const SUPABASE_TABLE = "vocabquest_progress";
+const AUTH_REDIRECT_URL = "https://lillianaretana-tech.github.io/Wordyssey/";
 const REQUIRE_ACCOUNT_FOR_RECORDS = true;
 
 let app = {
@@ -1402,6 +1403,12 @@ function closeAppModal() {
   document.getElementById("appModal").setAttribute("aria-hidden", "true");
 }
 
+function getAuthRedirectUrl() {
+  const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+  if (isLocal || window.location.protocol === "file:") return AUTH_REDIRECT_URL;
+  return window.location.origin + window.location.pathname;
+}
+
 function openAccountModal(reason = "") {
   const statusText = reason || (cloudReady ? `Sincronizado como ${currentUser.email || "usuario"}.` : "Registrate con tu correo para guardar tu avance y records en Supabase.");
   openAppModal("Cuenta y sincronizacion", `
@@ -1500,7 +1507,7 @@ async function sendLoginLink() {
   setSyncStatus("Enviando enlace de acceso...");
   const { error } = await supabaseClient.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: window.location.href.split("#")[0] }
+    options: { emailRedirectTo: getAuthRedirectUrl() }
   });
   setSyncStatus(error ? `No se pudo enviar: ${error.message}` : "Revisa tu correo y abre el enlace para activar la sincronizacion.");
 }
