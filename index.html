@@ -226,6 +226,30 @@
 
   .story-card b, .achievement-card b { display: block; margin-bottom: 5px; }
   .story-card span, .achievement-card span { color: var(--muted); font-size: .86rem; line-height: 1.4; }
+  .story-visual {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    margin-bottom: 10px;
+    background: rgba(255,255,255,.1);
+    color: #fff;
+    font-weight: 900;
+    font-size: 1.05rem;
+    overflow: hidden;
+  }
+  .story-visual img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .story-card.airport { background: linear-gradient(145deg, rgba(85,182,255,.22), rgba(28,33,53,.9)); }
+  .story-card.hotel { background: linear-gradient(145deg, rgba(108,99,255,.22), rgba(28,33,53,.9)); }
+  .story-card.restaurant { background: linear-gradient(145deg, rgba(255,102,128,.2), rgba(28,33,53,.9)); }
+  .story-card.shopping { background: linear-gradient(145deg, rgba(0,215,167,.18), rgba(28,33,53,.9)); }
+  .story-card.work { background: linear-gradient(145deg, rgba(245,197,66,.18), rgba(28,33,53,.9)); }
+  .story-card.health { background: linear-gradient(145deg, rgba(255,102,128,.18), rgba(28,33,53,.9)); }
+  .story-card.daily { background: linear-gradient(145deg, rgba(255,255,255,.12), rgba(28,33,53,.9)); }
+  .story-card.travel { background: linear-gradient(145deg, rgba(85,182,255,.16), rgba(108,99,255,.16)); }
+  .story-card.friends { background: linear-gradient(145deg, rgba(0,215,167,.14), rgba(245,197,66,.14)); }
+  .story-card.emergency { background: linear-gradient(145deg, rgba(255,102,128,.24), rgba(28,33,53,.92)); }
   .achievement-card.unlocked { border-color: var(--gold); background: linear-gradient(145deg, rgba(245,197,66,.14), rgba(28,33,53,.9)); }
   .story-stage {
     border: 1px solid var(--border);
@@ -239,6 +263,11 @@
     font-size: 1.2rem;
     line-height: 1.5;
     margin: 12px 0 16px;
+  }
+  .story-speaker {
+    color: var(--gold);
+    font-weight: 800;
+    margin-top: 10px;
   }
 
   .setup-panel {
@@ -874,6 +903,11 @@ const STORY_SCENARIOS = {
   airport: {
     title: "Aeropuerto",
     icon: "AIR",
+    visual: "AIR",
+    theme: "airport",
+    character: "Captain Smith",
+    level: "Basico",
+    targetVocab: ["passport", "boarding", "gate", "luggage"],
     intro: "You arrive late at the airport. Your flight leaves soon.",
     reward: 18,
     scenes: [
@@ -897,6 +931,11 @@ const STORY_SCENARIOS = {
   restaurant: {
     title: "Restaurante",
     icon: "FOOD",
+    visual: "PIZZA",
+    theme: "restaurant",
+    character: "Marco",
+    level: "Principiante",
+    targetVocab: ["order", "water", "bill", "spicy"],
     intro: "You are at a restaurant and need to order politely.",
     reward: 18,
     scenes: [
@@ -920,6 +959,11 @@ const STORY_SCENARIOS = {
   hotel: {
     title: "Hotel",
     icon: "HOTEL",
+    visual: "HOTEL",
+    theme: "hotel",
+    character: "Sarah",
+    level: "Basico",
+    targetVocab: ["reservation", "key", "room", "towels"],
     intro: "You arrive at a hotel and need your room.",
     reward: 18,
     scenes: [
@@ -943,6 +987,11 @@ const STORY_SCENARIOS = {
   interview: {
     title: "Primera entrevista",
     icon: "JOB",
+    visual: "WORK",
+    theme: "work",
+    character: "Sarah",
+    level: "Intermedio",
+    targetVocab: ["interview", "strengths", "team", "opportunity"],
     intro: "You are at your first job interview and want to sound confident.",
     reward: 22,
     scenes: [
@@ -966,6 +1015,11 @@ const STORY_SCENARIOS = {
   newyork: {
     title: "Viaje a Nueva York",
     icon: "NYC",
+    visual: "NYC",
+    theme: "travel",
+    character: "Lilly",
+    level: "Intermedio",
+    targetVocab: ["directions", "subway", "ticket", "photo"],
     intro: "You arrive in New York and need to move around the city.",
     reward: 22,
     scenes: [
@@ -989,6 +1043,11 @@ const STORY_SCENARIOS = {
   friend: {
     title: "Conociendo un amigo",
     icon: "PAL",
+    visual: "PAL",
+    theme: "friends",
+    character: "Lilly",
+    level: "Principiante",
+    targetVocab: ["meet", "music", "tomorrow", "friend"],
     intro: "You meet a new friend and start a simple conversation.",
     reward: 20,
     scenes: [
@@ -1006,6 +1065,146 @@ const STORY_SCENARIOS = {
         { label: "Would you like to meet again tomorrow?", ok: true, next: "complete" },
         { label: "Would you like to download my chair?", ok: false, next: "complete" },
         { label: "Would you like to be a receipt?", ok: false, next: "complete" }
+      ]}
+    ]
+  },
+  shopping: {
+    title: "Supermarket Challenge",
+    icon: "SHOP",
+    visual: "CART",
+    theme: "shopping",
+    character: "Bruno",
+    level: "Principiante",
+    targetVocab: ["price", "receipt", "fresh", "bag"],
+    intro: "Bruno helps you buy groceries before dinner.",
+    reward: 20,
+    scenes: [
+      { text: "Bruno points at apples. The cashier asks: 'How many do you want?'", choices: [
+        { label: "I would like three apples, please.", ok: true, next: 1 },
+        { label: "I would like three airports.", ok: false, next: 1 },
+        { label: "I would like three passwords.", ok: false, next: 1 }
+      ]},
+      { text: "You need to ask the price.", choices: [
+        { label: "How much is this?", ok: true, next: 2 },
+        { label: "How tall is this soup?", ok: false, next: 2 },
+        { label: "How late is my chair?", ok: false, next: 2 }
+      ]},
+      { text: "The cashier gives you a receipt.", choices: [
+        { label: "Thank you. Have a nice day.", ok: true, next: "complete" },
+        { label: "Thank you. Open my meeting.", ok: false, next: "complete" },
+        { label: "Thank you. The receipt is sleeping.", ok: false, next: "complete" }
+      ]}
+    ]
+  },
+  workday: {
+    title: "First Day at Work",
+    icon: "WORK",
+    visual: "DESK",
+    theme: "work",
+    character: "Sarah",
+    level: "Intermedio",
+    targetVocab: ["meeting", "task", "deadline", "team"],
+    intro: "Sarah welcomes you on your first day at the office.",
+    reward: 22,
+    scenes: [
+      { text: "Sarah says: 'The meeting starts in five minutes.'", choices: [
+        { label: "Great, I will join the meeting.", ok: true, next: 1 },
+        { label: "Great, I will eat the deadline.", ok: false, next: 1 },
+        { label: "Great, I will open the beach.", ok: false, next: 1 }
+      ]},
+      { text: "Your manager gives you a task.", choices: [
+        { label: "I will finish the task today.", ok: true, next: 2 },
+        { label: "I will finish the luggage today.", ok: false, next: 2 },
+        { label: "I will finish the spicy today.", ok: false, next: 2 }
+      ]},
+      { text: "A teammate asks for help.", choices: [
+        { label: "Sure, I can help you.", ok: true, next: "complete" },
+        { label: "Sure, I can board you.", ok: false, next: "complete" },
+        { label: "Sure, I can cough you.", ok: false, next: "complete" }
+      ]}
+    ]
+  },
+  doctor: {
+    title: "Visit the Doctor",
+    icon: "HEALTH",
+    visual: "DOC",
+    theme: "health",
+    character: "Dr. Emma",
+    level: "Basico",
+    targetVocab: ["appointment", "pain", "medicine", "symptom"],
+    intro: "Dr. Emma asks what happened and Bruno waits quietly.",
+    reward: 22,
+    scenes: [
+      { text: "Dr. Emma asks: 'What symptoms do you have?'", choices: [
+        { label: "I have a headache and a cough.", ok: true, next: 1 },
+        { label: "I have a ticket and a browser.", ok: false, next: 1 },
+        { label: "I have a hotel and a meeting.", ok: false, next: 1 }
+      ]},
+      { text: "She asks if you need medicine.", choices: [
+        { label: "Yes, I need medicine.", ok: true, next: 2 },
+        { label: "Yes, I need a suitcase.", ok: false, next: 2 },
+        { label: "Yes, I need a receipt.", ok: false, next: 2 }
+      ]},
+      { text: "You need a follow-up appointment.", choices: [
+        { label: "Can I make an appointment?", ok: true, next: "complete" },
+        { label: "Can I make a salary?", ok: false, next: "complete" },
+        { label: "Can I make a screen?", ok: false, next: "complete" }
+      ]}
+    ]
+  },
+  morning: {
+    title: "Daily Life Mission",
+    icon: "DAILY",
+    visual: "HOME",
+    theme: "daily",
+    character: "Bruno",
+    level: "Principiante",
+    targetVocab: ["key", "door", "kitchen", "schedule"],
+    intro: "Bruno hides your key before school. You need to get ready.",
+    reward: 18,
+    scenes: [
+      { text: "You cannot find your key.", choices: [
+        { label: "Where is my key?", ok: true, next: 1 },
+        { label: "Where is my airport?", ok: false, next: 1 },
+        { label: "Where is my soup?", ok: false, next: 1 }
+      ]},
+      { text: "Bruno runs to the kitchen.", choices: [
+        { label: "The key is in the kitchen.", ok: true, next: 2 },
+        { label: "The key is in the deadline.", ok: false, next: 2 },
+        { label: "The key is in the browser.", ok: false, next: 2 }
+      ]},
+      { text: "You check your schedule.", choices: [
+        { label: "I have class at eight.", ok: true, next: "complete" },
+        { label: "I have cheese at eight.", ok: false, next: "complete" },
+        { label: "I have laundry at the moon.", ok: false, next: "complete" }
+      ]}
+    ]
+  },
+  emergency: {
+    title: "Emergency Call",
+    icon: "SOS",
+    visual: "SOS",
+    theme: "emergency",
+    character: "Dr. Emma",
+    level: "Intermedio",
+    targetVocab: ["help", "address", "injury", "emergency"],
+    intro: "Someone needs help. You must explain the situation clearly.",
+    reward: 26,
+    scenes: [
+      { text: "The operator asks: 'What is the emergency?'", choices: [
+        { label: "There is an injured person.", ok: true, next: 1 },
+        { label: "There is a delicious password.", ok: false, next: 1 },
+        { label: "There is a meeting in the soup.", ok: false, next: 1 }
+      ]},
+      { text: "They ask for your address.", choices: [
+        { label: "The address is 25 Main Street.", ok: true, next: 2 },
+        { label: "The address is spicy and grilled.", ok: false, next: 2 },
+        { label: "The address is a boarding pass.", ok: false, next: 2 }
+      ]},
+      { text: "They tell you to stay calm.", choices: [
+        { label: "I will stay calm and wait.", ok: true, next: "complete" },
+        { label: "I will stay cheese and flight.", ok: false, next: "complete" },
+        { label: "I will stay deadline and browser.", ok: false, next: "complete" }
       ]}
     ]
   }
@@ -1223,8 +1422,54 @@ async function pushCloudProgress() {
   const { error } = await supabaseClient
     .from(SUPABASE_TABLE)
     .upsert(payload, { onConflict: "user_id" });
+  if (!error) await pushStructuredProgress();
   setSyncStatus(error ? `No se pudo guardar: ${error.message}` : `Progreso guardado en linea como ${currentUser.email || "usuario"}.`);
   syncing = false;
+}
+
+async function pushStructuredProgress() {
+  if (!cloudReady || !supabaseClient) return;
+  const week = getWeekKeys().reduce((sum, d) => sum + (progress.days[d]?.correct || 0), 0);
+  const todayCorrect = progress.days[todayKey()]?.correct || 0;
+  const unlockedWorlds = Object.keys(TOPICS).filter(topic => topic === "daily" || topicStars(topic) > 0);
+  await supabaseClient.from("vocabquest_profiles").upsert({
+    user_id: currentUser.id,
+    email: currentUser.email || null,
+    current_level: app.level || 1,
+    updated_at: new Date().toISOString()
+  }, { onConflict: "user_id" });
+  await supabaseClient.from("vocabquest_user_progress").upsert({
+    user_id: currentUser.id,
+    points: progress.records.totalPoints || 0,
+    coins: progress.rewards.coins || 0,
+    stars: progress.rewards.stars || 0,
+    energy: progress.rewards.energy || 0,
+    streak: app.streak || 0,
+    daily_goal_correct: todayCorrect,
+    weekly_correct: week,
+    unlocked_worlds: unlockedWorlds,
+    bosses_defeated: Object.keys(progress.quests || {}),
+    chests_opened: progress.rewards.chests || 0,
+    bruno: progress.bruno || {},
+    last_activity_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  }, { onConflict: "user_id" });
+  const achievementRows = Object.keys(progress.achievements || {}).map(id => ({
+    user_id: currentUser.id,
+    achievement_id: id,
+    unlocked_at: new Date(progress.achievements[id].unlockedAt || Date.now()).toISOString()
+  }));
+  if (achievementRows.length) await supabaseClient.from("vocabquest_user_achievements").upsert(achievementRows, { onConflict: "user_id,achievement_id" });
+  const storyRows = Object.keys(progress.stories.completed || {}).map(id => ({
+    user_id: currentUser.id,
+    story_id: id,
+    completed: true,
+    best_correct: progress.stories.completed[id].correct || 0,
+    attempts: 1,
+    last_played_at: new Date(progress.stories.completed[id].completedAt || Date.now()).toISOString(),
+    story_state: progress.stories.completed[id]
+  }));
+  if (storyRows.length) await supabaseClient.from("vocabquest_user_story_progress").upsert(storyRows, { onConflict: "user_id,story_id" });
 }
 
 function todayKey(offset = 0) {
@@ -1330,13 +1575,27 @@ function showView(id) {
 function renderStories() {
   normalizeProgress();
   const grid = document.getElementById("storyGrid");
+  const recommended = getNextStoryForUser();
   grid.innerHTML = Object.entries(STORY_SCENARIOS).map(([id, story]) => {
     const done = !!progress.stories.completed[id];
-    return `<button class="story-card ${done ? "achievement-card unlocked" : ""}" data-story="${id}">
-      <b>${story.icon} ${story.title}</b>
-      <span>${story.intro}<br>${done ? "Completed" : `Reward: ${story.reward} coins`}</span>
+    return `<button class="story-card ${story.theme || ""} ${done ? "achievement-card unlocked" : ""}" data-story="${id}">
+      ${storyVisual(story)}
+      <b>${id === recommended ? "Recommended: " : ""}${story.title}</b>
+      <span>${story.intro}<br>${story.character} | ${story.level}<br>${done ? "Completed" : `Reward: ${story.reward} coins`}</span>
     </button>`;
   }).join("");
+}
+
+function getNextStoryForUser() {
+  const entries = Object.entries(STORY_SCENARIOS);
+  const notCompleted = entries.filter(([id]) => !progress.stories.completed[id]);
+  const preferred = notCompleted.find(([, story]) => levelMatchesStory(story.level));
+  return (preferred || notCompleted[0] || entries[0])?.[0];
+}
+
+function levelMatchesStory(storyLevel) {
+  const map = { "Principiante": 1, "Basico": 2, "Intermedio": 3, "Avanzado": 4 };
+  return (map[storyLevel] || 1) <= Math.max(1, app.level + 1);
 }
 
 function startStory(id) {
@@ -1352,10 +1611,18 @@ function renderStoryScene() {
   const stage = document.getElementById("storyStage");
   stage.classList.remove("hidden");
   stage.innerHTML = `<span class="badge">${story.title} | Scene ${app.story.index + 1}/${story.scenes.length}</span>
+    ${storyVisual(story)}
+    <div class="story-speaker">${story.character}</div>
     <div class="story-scene">${scene.text}</div>
+    <div class="feedback">Target vocab: ${(story.targetVocab || []).join(", ")}</div>
     <div class="options">
       ${scene.choices.map(choice => `<button class="option" onclick="chooseStory('${escapeAttr(choice.label)}')">${choice.label}</button>`).join("")}
     </div>`;
+}
+
+function storyVisual(story) {
+  if (story.image) return `<div class="story-visual"><img src="${escapeAttr(story.image)}" alt="${escapeAttr(story.title)}"></div>`;
+  return `<div class="story-visual">${story.visual || story.icon || "STORY"}</div>`;
 }
 
 function chooseStory(label) {
