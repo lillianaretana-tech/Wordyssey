@@ -2044,10 +2044,10 @@ function startStory(id) {
   progress.stories.recent = [id, ...(progress.stories.recent || []).filter(item => item !== id)].slice(0, 8);
   saveProgress();
   app.story = { id, index: 0, correct: 0 };
-  renderStoryScene();
+  renderStoryScene(true);
 }
 
-function renderStoryScene() {
+function renderStoryScene(shouldFocus = false) {
   const story = STORY_SCENARIOS[app.story.id];
   const scene = story.scenes[app.story.index];
   const stage = document.getElementById("storyStage");
@@ -2063,6 +2063,12 @@ function renderStoryScene() {
     <div class="options">
       ${scene.choices.map((choice, index) => `<button class="option" onclick="chooseStory(${index})">${choice.label}</button>`).join("")}
     </div>`;
+  if (shouldFocus) {
+    setTimeout(() => {
+      stage.scrollIntoView({ behavior: "smooth", block: "start" });
+      stage.querySelector(".option")?.focus({ preventScroll: true });
+    }, 60);
+  }
 }
 
 function storyVisual(story, visualOverride = "") {
