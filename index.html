@@ -276,6 +276,7 @@
     font-size: 1.05rem;
     overflow: hidden;
   }
+  .story-visual .scene-emoji { font-size: 2.15rem; line-height: 1; }
   .story-visual img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .story-card.airport { background: linear-gradient(145deg, rgba(85,182,255,.22), rgba(28,33,53,.9)); }
   .story-card.hotel { background: linear-gradient(145deg, rgba(108,99,255,.22), rgba(28,33,53,.9)); }
@@ -1276,6 +1277,117 @@ const STORY_SCENARIOS = {
     ]
   }
 };
+const STORY_VISUALS = {
+  AIR: "✈️", FOOD: "🍕", PIZZA: "🍕", HOTEL: "🏨", JOB: "💼", WORK: "💼",
+  NYC: "🗽", PAL: "🤝", SHOP: "🛒", CART: "🛒", DESK: "🖥️", HEALTH: "🩺",
+  DOC: "🩺", DAILY: "🏠", HOME: "🏠", SOS: "🚑", airport: "✈️", hotel: "🏨",
+  restaurant: "🍽️", shopping: "🛒", work: "💼", health: "🩺", daily: "🏠",
+  travel: "🧳", friends: "🤝", emergency: "🚑", tech: "💻", school: "📚",
+  bank: "🏦", gym: "🏋️", beach: "🏖️", bus: "🚌", cafe: "☕", pharmacy: "💊",
+  museum: "🏛️", library: "📚", weather: "🌦️", family: "👨‍👩‍👧", phone: "📱",
+  delivery: "📦", apartment: "🔑", party: "🎉", pet: "🐾", car: "🚗"
+};
+
+const STORY_EXPANSION_SEEDS = [
+  ["airport_luggage","Lost Luggage Desk","airport","✈️","Captain Smith","Basico",["luggage","claim","tag","delayed"],"Your suitcase did not arrive after the flight.","My luggage is missing.","Here is my baggage tag.","Please call me when it arrives."],
+  ["airport_security","Security Check","airport","🛂","Officer Lee","Basico",["security","tray","pocket","belt"],"You need to pass security without confusion.","I will put my items on the tray.","I have nothing in my pockets.","Thank you, I can go now."],
+  ["airport_connection","Connecting Flight","airport","🛫","Captain Smith","Intermedio",["connection","gate","boarding","delay"],"Your first flight is late and you need the next gate.","Where is gate twenty-four?","Is my connecting flight delayed?","Thank you, I will hurry."],
+  ["hotel_checkin","Late Hotel Check-in","hotel","🏨","Mia","Basico",["reservation","passport","key","breakfast"],"You arrive at night and need to check in.","I have a reservation for tonight.","Here is my passport.","What time is breakfast?"],
+  ["hotel_noise","Noisy Room","hotel","🛎️","Mia","Intermedio",["noise","room","change","quiet"],"Your hotel room is too noisy to sleep.","My room is very noisy.","Could I change rooms, please?","Thank you for your help."],
+  ["hotel_checkout","Hotel Checkout","hotel","🧾","Mia","Basico",["checkout","bill","taxi","receipt"],"You are leaving the hotel early.","I would like to check out.","Could I have the receipt?","Can you call a taxi?"],
+  ["restaurant_breakfast","Breakfast Order","restaurant","🥞","Marco","Principiante",["coffee","eggs","menu","orange juice"],"You order breakfast before class.","Could I see the menu?","I would like eggs and coffee.","Can I have orange juice, please?"],
+  ["restaurant_allergy","Food Allergy","restaurant","🥗","Marco","Intermedio",["allergy","nuts","ingredients","safe"],"You need to explain a food allergy.","I have a nut allergy.","Does this dish have nuts?","Thank you, I will choose another dish."],
+  ["restaurant_reservation","Dinner Reservation","restaurant","🍽️","Marco","Basico",["reservation","table","tonight","people"],"You call a restaurant for dinner.","I need a table for two.","Do you have space tonight?","Thank you, see you at seven."],
+  ["office_meeting","Team Meeting","work","💼","Sarah","Intermedio",["meeting","agenda","question","notes"],"You join a team meeting in English.","Could you repeat the agenda?","I have one question.","I will send my notes later."],
+  ["office_email","Important Email","work","📧","Sarah","Intermedio",["email","attachment","reply","deadline"],"You need to answer a work email.","I received your email.","The attachment is missing.","I will reply before the deadline."],
+  ["office_presentation","Small Presentation","work","📊","Sarah","Avanzado",["presentation","results","feedback","improve"],"You present simple results to your team.","Today I will present the results.","Your feedback is helpful.","We can improve next week."],
+  ["clinic_appointment","Clinic Appointment","health","🩺","Dr. Emma","Basico",["appointment","fever","medicine","rest"],"You visit a clinic because you feel sick.","I have a fever.","Do I need medicine?","I will rest today."],
+  ["pharmacy_medicine","At the Pharmacy","pharmacy","💊","Dr. Emma","Basico",["pharmacy","dose","medicine","twice"],"You need to buy medicine and understand directions.","I need this medicine.","How often should I take it?","I will take it twice a day."],
+  ["dentist_visit","Dentist Visit","health","🦷","Dr. Emma","Intermedio",["tooth","pain","appointment","cleaning"],"You have tooth pain and need help.","My tooth hurts.","Can I make an appointment?","Thank you, I will come tomorrow."],
+  ["subway_ticket","Subway Ticket","travel","🚇","Lilly","Basico",["subway","ticket","station","map"],"You need to use the subway in a new city.","Where can I buy a ticket?","Which station is next?","I will check the map."],
+  ["bus_stop","Wrong Bus Stop","bus","🚌","Lilly","Principiante",["bus","stop","route","downtown"],"You are waiting for the bus downtown.","Is this the bus to downtown?","Where is the next stop?","Thank you, I will wait here."],
+  ["taxi_ride","Taxi Ride","travel","🚕","Lilly","Basico",["taxi","address","fare","receipt"],"You take a taxi to a hotel.","Please take me to this address.","How much is the fare?","Could I have a receipt?"],
+  ["museum_ticket","Museum Visit","museum","🏛️","Lilly","Basico",["museum","ticket","exhibit","photo"],"You visit a museum on vacation.","One ticket, please.","Where is the new exhibit?","Can I take photos here?"],
+  ["library_card","Library Card","library","📚","Sarah","Basico",["library","card","borrow","return"],"You want to borrow an English book.","I need a library card.","Can I borrow this book?","When should I return it?"],
+  ["school_project","Class Project","school","📚","Sarah","Intermedio",["project","partner","topic","deadline"],"You work with a partner on a class project.","What topic should we choose?","I can make the slides.","The deadline is Friday."],
+  ["school_question","Ask the Teacher","school","✏️","Sarah","Principiante",["teacher","question","understand","homework"],"You need help in English class.","I have a question.","I do not understand this word.","What is the homework?"],
+  ["bank_account","Open a Bank Account","bank","🏦","Mia","Intermedio",["account","deposit","signature","card"],"You need basic help at a bank.","I would like to open an account.","Where do I sign?","When will I get my card?"],
+  ["atm_problem","ATM Problem","bank","💳","Mia","Basico",["ATM","card","cash","problem"],"The ATM does not give you cash.","My card is not working.","I need to withdraw cash.","Can someone help me?"],
+  ["gym_membership","Gym Membership","gym","🏋️","Bruno","Basico",["gym","membership","schedule","trainer"],"You want to join a gym.","I want a gym membership.","What is the schedule?","Can I meet a trainer?"],
+  ["beach_day","Beach Day","beach","🏖️","Bruno","Principiante",["beach","sun","water","safe"],"You spend a day at the beach.","The sun is very strong.","I need some water.","Is it safe to swim?"],
+  ["cafe_wifi","Cafe Wi-Fi","cafe","☕","Marco","Principiante",["coffee","wifi","password","table"],"You work from a cafe and need Wi-Fi.","Could I have a coffee?","What is the Wi-Fi password?","Is this table free?"],
+  ["phone_repair","Phone Repair","phone","📱","Lilly","Intermedio",["phone","screen","repair","price"],"Your phone screen is broken.","My phone screen is broken.","How much is the repair?","When can I pick it up?"],
+  ["tech_support","Computer Help","tech","💻","Bruno","Intermedio",["computer","password","restart","file"],"Your computer is not working before class.","My computer is frozen.","Should I restart it?","I saved the file."],
+  ["online_order","Online Order","delivery","📦","Mia","Basico",["order","delivery","address","package"],"You check an online order.","Where is my package?","This is my address.","When is the delivery?"],
+  ["apartment_keys","Apartment Keys","apartment","🔑","Lilly","Basico",["apartment","key","landlord","rent"],"You move into a new apartment.","I need the apartment key.","Can I call the landlord?","When is the rent due?"],
+  ["neighbor_noise","Neighbor Conversation","apartment","🏢","Lilly","Intermedio",["neighbor","noise","quiet","morning"],"You talk politely to a noisy neighbor.","Could you lower the music?","I need to sleep early.","Thank you for understanding."],
+  ["birthday_party","Birthday Party","party","🎉","Bruno","Principiante",["birthday","gift","cake","invite"],"You go to a birthday party.","Happy birthday!","I brought a gift.","The cake is delicious."],
+  ["pet_vet","At the Vet","pet","🐾","Dr. Emma","Basico",["pet","vet","food","healthy"],"You take a pet to the vet.","My pet is not eating.","Is it healthy?","What food should I buy?"],
+  ["car_rental","Rent a Car","car","🚗","Mia","Intermedio",["car","license","insurance","return"],"You rent a car for a short trip.","I would like to rent a car.","Here is my license.","When should I return it?"],
+  ["weather_plan","Rainy Plans","weather","🌦️","Sarah","Principiante",["rain","umbrella","weather","plan"],"The weather changes your plans.","It is raining today.","I need an umbrella.","Let's change the plan."],
+  ["family_dinner","Family Dinner","family","👨‍👩‍👧","Lilly","Principiante",["family","dinner","help","kitchen"],"You help prepare a family dinner.","Can I help in the kitchen?","Dinner smells great.","I will set the table."],
+  ["lost_wallet","Lost Wallet","emergency","🚨","Officer Lee","Intermedio",["wallet","lost","report","ID"],"You lost your wallet in the city.","I lost my wallet.","I need to make a report.","My ID was inside."],
+  ["train_station","Train Station","travel","🚆","Captain Smith","Basico",["train","platform","ticket","time"],"You travel by train for the first time.","Which platform is this train?","Here is my ticket.","What time does it leave?"],
+  ["clothing_store","Clothing Store","shopping","👕","Mia","Principiante",["size","color","try on","cashier"],"You buy clothes for a trip.","Do you have this in medium?","Can I try it on?","I will pay at the cashier."],
+  ["market_fruit","Fruit Market","shopping","🍎","Marco","Principiante",["fruit","fresh","kilo","bag"],"You buy fruit at a local market.","Are these apples fresh?","I would like one kilo.","Can I have a bag?"],
+  ["movie_night","Movie Night","friends","🎬","Lilly","Basico",["movie","ticket","seat","popcorn"],"You invite a friend to the movies.","Do you want to watch a movie?","Let's buy two tickets.","I want some popcorn."],
+  ["friend_message","Texting a Friend","friends","💬","Lilly","Principiante",["message","busy","later","call"],"You text a friend to make plans.","Are you busy today?","Can we talk later?","I will call you tonight."],
+  ["job_offer","Job Offer Call","work","📞","Sarah","Avanzado",["offer","salary","schedule","accept"],"You receive a job offer by phone.","Thank you for the offer.","Can we discuss the schedule?","I am happy to accept."],
+  ["conference_badge","Conference Desk","work","🎟️","Sarah","Intermedio",["conference","badge","session","speaker"],"You arrive at a professional conference.","I am here for the conference.","Where can I get my badge?","Which session starts first?"],
+  ["campus_tour","Campus Tour","school","🎓","Sarah","Basico",["campus","building","classroom","tour"],"You visit a new campus.","Where is the classroom?","This building is beautiful.","Thank you for the tour."],
+  ["park_picnic","Park Picnic","daily","🧺","Bruno","Principiante",["park","picnic","blanket","snack"],"You plan a picnic at the park.","Let's go to the park.","I brought a blanket.","Do you want a snack?"],
+  ["laundry_day","Laundry Day","daily","🧺","Bruno","Basico",["laundry","machine","detergent","dry"],"You need to wash clothes in English.","Is this machine free?","I need detergent.","How long does it take to dry?"],
+  ["post_office","Post Office","daily","📮","Mia","Basico",["package","stamp","address","send"],"You send a package at the post office.","I want to send this package.","Do I need a stamp?","Here is the address."],
+  ["city_tour","City Tour","travel","🗺️","Lilly","Intermedio",["tour","landmark","guide","history"],"You join a guided city tour.","Where does the tour start?","That landmark is famous.","The guide explained the history."],
+  ["immigration_form","Arrival Form","airport","📝","Officer Lee","Avanzado",["form","purpose","stay","address"],"You answer questions after landing.","I am here for vacation.","I will stay for one week.","This is my hotel address."],
+  ["recipe_call","Cooking Together","restaurant","🍳","Marco","Basico",["recipe","ingredient","mix","taste"],"You cook with a friend using English.","What ingredients do we need?","I will mix the sauce.","It tastes great."],
+  ["doctor_results","Test Results","health","🧪","Dr. Emma","Avanzado",["results","normal","follow-up","advice"],"You ask a doctor about test results.","Are my results normal?","Do I need a follow-up?","Thank you for the advice."],
+  ["remote_work","Remote Work Setup","tech","🎧","Sarah","Intermedio",["remote","microphone","camera","connection"],"You prepare for a remote meeting.","My microphone is working.","Can you see my camera?","The connection is better now."],
+  ["hotel_pool","Hotel Pool","hotel","🏊","Mia","Principiante",["pool","towel","open","floor"],"You want to use the hotel pool.","Where is the pool?","Can I have a towel?","What time does it open?"],
+  ["airport_upgrade","Seat Upgrade","airport","💺","Captain Smith","Avanzado",["seat","upgrade","available","window"],"You ask about changing your seat.","Is there a seat upgrade available?","I prefer a window seat.","Thank you for checking."],
+  ["restaurant_complaint","Polite Complaint","restaurant","🍲","Marco","Intermedio",["cold","order","replace","sorry"],"Your restaurant order is wrong.","This is not my order.","Could you replace it, please?","Thank you, no problem."],
+  ["shopping_return","Return an Item","shopping","↩️","Mia","Intermedio",["return","receipt","exchange","refund"],"You need to return something you bought.","I would like to return this.","Here is the receipt.","Can I get a refund?"],
+  ["emergency_fire","Fire Alarm","emergency","🚒","Officer Lee","Intermedio",["fire","alarm","exit","safe"],"A fire alarm starts in a building.","Where is the emergency exit?","Is everyone safe?","I will wait outside."],
+  ["friend_apology","Apologizing to a Friend","friends","🙏","Lilly","Intermedio",["sorry","mistake","forgive","honest"],"You need to apologize clearly.","I am sorry for my mistake.","Can you forgive me?","I will be honest next time."],
+  ["work_feedback","Feedback Chat","work","📝","Sarah","Avanzado",["feedback","improve","specific","goal"],"You ask your manager for feedback.","Could you give me feedback?","What should I improve?","I will set a clear goal."]
+];
+
+function buildStoryExpansion() {
+  return STORY_EXPANSION_SEEDS.reduce((stories, seed, index) => {
+    const [id, title, theme, visual, character, level, vocab, intro, phrase1, phrase2, phrase3] = seed;
+    stories[id] = {
+      title,
+      icon: visual,
+      visual,
+      theme,
+      character,
+      level,
+      targetVocab: vocab,
+      intro,
+      reward: 18 + (index % 5) * 2,
+      scenes: [
+        { text: `${character} starts the situation. What do you say first?`, choices: [
+          { label: phrase1, ok: true, next: 1 },
+          { label: "I need a flying sandwich.", ok: false, next: 1 },
+          { label: "The chair is very cloudy.", ok: false, next: 1 }
+        ]},
+        { text: `Now you need to use: ${vocab[1] || vocab[0]}.`, choices: [
+          { label: phrase2, ok: true, next: 2 },
+          { label: "My suitcase is drinking homework.", ok: false, next: 2 },
+          { label: "Please open the moon receipt.", ok: false, next: 2 }
+        ]},
+        { text: "Finish the conversation politely.", choices: [
+          { label: phrase3, ok: true, next: "complete" },
+          { label: "Thank you, the password is soup.", ok: false, next: "complete" },
+          { label: "I will download the beach.", ok: false, next: "complete" }
+        ]}
+      ]
+    };
+    return stories;
+  }, {});
+}
+
+Object.assign(STORY_SCENARIOS, buildStoryExpansion());
 const ACHIEVEMENTS = [
   { id: "first_points", title: "First 100 Points", desc: "Reach 100 total session points.", test: () => progress.records.totalPoints >= 100 },
   { id: "coin_collector", title: "Coin Collector", desc: "Collect 150 coins.", test: () => progress.rewards.coins >= 150 },
@@ -1723,19 +1835,20 @@ function renderStoryScene() {
     <div class="story-scene">${scene.text}</div>
     <div class="feedback">Target vocab: ${(story.targetVocab || []).join(", ")}</div>
     <div class="options">
-      ${scene.choices.map(choice => `<button class="option" onclick="chooseStory('${escapeAttr(choice.label)}')">${choice.label}</button>`).join("")}
+      ${scene.choices.map((choice, index) => `<button class="option" onclick="chooseStory(${index})">${choice.label}</button>`).join("")}
     </div>`;
 }
 
 function storyVisual(story) {
   if (story.image) return `<div class="story-visual"><img src="${escapeAttr(story.image)}" alt="${escapeAttr(story.title)}"></div>`;
-  return `<div class="story-visual">${story.visual || story.icon || "STORY"}</div>`;
+  const visual = STORY_VISUALS[story.visual] || STORY_VISUALS[story.icon] || STORY_VISUALS[story.theme] || story.visual || story.icon || "📖";
+  return `<div class="story-visual"><span class="scene-emoji">${visual}</span></div>`;
 }
 
-function chooseStory(label) {
+function chooseStory(choiceIndex) {
   const story = STORY_SCENARIOS[app.story.id];
   const scene = story.scenes[app.story.index];
-  const choice = scene.choices.find(c => c.label === label);
+  const choice = scene.choices[choiceIndex];
   if (!choice) return;
   if (choice.ok) {
     app.story.correct++;
