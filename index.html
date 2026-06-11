@@ -307,6 +307,28 @@
     font-weight: 800;
     margin-top: 10px;
   }
+  .story-context, .bruno-line, .mini-challenge {
+    border: 1px solid rgba(255,255,255,.08);
+    background: rgba(255,255,255,.055);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--muted);
+    line-height: 1.45;
+    margin-top: 10px;
+  }
+  .bruno-line {
+    border-color: rgba(0,215,167,.22);
+    color: #dffbf5;
+  }
+  .mini-challenge {
+    border-color: rgba(245,197,66,.22);
+    color: #f8e7ad;
+  }
+  .story-stage .story-visual {
+    width: 86px;
+    height: 86px;
+    font-size: 1.35rem;
+  }
 
   .setup-panel {
     background: rgba(21, 25, 42, .88);
@@ -1285,7 +1307,7 @@ const STORY_VISUALS = {
   travel: "🧳", friends: "🤝", emergency: "🚑", tech: "💻", school: "📚",
   bank: "🏦", gym: "🏋️", beach: "🏖️", bus: "🚌", cafe: "☕", pharmacy: "💊",
   museum: "🏛️", library: "📚", weather: "🌦️", family: "👨‍👩‍👧", phone: "📱",
-  delivery: "📦", apartment: "🔑", party: "🎉", pet: "🐾", car: "🚗"
+  delivery: "📦", apartment: "🔑", party: "🎉", pet: "🐾", car: "🚗", city: "🧭"
 };
 
 const STORY_EXPANSION_SEEDS = [
@@ -1388,6 +1410,183 @@ function buildStoryExpansion() {
 }
 
 Object.assign(STORY_SCENARIOS, buildStoryExpansion());
+
+function makeAdventure(spec) {
+  return {
+    title: spec.title,
+    icon: spec.visual,
+    visual: spec.visual,
+    theme: spec.theme,
+    character: spec.character,
+    level: spec.level,
+    targetVocab: spec.vocab,
+    intro: spec.intro,
+    scenario: spec.scenario,
+    reward: spec.reward,
+    priority: true,
+    scenes: spec.steps.map((step, index) => ({
+      speaker: step.speaker || spec.character,
+      visual: step.visual || spec.visual,
+      text: step.text,
+      bruno: step.bruno || "Bruno is watching your choice carefully.",
+      challenge: step.challenge || `Mini reto: use "${spec.vocab[index % spec.vocab.length]}" in context.`,
+      boss: !!step.boss,
+      choices: [
+        { label: step.correct, ok: true, next: index === spec.steps.length - 1 ? "complete" : index + 1 },
+        { label: step.wrong1 || "I need a flying sandwich.", ok: false, next: index === spec.steps.length - 1 ? "complete" : index + 1 },
+        { label: step.wrong2 || "The chair is very cloudy.", ok: false, next: index === spec.steps.length - 1 ? "complete" : index + 1 }
+      ]
+    }))
+  };
+}
+
+const STORY_CORE_ADVENTURES = [
+  {
+    id: "airport", title: "Airport Adventure", theme: "airport", visual: "airport", character: "Captain Smith", level: "Basico",
+    vocab: ["passport", "boarding pass", "security", "gate", "delay", "luggage"], reward: 36,
+    intro: "A complete airport mission: check-in, security, gate search and an Airport Boss.",
+    scenario: "You arrive at the airport with Bruno. Your flight leaves soon and every minute matters.",
+    steps: [
+      { visual: "airport", speaker: "Bruno", text: "Bruno points at the check-in counters. The line is moving fast.", bruno: "Bruno found a new adventure for you. Start calm and clear.", challenge: "Mini reto: identify the place where you show your passport.", correct: "I need to check in for my flight.", wrong1: "I need to cook my suitcase.", wrong2: "My hotel is boarding." },
+      { visual: "airport", speaker: "Airline Agent", text: "The agent asks for your passport and destination.", bruno: "Bruno thinks you are ready for the first conversation.", challenge: "Question: What document does the agent need?", correct: "Here is my passport. I am flying to Miami.", wrong1: "Here is my soup. I am flying to the kitchen.", wrong2: "My passport is a sandwich." },
+      { visual: "airport", speaker: "Security Officer", text: "At security, you must put your bag and jacket on the tray.", bruno: "Bruno whispers: short instructions are easier to understand.", challenge: "Mini reto: choose the action with bag and tray.", correct: "I will put my bag on the tray.", wrong1: "I will put my gate in the soup.", wrong2: "I will board my shoes tomorrow." },
+      { visual: "airport", speaker: "Traveler", text: "You cannot find your boarding gate on the screen.", bruno: "Bruno discovered a clue: ask for directions.", challenge: "Question: What do you ask when you are lost?", correct: "Excuse me, where is gate twenty-four?", wrong1: "Excuse me, where is my pizza gate?", wrong2: "Can I delay the window?" },
+      { visual: "airport", speaker: "Gate Agent", text: "The screen says boarding starts now, but your luggage tag is still in your hand.", bruno: "Bruno thinks you are ready for the Airport Boss.", challenge: "Vocabulary Boss: choose the phrase that completes the trip.", boss: true, correct: "I have my boarding pass and I am ready to board.", wrong1: "I have my breakfast and I am ready to swim.", wrong2: "I have my password and I am ready to sleep." },
+      { visual: "airport", speaker: "Bruno", text: "You reach the gate on time. Bruno jumps beside your carry-on.", bruno: "Bruno celebrates: Airport Adventure cleared.", challenge: "Reward step: confirm the adventure is complete.", correct: "We made it to the gate. Thank you, Bruno!", wrong1: "We made it to the dentist. Thank you, suitcase!", wrong2: "The gate made soup." }
+    ]
+  },
+  {
+    id: "hotel", title: "Hotel Adventure", theme: "hotel", visual: "hotel", character: "Mia", level: "Basico",
+    vocab: ["reservation", "room key", "towels", "breakfast", "checkout", "receipt"], reward: 34,
+    intro: "Check in, solve a room problem, ask for help and finish checkout.",
+    scenario: "You and Bruno arrive at a hotel after a long trip. The lobby is busy.",
+    steps: [
+      { speaker: "Bruno", text: "Bruno sees the reception desk and nudges your backpack.", bruno: "Bruno says: start with the reservation.", challenge: "Mini reto: say you have a reservation.", correct: "Hello, I have a reservation.", wrong1: "Hello, I have a refrigerator.", wrong2: "My reservation is eating." },
+      { speaker: "Receptionist", text: "The receptionist asks for your name and passport.", bruno: "Bruno reminds you: polite phrases unlock better help.", challenge: "Question: What should you give the receptionist?", correct: "Sure, here is my passport.", wrong1: "Sure, here is my pillow soup.", wrong2: "The passport is swimming." },
+      { speaker: "You", text: "Your room key does not work when you reach the door.", bruno: "Bruno found a problem to solve.", challenge: "Mini reto: explain the key problem.", correct: "My room key is not working.", wrong1: "My breakfast is not flying.", wrong2: "My door is a suitcase." },
+      { speaker: "Housekeeping", text: "You need more towels before taking a shower.", bruno: "Bruno says: ask directly and kindly.", challenge: "Question: Which request is polite?", correct: "Could I have more towels, please?", wrong1: "Could I have more airports?", wrong2: "Please towel my meeting." },
+      { speaker: "Receptionist", text: "In the morning, you need breakfast information and checkout time.", bruno: "Bruno thinks you are ready for the Hotel Boss.", challenge: "Vocabulary Boss: choose the hotel phrase.", boss: true, correct: "What time is breakfast and checkout?", wrong1: "What time is the moon receipt?", wrong2: "Can the room key eat breakfast?" },
+      { speaker: "Bruno", text: "You check out with your receipt and Bruno carries a tiny imaginary suitcase.", bruno: "Bruno celebrates: Hotel Adventure cleared.", challenge: "Reward step: close the hotel mission.", correct: "Could I have the receipt, please?", wrong1: "Could I have the roof sandwich?", wrong2: "The receipt is sleeping." }
+    ]
+  },
+  {
+    id: "restaurant", title: "Restaurant Adventure", theme: "restaurant", visual: "restaurant", character: "Marco", level: "Principiante",
+    vocab: ["menu", "order", "water", "spicy", "bill", "tip"], reward: 34,
+    intro: "Order food, ask questions, solve a small problem and pay politely.",
+    scenario: "Bruno chooses a cozy restaurant. The menu is in English.",
+    steps: [
+      { speaker: "Bruno", text: "Bruno smells pizza and points at an empty table.", bruno: "Bruno says: this adventure starts with a table.", challenge: "Mini reto: ask for a table.", correct: "Could we have a table for two?", wrong1: "Could we have a table for the moon?", wrong2: "The pizza is a password." },
+      { speaker: "Server", text: "The server brings the menu and asks what you want to drink.", bruno: "Bruno recommends water before spicy food.", challenge: "Question: What drink request is clear?", correct: "Could I have water, please?", wrong1: "Could I have a laptop, please?", wrong2: "Water is boarding now." },
+      { speaker: "Server", text: "You are ready to order your meal.", bruno: "Bruno watches the menu like a treasure map.", challenge: "Mini reto: order politely.", correct: "I would like the chicken with rice.", wrong1: "I would like the ticket with shoes.", wrong2: "The chicken needs a hotel." },
+      { speaker: "You", text: "The food is too spicy and you need help.", bruno: "Bruno says: explain the problem, not the panic.", challenge: "Question: Which phrase solves the spicy problem?", correct: "This is too spicy. Could I have more water?", wrong1: "This is too airport. Could I have luggage?", wrong2: "My water is interviewing soup." },
+      { speaker: "Marco", text: "Marco asks if everything was good. It is time to pay.", bruno: "Bruno thinks you are ready for the Restaurant Boss.", challenge: "Vocabulary Boss: choose the payment phrase.", boss: true, correct: "Could I have the bill, please?", wrong1: "Could I have the boarding pass, please?", wrong2: "Could the bill eat my chair?" },
+      { speaker: "Bruno", text: "You pay, leave a small tip, and Bruno gives the restaurant five imaginary stars.", bruno: "Bruno celebrates: Restaurant Adventure cleared.", challenge: "Reward step: finish politely.", correct: "Thank you. The food was delicious.", wrong1: "Thank you. The receipt is cloudy.", wrong2: "The pizza checked out." }
+    ]
+  },
+  {
+    id: "shopping", title: "Shopping Adventure", theme: "shopping", visual: "shopping", character: "Mia", level: "Principiante",
+    vocab: ["size", "price", "try on", "receipt", "exchange", "cashier"], reward: 32,
+    intro: "Buy an item, ask for size and price, then handle checkout.",
+    scenario: "You and Bruno enter a store looking for a jacket.",
+    steps: [
+      { speaker: "Bruno", text: "Bruno spots a jacket that looks perfect for a rainy day.", bruno: "Bruno says: first, ask about size.", challenge: "Mini reto: ask for a size.", correct: "Do you have this in medium?", wrong1: "Do you have this in airport?", wrong2: "Medium is eating a jacket." },
+      { speaker: "Shop Assistant", text: "The assistant offers two colors and asks what you prefer.", bruno: "Bruno likes the blue one, but it is your decision.", challenge: "Decision: choose a color.", correct: "I prefer the blue one.", wrong1: "I prefer the receipt one.", wrong2: "The blue one is checking in." },
+      { speaker: "You", text: "You need to try the jacket on.", bruno: "Bruno points to the fitting rooms.", challenge: "Question: What do you ask?", correct: "Can I try it on?", wrong1: "Can I fly it on?", wrong2: "Can I try the cashier?" },
+      { speaker: "Cashier", text: "At checkout, you want to know the price.", bruno: "Bruno says: prices are part of survival.", challenge: "Mini reto: ask the price.", correct: "How much is it?", wrong1: "How spicy is the jacket?", wrong2: "How much is the moon?" },
+      { speaker: "Mia", text: "Mia says you should keep the receipt in case you need an exchange.", bruno: "Bruno thinks you are ready for the Shopping Boss.", challenge: "Vocabulary Boss: choose the receipt phrase.", boss: true, correct: "Could I have the receipt, please?", wrong1: "Could I have the suitcase soup?", wrong2: "The receipt wants a hotel." },
+      { speaker: "Bruno", text: "You leave the store with the right jacket and Bruno pretends to be a fashion critic.", bruno: "Bruno celebrates: Shopping Adventure cleared.", challenge: "Reward step: finish the purchase.", correct: "Thank you. Have a nice day.", wrong1: "Thank you. The jacket is a train.", wrong2: "Have a cloudy receipt." }
+    ]
+  },
+  {
+    id: "workday", title: "First Day at Work", theme: "work", visual: "work", character: "Sarah", level: "Intermedio",
+    vocab: ["meeting", "task", "deadline", "team", "feedback", "schedule"], reward: 38,
+    intro: "Meet your team, understand tasks and survive the first office day.",
+    scenario: "Bruno walks beside you like a tiny career coach on your first day.",
+    steps: [
+      { speaker: "Bruno", text: "Bruno finds your desk and whispers that first impressions matter.", bruno: "Bruno says: greet the team with confidence.", challenge: "Mini reto: introduce yourself.", correct: "Hi, I am happy to join the team.", wrong1: "Hi, I am a printer sandwich.", wrong2: "The team is a luggage." },
+      { speaker: "Sarah", text: "Sarah invites you to a morning meeting.", bruno: "Bruno says: meetings need clear listening.", challenge: "Question: What do you say before joining?", correct: "Great, I will join the meeting.", wrong1: "Great, I will eat the deadline.", wrong2: "The meeting is a beach." },
+      { speaker: "Manager", text: "Your manager gives you your first task.", bruno: "Bruno found a task scroll.", challenge: "Mini reto: confirm the task.", correct: "I understand the task.", wrong1: "I understand the sandwich.", wrong2: "The task is sleeping." },
+      { speaker: "Teammate", text: "A teammate asks if you need help with the schedule.", bruno: "Bruno says: asking for help is smart.", challenge: "Decision: ask for clarification.", correct: "Could you explain the schedule?", wrong1: "Could you explain the soup?", wrong2: "My schedule is boarding." },
+      { speaker: "Sarah", text: "Sarah asks if you can finish before the deadline.", bruno: "Bruno thinks you are ready for the Work Boss.", challenge: "Vocabulary Boss: choose the deadline phrase.", boss: true, correct: "I can finish it before the deadline.", wrong1: "I can finish it before the airport.", wrong2: "The deadline can drink coffee." },
+      { speaker: "Bruno", text: "The day ends. Bruno gives you an invisible employee badge.", bruno: "Bruno celebrates: First Day at Work cleared.", challenge: "Reward step: ask for feedback.", correct: "Thank you. I would like feedback.", wrong1: "Thank you. I would like a rainy printer.", wrong2: "Feedback is in my soup." }
+    ]
+  },
+  {
+    id: "friend", title: "Meeting New Friends", theme: "friends", visual: "friends", character: "Lilly", level: "Principiante",
+    vocab: ["meet", "hobby", "music", "invite", "tomorrow", "friend"], reward: 32,
+    intro: "Start a friendly conversation, discover interests and make plans.",
+    scenario: "Bruno notices someone friendly at the park and gives you a little push.",
+    steps: [
+      { speaker: "Bruno", text: "Bruno found a possible new friend near the fountain.", bruno: "Bruno says: a simple greeting can open a door.", challenge: "Mini reto: greet someone new.", correct: "Hi, nice to meet you.", wrong1: "Hi, nice to eat your ticket.", wrong2: "The fountain is my password." },
+      { speaker: "Lilly", text: "Lilly asks where you are from.", bruno: "Bruno reminds you to answer with one clear sentence.", challenge: "Question: answer personally.", correct: "I am from Guatemala.", wrong1: "I am from the refrigerator.", wrong2: "My country is a sandwich." },
+      { speaker: "Lilly", text: "She asks about your hobbies.", bruno: "Bruno is hoping you say something fun.", challenge: "Mini reto: talk about a hobby.", correct: "I like music and learning English.", wrong1: "I like opening a salary.", wrong2: "My hobby is boarding soup." },
+      { speaker: "You", text: "You want to invite Lilly to do something later.", bruno: "Bruno says: invitations are tiny adventures.", challenge: "Decision: invite politely.", correct: "Would you like to get coffee tomorrow?", wrong1: "Would you like to download my chair?", wrong2: "Could coffee visit the airport?" },
+      { speaker: "Lilly", text: "Lilly smiles and asks where to meet.", bruno: "Bruno thinks you are ready for the Friends Boss.", challenge: "Vocabulary Boss: choose the plan phrase.", boss: true, correct: "Let's meet at the cafe at four.", wrong1: "Let's meet inside the password.", wrong2: "The cafe is very luggage." },
+      { speaker: "Bruno", text: "You made a new plan and Bruno looks very proud.", bruno: "Bruno celebrates: Meeting New Friends cleared.", challenge: "Reward step: close warmly.", correct: "Great, see you tomorrow!", wrong1: "Great, see you yesterday soup!", wrong2: "Tomorrow is a desk." }
+    ]
+  },
+  {
+    id: "doctor", title: "Doctor Visit", theme: "health", visual: "health", character: "Dr. Emma", level: "Basico",
+    vocab: ["appointment", "symptom", "pain", "medicine", "rest", "follow-up"], reward: 36,
+    intro: "Explain symptoms, understand advice and schedule a follow-up.",
+    scenario: "Bruno walks quietly beside you at the clinic. He brought a tiny notebook.",
+    steps: [
+      { speaker: "Bruno", text: "Bruno points to the reception window.", bruno: "Bruno says: start with the appointment.", challenge: "Mini reto: say why you are there.", correct: "I have an appointment.", wrong1: "I have an airport.", wrong2: "The appointment is spicy." },
+      { speaker: "Nurse", text: "The nurse asks what symptoms you have.", bruno: "Bruno reminds you to name the symptoms clearly.", challenge: "Question: describe symptoms.", correct: "I have a headache and a cough.", wrong1: "I have a ticket and a browser.", wrong2: "My cough is a hotel." },
+      { speaker: "Dr. Emma", text: "The doctor asks where you feel pain.", bruno: "Bruno opens his notebook dramatically.", challenge: "Mini reto: explain pain.", correct: "I feel pain in my throat.", wrong1: "I feel pain in my suitcase.", wrong2: "My throat is boarding." },
+      { speaker: "Dr. Emma", text: "She gives you advice about medicine and rest.", bruno: "Bruno says: instructions matter.", challenge: "Question: confirm the medicine.", correct: "How often should I take the medicine?", wrong1: "How often should I take the airport?", wrong2: "Can the medicine eat my schedule?" },
+      { speaker: "Dr. Emma", text: "You need to understand if you should return.", bruno: "Bruno thinks you are ready for the Doctor Boss.", challenge: "Vocabulary Boss: choose the follow-up phrase.", boss: true, correct: "Do I need a follow-up appointment?", wrong1: "Do I need a spicy boarding pass?", wrong2: "The appointment is a receipt." },
+      { speaker: "Bruno", text: "You leave with clear instructions and Bruno promises to remind you to rest.", bruno: "Bruno celebrates: Doctor Visit cleared.", challenge: "Reward step: thank the doctor.", correct: "Thank you, doctor. I will rest.", wrong1: "Thank you, doctor. I will download soup.", wrong2: "The rest is a suitcase." }
+    ]
+  },
+  {
+    id: "emergency", title: "Emergency Situation", theme: "emergency", visual: "emergency", character: "Officer Lee", level: "Intermedio",
+    vocab: ["emergency", "injury", "address", "calm", "help", "safe"], reward: 42,
+    intro: "Explain an emergency clearly, give an address and stay calm.",
+    scenario: "A bicycle accident happens nearby. Bruno looks serious and stays close.",
+    steps: [
+      { speaker: "Bruno", text: "Bruno sees someone fall and points to your phone.", bruno: "Bruno says: clear English can help someone fast.", challenge: "Mini reto: identify the emergency.", correct: "There is an emergency.", wrong1: "There is a delicious password.", wrong2: "The emergency is shopping." },
+      { speaker: "Operator", text: "The operator asks what happened.", bruno: "Bruno whispers: say the main problem first.", challenge: "Question: explain the injury.", correct: "A person is injured.", wrong1: "A person is a suitcase.", wrong2: "The injury is eating pizza." },
+      { speaker: "Operator", text: "They ask where you are.", bruno: "Bruno found the street sign.", challenge: "Mini reto: give an address.", correct: "The address is 25 Main Street.", wrong1: "The address is spicy and grilled.", wrong2: "Main Street is sleeping." },
+      { speaker: "Operator", text: "They tell you to stay calm and wait for help.", bruno: "Bruno breathes slowly with you.", challenge: "Decision: stay safe.", correct: "I will stay calm and wait.", wrong1: "I will stay cheese and flight.", wrong2: "I will wait inside the alarm." },
+      { speaker: "Officer Lee", text: "Officer Lee arrives and asks if the area is safe.", bruno: "Bruno thinks you are ready for the Emergency Boss.", challenge: "Vocabulary Boss: choose the safety phrase.", boss: true, correct: "The area is safe now.", wrong1: "The area is a receipt now.", wrong2: "Safe is boarding soup." },
+      { speaker: "Bruno", text: "Help arrives. Bruno is quiet, but his eyes say you did well.", bruno: "Bruno celebrates softly: Emergency Situation cleared.", challenge: "Reward step: finish responsibly.", correct: "Thank you. I can answer more questions.", wrong1: "Thank you. I can cook the ambulance.", wrong2: "The questions are umbrellas." }
+    ]
+  },
+  {
+    id: "travel_adventure", title: "Travel Adventure", theme: "travel", visual: "travel", character: "Lilly", level: "Intermedio",
+    vocab: ["map", "train", "ticket", "landmark", "photo", "guide"], reward: 38,
+    intro: "Navigate a city trip with transport, landmarks and helpful questions.",
+    scenario: "Bruno discovers a map and decides today is a travel day.",
+    steps: [
+      { speaker: "Bruno", text: "Bruno opens the city map upside down, then pretends it was intentional.", bruno: "Bruno found a new adventure for you.", challenge: "Mini reto: ask about the map.", correct: "Can you show me on the map?", wrong1: "Can you show me on the sandwich?", wrong2: "The map is drinking coffee." },
+      { speaker: "Lilly", text: "Lilly suggests taking the train to the old town.", bruno: "Bruno loves trains, apparently.", challenge: "Question: ask about the ticket.", correct: "Where can I buy a train ticket?", wrong1: "Where can I buy a cough?", wrong2: "The train ticket is a towel." },
+      { speaker: "Station Agent", text: "The station agent tells you the platform number.", bruno: "Bruno points at the platform signs.", challenge: "Mini reto: confirm the platform.", correct: "Is this the right platform?", wrong1: "Is this the right pizza?", wrong2: "Platform is my doctor." },
+      { speaker: "Tour Guide", text: "At the landmark, the guide explains a short history.", bruno: "Bruno says: listen for key words.", challenge: "Question: ask for one detail.", correct: "Why is this landmark famous?", wrong1: "Why is this suitcase famous?", wrong2: "The landmark needs medicine." },
+      { speaker: "Traveler", text: "A traveler offers to take your photo.", bruno: "Bruno thinks you are ready for the Travel Boss.", challenge: "Vocabulary Boss: choose the photo phrase.", boss: true, correct: "Could you take a photo, please?", wrong1: "Could you take a salary, please?", wrong2: "Could the photo eat my ticket?" },
+      { speaker: "Bruno", text: "The day ends with a map full of notes and one excellent photo.", bruno: "Bruno celebrates: Travel Adventure cleared.", challenge: "Reward step: thank your guide.", correct: "Thank you for the tour.", wrong1: "Thank you for the cloudy train.", wrong2: "The tour is a password." }
+    ]
+  },
+  {
+    id: "lost_city", title: "Lost in the City", theme: "travel", visual: "city", character: "Officer Lee", level: "Intermedio",
+    vocab: ["lost", "directions", "corner", "street", "near", "safe"], reward: 40,
+    intro: "Find your way through the city by asking clear questions.",
+    scenario: "You take a wrong turn. Bruno looks at three streets and chooses none.",
+    steps: [
+      { speaker: "Bruno", text: "Bruno admits, silently, that he does not know where you are.", bruno: "Bruno says: no panic. Ask for directions.", challenge: "Mini reto: say you are lost.", correct: "Excuse me, I am lost.", wrong1: "Excuse me, I am soup.", wrong2: "The city is eating my shoes." },
+      { speaker: "Local Person", text: "A local person asks where you need to go.", bruno: "Bruno points to the hotel name on your phone.", challenge: "Question: ask for your hotel.", correct: "How do I get to this hotel?", wrong1: "How do I get to this sandwich?", wrong2: "My hotel is a keyboard." },
+      { speaker: "Local Person", text: "They say to turn left at the corner.", bruno: "Bruno repeats: left at the corner.", challenge: "Mini reto: confirm the direction.", correct: "I turn left at the corner, right?", wrong1: "I turn soup at the airport, right?", wrong2: "The corner is a doctor." },
+      { speaker: "You", text: "You see two streets with similar names.", bruno: "Bruno notices a street sign.", challenge: "Decision: ask about the street.", correct: "Is this Main Street?", wrong1: "Is this my luggage street?", wrong2: "Street is spicy today." },
+      { speaker: "Officer Lee", text: "Officer Lee sees you and offers help.", bruno: "Bruno thinks you are ready for the City Boss.", challenge: "Vocabulary Boss: choose the safe phrase.", boss: true, correct: "Is it safe to walk there?", wrong1: "Is it safe to eat the map?", wrong2: "Can safe board the bus?" },
+      { speaker: "Bruno", text: "You find your hotel. Bruno pretends he knew the way all along.", bruno: "Bruno celebrates: Lost in the City cleared.", challenge: "Reward step: finish with gratitude.", correct: "Thank you for the directions.", wrong1: "Thank you for the rainy sandwich.", wrong2: "Directions are sleeping." }
+    ]
+  }
+].reduce((stories, spec) => {
+  stories[spec.id] = makeAdventure(spec);
+  return stories;
+}, {});
+
+Object.assign(STORY_SCENARIOS, STORY_CORE_ADVENTURES);
 const ACHIEVEMENTS = [
   { id: "first_points", title: "First 100 Points", desc: "Reach 100 total session points.", test: () => progress.records.totalPoints >= 100 },
   { id: "coin_collector", title: "Coin Collector", desc: "Collect 150 coins.", test: () => progress.rewards.coins >= 150 },
@@ -1475,6 +1674,7 @@ function normalizeProgress() {
   progress.quests ||= {};
   progress.stories ||= { completed: {} };
   progress.stories.completed ||= {};
+  progress.stories.recent ||= [];
   progress.achievements ||= {};
   progress.bruno ||= { xp: 0, level: 1, energy: 10, accessories: {}, equipped: null };
   progress.bruno.xp ??= 0;
@@ -1632,7 +1832,10 @@ function mergeProgress(remote) {
   progress.mastered = {...(remote.mastered || {}), ...(progress.mastered || {})};
   progress.rewards = {...(remote.rewards || {}), ...(progress.rewards || {})};
   progress.quests = {...(remote.quests || {}), ...(progress.quests || {})};
-  progress.stories = { completed: {...(remote.stories?.completed || {}), ...(progress.stories?.completed || {})} };
+  progress.stories = {
+    completed: {...(remote.stories?.completed || {}), ...(progress.stories?.completed || {})},
+    recent: [...new Set([...(progress.stories?.recent || []), ...(remote.stories?.recent || [])])].slice(0, 8)
+  };
   progress.achievements = {...(remote.achievements || {}), ...(progress.achievements || {})};
   progress.bruno = {...(remote.bruno || {}), ...(progress.bruno || {})};
   progress.bruno.accessories = {...(remote.bruno?.accessories || {}), ...(progress.bruno?.accessories || {})};
@@ -1794,20 +1997,38 @@ function renderStories() {
   normalizeProgress();
   const grid = document.getElementById("storyGrid");
   const recommended = getNextStoryForUser();
-  grid.innerHTML = Object.entries(STORY_SCENARIOS).map(([id, story]) => {
+  grid.innerHTML = getOrderedStories().map(([id, story]) => {
     const done = !!progress.stories.completed[id];
     return `<button class="story-card ${story.theme || ""} ${done ? "achievement-card unlocked" : ""}" data-story="${id}">
       ${storyVisual(story)}
       <b>${id === recommended ? "Recommended: " : ""}${story.title}</b>
-      <span>${story.intro}<br>${story.character} | ${story.level}<br>${done ? "Completed" : `Reward: ${story.reward} coins`}</span>
+      <span>${story.intro}<br>${story.character} | ${story.level} | ${story.scenes.length} steps<br>${done ? "Completed" : `Reward: ${story.reward} coins`}</span>
     </button>`;
   }).join("");
 }
 
+function getOrderedStories() {
+  const recent = new Set(progress.stories.recent || []);
+  return Object.entries(STORY_SCENARIOS).sort(([idA, a], [idB, b]) => {
+    const doneA = !!progress.stories.completed[idA];
+    const doneB = !!progress.stories.completed[idB];
+    if (doneA !== doneB) return doneA ? 1 : -1;
+    if (!!a.priority !== !!b.priority) return a.priority ? -1 : 1;
+    if (recent.has(idA) !== recent.has(idB)) return recent.has(idA) ? 1 : -1;
+    const levelA = levelMatchesStory(a.level) ? 0 : 1;
+    const levelB = levelMatchesStory(b.level) ? 0 : 1;
+    if (levelA !== levelB) return levelA - levelB;
+    return a.title.localeCompare(b.title);
+  });
+}
+
 function getNextStoryForUser() {
-  const entries = Object.entries(STORY_SCENARIOS);
+  const entries = getOrderedStories();
   const notCompleted = entries.filter(([id]) => !progress.stories.completed[id]);
-  const preferred = notCompleted.find(([, story]) => levelMatchesStory(story.level));
+  const recent = new Set(progress.stories.recent || []);
+  const preferred = notCompleted.find(([id, story]) => story.priority && levelMatchesStory(story.level) && !recent.has(id))
+    || notCompleted.find(([id, story]) => levelMatchesStory(story.level) && !recent.has(id))
+    || notCompleted.find(([, story]) => levelMatchesStory(story.level));
   return (preferred || notCompleted[0] || entries[0])?.[0];
 }
 
@@ -1820,6 +2041,8 @@ function startStory(id) {
   if (!requireCloudAccount("guardar tu avance de historias")) return;
   const story = STORY_SCENARIOS[id];
   if (!story) return;
+  progress.stories.recent = [id, ...(progress.stories.recent || []).filter(item => item !== id)].slice(0, 8);
+  saveProgress();
   app.story = { id, index: 0, correct: 0 };
   renderStoryScene();
 }
@@ -1829,20 +2052,24 @@ function renderStoryScene() {
   const scene = story.scenes[app.story.index];
   const stage = document.getElementById("storyStage");
   stage.classList.remove("hidden");
-  stage.innerHTML = `<span class="badge">${story.title} | Scene ${app.story.index + 1}/${story.scenes.length}</span>
-    ${storyVisual(story)}
-    <div class="story-speaker">${story.character}</div>
+  stage.innerHTML = `<span class="badge">${story.title} | Scene ${app.story.index + 1}/${story.scenes.length}${scene.boss ? " | Vocabulary Boss" : ""}</span>
+    ${storyVisual(story, scene.visual)}
+    <div class="story-context">${story.scenario || story.intro}</div>
+    <div class="bruno-line">${scene.bruno || "Bruno is with you."}</div>
+    <div class="story-speaker">${scene.speaker || story.character}</div>
     <div class="story-scene">${scene.text}</div>
+    <div class="mini-challenge">${scene.challenge || "Mini reto: choose the best English response."}</div>
     <div class="feedback">Target vocab: ${(story.targetVocab || []).join(", ")}</div>
     <div class="options">
       ${scene.choices.map((choice, index) => `<button class="option" onclick="chooseStory(${index})">${choice.label}</button>`).join("")}
     </div>`;
 }
 
-function storyVisual(story) {
+function storyVisual(story, visualOverride = "") {
   if (story.image) return `<div class="story-visual"><img src="${escapeAttr(story.image)}" alt="${escapeAttr(story.title)}"></div>`;
   const visual = STORY_VISUALS[story.visual] || STORY_VISUALS[story.icon] || STORY_VISUALS[story.theme] || story.visual || story.icon || "📖";
-  return `<div class="story-visual"><span class="scene-emoji">${visual}</span></div>`;
+  const sceneVisual = visualOverride ? (STORY_VISUALS[visualOverride] || visualOverride) : visual;
+  return `<div class="story-visual"><span class="scene-emoji">${sceneVisual}</span></div>`;
 }
 
 function chooseStory(choiceIndex) {
@@ -1876,6 +2103,8 @@ function completeStory() {
   unlockAchievements();
   saveProgress();
   document.getElementById("storyStage").innerHTML = `<span class="badge">Story complete</span>
+    ${storyVisual(story)}
+    <div class="bruno-line">${perfect ? "Bruno is absolutely glowing. Perfect adventure." : "Bruno gives you a proud nod. Adventure cleared."}</div>
     <div class="story-scene">${perfect ? "Perfect route!" : "Story cleared!"} You earned ${story.reward + (perfect ? 10 : 0)} coins${perfect ? " and 1 star" : ""}.</div>
     <div class="options"><button class="primary-btn" onclick="renderStories()">Choose another story</button><button class="soft-btn" onclick="showView('home')">Back to map</button></div>`;
   popReward(`${story.title} complete!`);
