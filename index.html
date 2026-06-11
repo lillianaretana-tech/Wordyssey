@@ -361,6 +361,16 @@
   }
   .companion b { display: block; }
   .companion span { color: var(--muted); font-size: .84rem; }
+  .bruno-shop { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 9px; }
+  .bruno-chip {
+    border: 1px solid var(--border);
+    background: rgba(28,33,53,.8);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 5px 8px;
+    font-size: .75rem;
+  }
+  .bruno-chip.equipped { border-color: var(--gold); color: var(--gold); }
 
   .practice-card {
     padding: 20px;
@@ -728,8 +738,12 @@
 
     <aside class="side-panel">
       <section class="companion">
-        <div class="mascot">VQ</div>
-        <div><b id="mascotLine">Ready for a quest?</b><span>Gana monedas, estrellas y cofres al practicar.</span></div>
+        <div class="mascot" id="brunoAvatar">B</div>
+        <div>
+          <b id="mascotLine">Bruno is ready!</b>
+          <span id="brunoStats">Nivel 1 | Energia 10</span>
+          <div class="bruno-shop" id="brunoShop"></div>
+        </div>
       </section>
       <section>
         <h3 class="mini-title">Sesion</h3>
@@ -858,7 +872,7 @@ const MINI_QUESTS = [
 ];
 const STORY_SCENARIOS = {
   airport: {
-    title: "Airport Dash",
+    title: "Aeropuerto",
     icon: "AIR",
     intro: "You arrive late at the airport. Your flight leaves soon.",
     reward: 18,
@@ -881,7 +895,7 @@ const STORY_SCENARIOS = {
     ]
   },
   restaurant: {
-    title: "Restaurant Quest",
+    title: "Restaurante",
     icon: "FOOD",
     intro: "You are at a restaurant and need to order politely.",
     reward: 18,
@@ -904,7 +918,7 @@ const STORY_SCENARIOS = {
     ]
   },
   hotel: {
-    title: "Hotel Check-in",
+    title: "Hotel",
     icon: "HOTEL",
     intro: "You arrive at a hotel and need your room.",
     reward: 18,
@@ -925,15 +939,94 @@ const STORY_SCENARIOS = {
         { label: "Could I have more batteries?", ok: false, next: "complete" }
       ]}
     ]
+  },
+  interview: {
+    title: "Primera entrevista",
+    icon: "JOB",
+    intro: "You are at your first job interview and want to sound confident.",
+    reward: 22,
+    scenes: [
+      { text: "The interviewer says: 'Tell me about yourself.'", choices: [
+        { label: "I am responsible and I like learning.", ok: true, next: 1 },
+        { label: "I am a window and I like soup.", ok: false, next: 1 },
+        { label: "My luggage works in a meeting.", ok: false, next: 1 }
+      ]},
+      { text: "They ask: 'What are your strengths?'", choices: [
+        { label: "I am organized and I work well with a team.", ok: true, next: 2 },
+        { label: "I am delayed and spicy.", ok: false, next: 2 },
+        { label: "I download my chair.", ok: false, next: 2 }
+      ]},
+      { text: "The interview ends. What do you say?", choices: [
+        { label: "Thank you for the opportunity.", ok: true, next: "complete" },
+        { label: "Thank you for the blanket.", ok: false, next: "complete" },
+        { label: "The airport is a salary.", ok: false, next: "complete" }
+      ]}
+    ]
+  },
+  newyork: {
+    title: "Viaje a Nueva York",
+    icon: "NYC",
+    intro: "You arrive in New York and need to move around the city.",
+    reward: 22,
+    scenes: [
+      { text: "You need to get to your hotel. A person asks: 'Do you need directions?'", choices: [
+        { label: "Yes, how do I get to the hotel?", ok: true, next: 1 },
+        { label: "Yes, how do I eat the browser?", ok: false, next: 1 },
+        { label: "No, my password is grilled.", ok: false, next: 1 }
+      ]},
+      { text: "You want to buy a subway ticket.", choices: [
+        { label: "Where can I buy a subway ticket?", ok: true, next: 2 },
+        { label: "Where can I buy a cough?", ok: false, next: 2 },
+        { label: "Where can I buy a deadline?", ok: false, next: 2 }
+      ]},
+      { text: "At Times Square, someone asks if you need help.", choices: [
+        { label: "Yes, could you take a photo, please?", ok: true, next: "complete" },
+        { label: "Yes, could you take a salary, please?", ok: false, next: "complete" },
+        { label: "Yes, could you update my soup?", ok: false, next: "complete" }
+      ]}
+    ]
+  },
+  friend: {
+    title: "Conociendo un amigo",
+    icon: "PAL",
+    intro: "You meet a new friend and start a simple conversation.",
+    reward: 20,
+    scenes: [
+      { text: "Your new friend says: 'Hi, nice to meet you.'", choices: [
+        { label: "Nice to meet you too.", ok: true, next: 1 },
+        { label: "Nice to eat your ticket.", ok: false, next: 1 },
+        { label: "The meeting is a window.", ok: false, next: 1 }
+      ]},
+      { text: "They ask: 'What do you like to do?'", choices: [
+        { label: "I like listening to music and learning English.", ok: true, next: 2 },
+        { label: "I like opening a salary.", ok: false, next: 2 },
+        { label: "I like boarding a soup.", ok: false, next: 2 }
+      ]},
+      { text: "You want to meet again.", choices: [
+        { label: "Would you like to meet again tomorrow?", ok: true, next: "complete" },
+        { label: "Would you like to download my chair?", ok: false, next: "complete" },
+        { label: "Would you like to be a receipt?", ok: false, next: "complete" }
+      ]}
+    ]
   }
 };
 const ACHIEVEMENTS = [
   { id: "first_points", title: "First 100 Points", desc: "Reach 100 total session points.", test: () => progress.records.totalPoints >= 100 },
   { id: "coin_collector", title: "Coin Collector", desc: "Collect 150 coins.", test: () => progress.rewards.coins >= 150 },
   { id: "story_starter", title: "Story Starter", desc: "Complete one interactive story.", test: () => Object.keys(progress.stories.completed || {}).length >= 1 },
-  { id: "travel_expert", title: "Travel Expert", desc: "Complete Airport Dash.", test: () => !!progress.stories.completed?.airport },
+  { id: "travel_expert", title: "Travel Expert", desc: "Complete Aeropuerto and Viaje a Nueva York.", test: () => !!progress.stories.completed?.airport && !!progress.stories.completed?.newyork },
+  { id: "hotel_guest", title: "Hotel Guest", desc: "Complete the Hotel story.", test: () => !!progress.stories.completed?.hotel },
+  { id: "first_interview", title: "First Interview", desc: "Complete Primera entrevista.", test: () => !!progress.stories.completed?.interview },
+  { id: "friendly_voice", title: "Friendly Voice", desc: "Complete Conociendo un amigo.", test: () => !!progress.stories.completed?.friend },
+  { id: "bruno_buddy", title: "Bruno Buddy", desc: "Help Bruno reach level 3.", test: () => progress.bruno.level >= 3 },
+  { id: "bruno_stylist", title: "Bruno Stylist", desc: "Buy one accessory for Bruno.", test: () => Object.keys(progress.bruno.accessories || {}).length >= 1 },
   { id: "survivor", title: "Survivor", desc: "Survive 10 questions.", test: () => progress.records.survivalBest >= 10 },
   { id: "vocabulary_master", title: "Vocabulary Master", desc: "Master 20 words.", test: () => Object.keys(progress.mastered).length >= 20 }
+];
+const BRUNO_ACCESSORIES = [
+  { id: "cap", label: "Cap", icon: "B+", cost: 35 },
+  { id: "scarf", label: "Scarf", icon: "B*", cost: 50 },
+  { id: "badge", label: "Hero Badge", icon: "B★", cost: 75 }
 ];
 const STORE_KEY = "vocabquest_plus_progress_v1";
 const DAY_MS = 86400000;
@@ -976,6 +1069,7 @@ function defaultProgress() {
     quests: {},
     stories: { completed: {} },
     achievements: {},
+    bruno: { xp: 0, level: 1, energy: 10, accessories: {}, equipped: null },
     records: { survivalBest: 0, totalPoints: 0 },
     lastSeen: null
   };
@@ -1001,6 +1095,12 @@ function normalizeProgress() {
   progress.stories ||= { completed: {} };
   progress.stories.completed ||= {};
   progress.achievements ||= {};
+  progress.bruno ||= { xp: 0, level: 1, energy: 10, accessories: {}, equipped: null };
+  progress.bruno.xp ??= 0;
+  progress.bruno.level ??= 1;
+  progress.bruno.energy ??= 10;
+  progress.bruno.accessories ||= {};
+  progress.bruno.equipped ??= null;
   progress.records ||= { survivalBest: 0, totalPoints: 0 };
   progress.records.survivalBest ??= 0;
   progress.records.totalPoints ??= 0;
@@ -1076,6 +1176,8 @@ function mergeProgress(remote) {
   progress.quests = {...(remote.quests || {}), ...(progress.quests || {})};
   progress.stories = { completed: {...(remote.stories?.completed || {}), ...(progress.stories?.completed || {})} };
   progress.achievements = {...(remote.achievements || {}), ...(progress.achievements || {})};
+  progress.bruno = {...(remote.bruno || {}), ...(progress.bruno || {})};
+  progress.bruno.accessories = {...(remote.bruno?.accessories || {}), ...(progress.bruno?.accessories || {})};
   progress.records = {...(remote.records || {}), ...(progress.records || {})};
   progress.lastSeen = Math.max(remote.lastSeen || 0, progress.lastSeen || 0);
   normalizeProgress();
@@ -1283,6 +1385,7 @@ function completeStory() {
   progress.stories.completed[app.story.id] = { completedAt: Date.now(), correct: app.story.correct };
   progress.rewards.coins += story.reward + (perfect ? 10 : 0);
   progress.rewards.stars += perfect ? 1 : 0;
+  feedBruno(story.reward + (perfect ? 10 : 0));
   unlockAchievements();
   saveProgress();
   document.getElementById("storyStage").innerHTML = `<span class="badge">Story complete</span>
@@ -1647,6 +1750,7 @@ function applyRewards(correct) {
     const bonus = app.streak >= 5 ? 6 : app.streak >= 3 ? 3 : 0;
     progress.rewards.coins += 5 + app.level + bonus;
     progress.rewards.energy = Math.min(20, progress.rewards.energy + 1);
+    feedBruno(3 + app.level + bonus);
     if (app.streak > 0 && app.streak % 5 === 0) {
       progress.rewards.stars += 1;
       popReward(`Streak bonus! +1 star, +${bonus} coins`);
@@ -1658,9 +1762,55 @@ function applyRewards(correct) {
     }
   } else {
     progress.rewards.energy = Math.max(0, progress.rewards.energy - 1);
+    progress.bruno.energy = Math.max(0, progress.bruno.energy - 1);
   }
   localStorage.setItem(STORE_KEY, JSON.stringify(progress));
   queueCloudSave();
+}
+
+function feedBruno(xp) {
+  normalizeProgress();
+  progress.bruno.xp += xp;
+  progress.bruno.energy = Math.min(30, progress.bruno.energy + 1);
+  const nextLevel = Math.floor(progress.bruno.xp / 60) + 1;
+  if (nextLevel > progress.bruno.level) {
+    progress.bruno.level = nextLevel;
+    progress.rewards.coins += 15;
+    popReward(`Bruno leveled up! Level ${progress.bruno.level} +15 coins`);
+  }
+}
+
+function renderBruno() {
+  const avatar = document.getElementById("brunoAvatar");
+  const stats = document.getElementById("brunoStats");
+  const shop = document.getElementById("brunoShop");
+  if (!avatar || !stats || !shop) return;
+  const equipped = BRUNO_ACCESSORIES.find(a => a.id === progress.bruno.equipped);
+  avatar.textContent = equipped ? equipped.icon : "B";
+  stats.textContent = `Bruno nivel ${progress.bruno.level} | Energia ${progress.bruno.energy} | XP ${progress.bruno.xp}`;
+  shop.innerHTML = BRUNO_ACCESSORIES.map(item => {
+    const owned = !!progress.bruno.accessories[item.id];
+    const equippedNow = progress.bruno.equipped === item.id;
+    return `<button class="bruno-chip ${equippedNow ? "equipped" : ""}" onclick="handleBrunoAccessory('${item.id}')">${owned ? (equippedNow ? "Equipped" : "Equip") : `${item.label} ${item.cost}`}</button>`;
+  }).join("");
+}
+
+function handleBrunoAccessory(id) {
+  const item = BRUNO_ACCESSORIES.find(a => a.id === id);
+  if (!item) return;
+  if (!progress.bruno.accessories[id]) {
+    if (progress.rewards.coins < item.cost) {
+      popReward("Need more coins for Bruno");
+      return;
+    }
+    progress.rewards.coins -= item.cost;
+    progress.bruno.accessories[id] = true;
+    popReward(`Bruno got ${item.label}!`);
+  }
+  progress.bruno.equipped = id;
+  saveProgress();
+  renderBruno();
+  updateHud();
 }
 
 function rewardLine() {
@@ -1678,7 +1828,7 @@ function animatePracticeCard(correct) {
   void card.offsetWidth;
   card.classList.add(correct ? "flash-ok" : "flash-bad");
   const line = document.getElementById("mascotLine");
-  if (line) line.textContent = correct ? randomItem(OK_MESSAGES) : randomItem(BAD_MESSAGES);
+  if (line) line.textContent = correct ? `Bruno: ${randomItem(OK_MESSAGES)}` : `Bruno: ${randomItem(BAD_MESSAGES)}`;
 }
 
 function popReward(message) {
@@ -1763,6 +1913,7 @@ function updateHud() {
   document.getElementById("progressFill").style.width = `${Math.min(100, app.questionCount * ((app.mode === "challenge" || app.mode === "survival") ? 5 : 8))}%`;
   document.getElementById("dailyGoal").textContent = `${progress.days[todayKey()]?.correct || 0} / 20 correctas`;
   document.getElementById("treasureOut").textContent = `${progress.rewards.stars} estrellas | ${progress.rewards.chests} cofres`;
+  renderBruno();
   updatePlayers();
 }
 
