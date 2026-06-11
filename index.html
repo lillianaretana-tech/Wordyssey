@@ -142,6 +142,75 @@
   .skill-tile b { display: block; font-size: 1.45rem; color: var(--gold); }
   .skill-tile span { color: var(--muted); font-size: .86rem; line-height: 1.35; }
 
+  .adventure-map {
+    margin-top: 22px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .world-card {
+    position: relative;
+    min-height: 118px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px;
+    background:
+      linear-gradient(145deg, rgba(108,99,255,.18), rgba(0,215,167,.08)),
+      rgba(28, 33, 53, .9);
+    overflow: hidden;
+    text-align: left;
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .world-card::after {
+    content: "";
+    position: absolute;
+    width: 74px;
+    height: 74px;
+    right: -24px;
+    bottom: -24px;
+    border: 12px solid rgba(255,255,255,.06);
+    border-radius: 50%;
+  }
+
+  .world-card.selected { border-color: var(--mint); box-shadow: 0 0 0 2px rgba(0,215,167,.16); }
+  .world-card:disabled { opacity: .48; cursor: not-allowed; }
+  .world-code {
+    display: inline-grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--gold);
+    color: #171000;
+    font-weight: 900;
+  }
+  .world-card b { display: block; margin-top: 10px; }
+  .world-card small { color: var(--muted); display: block; margin-top: 3px; }
+  .world-stars { margin-top: 10px; color: var(--gold); font-family: "JetBrains Mono", monospace; font-size: .85rem; }
+
+  .quest-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 9px;
+    margin-top: 10px;
+  }
+
+  .quest-btn {
+    min-height: 70px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    background: linear-gradient(145deg, #252b4a, #171c30);
+    border-radius: 9px;
+    padding: 10px;
+    text-align: left;
+  }
+
+  .quest-btn b { display: block; }
+  .quest-btn span { color: var(--muted); font-size: .78rem; }
+
   .setup-panel {
     background: rgba(21, 25, 42, .88);
     border: 1px solid var(--border);
@@ -239,9 +308,48 @@
   .hud-item span { color: var(--muted); font-size: .75rem; display: block; margin-bottom: 6px; }
   .hud-item b { font-family: "JetBrains Mono", monospace; font-size: 1.1rem; }
 
+  .companion {
+    display: grid;
+    grid-template-columns: 54px 1fr;
+    gap: 10px;
+    align-items: center;
+    border: 1px solid rgba(245,197,66,.35);
+    background: rgba(245,197,66,.08);
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .mascot {
+    width: 54px;
+    height: 54px;
+    display: grid;
+    place-items: center;
+    border-radius: 16px;
+    background: linear-gradient(145deg, var(--gold), #ff8f70);
+    color: #211000;
+    font-weight: 900;
+    font-size: 1.45rem;
+  }
+  .companion b { display: block; }
+  .companion span { color: var(--muted); font-size: .84rem; }
+
   .practice-card {
     padding: 20px;
     min-height: 430px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .practice-card.flash-ok { animation: flashOk .55s ease; }
+  .practice-card.flash-bad { animation: flashBad .55s ease; }
+  @keyframes flashOk {
+    0% { box-shadow: 0 0 0 rgba(0,215,167,0); }
+    45% { box-shadow: 0 0 0 8px rgba(0,215,167,.16); }
+    100% { box-shadow: 0 0 0 rgba(0,215,167,0); }
+  }
+  @keyframes flashBad {
+    0% { box-shadow: 0 0 0 rgba(255,102,128,0); }
+    45% { box-shadow: 0 0 0 8px rgba(255,102,128,.14); }
+    100% { box-shadow: 0 0 0 rgba(255,102,128,0); }
   }
 
   .exercise-meta { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: .8rem; }
@@ -313,6 +421,26 @@
   .feedback.bad { color: var(--rose); }
   .nav-row { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
 
+  .reward-pop {
+    position: fixed;
+    top: 88px;
+    right: 24px;
+    z-index: 60;
+    min-width: 210px;
+    border: 1px solid rgba(245,197,66,.48);
+    background: #211b35;
+    border-radius: 12px;
+    padding: 12px 14px;
+    color: var(--gold);
+    font-weight: 800;
+    box-shadow: 0 18px 50px rgba(0,0,0,.32);
+    animation: popIn .42s ease both;
+  }
+  @keyframes popIn {
+    from { transform: translateY(-12px) scale(.96); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+  }
+
   .word-search {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 180px;
@@ -372,6 +500,24 @@
     text-transform: lowercase;
   }
   .crossword-clue.solved { border-color: var(--mint); }
+  .clue-copy { display: grid; gap: 4px; }
+  .clue-copy b { color: var(--text); }
+  .clue-copy small { color: var(--muted); }
+  .letter-pattern {
+    color: var(--gold);
+    font-family: "JetBrains Mono", monospace;
+    letter-spacing: 2px;
+    margin-top: 4px;
+  }
+  .clue-actions { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 7px; }
+  .mini-quest {
+    border: 1px solid rgba(85,182,255,.38);
+    background: rgba(85,182,255,.08);
+    border-radius: 10px;
+    padding: 12px;
+    margin-top: 12px;
+  }
+  .mini-quest-options { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
 
   .side-panel { padding: 16px; display: grid; gap: 14px; }
   .mini-title { margin: 0 0 9px; font-size: .95rem; }
@@ -438,13 +584,13 @@
 
   @media (max-width: 860px) {
     .welcome, .game-layout { grid-template-columns: 1fr; }
-    .skill-strip, .hud, .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .skill-strip, .hud, .stats-grid, .adventure-map { grid-template-columns: repeat(2, 1fr); }
     .topbar-inner { align-items: flex-start; flex-direction: column; padding: 12px 0; }
   }
 
   @media (max-width: 520px) {
     .shell, .topbar-inner { width: min(100% - 22px, 1180px); }
-    .topic-grid, .segmented, .start-row, .options, .skill-strip, .hud, .stats-grid { grid-template-columns: 1fr; }
+    .topic-grid, .segmented, .start-row, .options, .skill-strip, .hud, .stats-grid, .adventure-map, .quest-row { grid-template-columns: 1fr; }
     .word-search, .crossword-clue { grid-template-columns: 1fr; }
     .letter-cell { width: 29px; height: 29px; }
     .type-row, .nav-row { flex-direction: column; }
@@ -470,11 +616,13 @@
       <h1>Vocabulario que se queda <span>en la memoria.</span></h1>
       <p>Practica ingles con temas cotidianos, profesionales y academicos. La app adapta las preguntas, guarda tu avance semanal y permite competir en el mismo dispositivo.</p>
       <div class="skill-strip">
-        <div class="skill-tile"><b>16</b><span>temas con palabras utiles para la vida real.</span></div>
+        <div class="skill-tile"><b>8</b><span>mundos con misiones de vocabulario real.</span></div>
         <div class="skill-tile"><b>4</b><span>niveles: principiante, basico, intermedio y avanzado.</span></div>
         <div class="skill-tile"><b>2P</b><span>modo multijugador local por turnos.</span></div>
         <div class="skill-tile"><b>7d</b><span>estadisticas semanales y racha diaria.</span></div>
       </div>
+      <div class="section-title">Mapa de aventura</div>
+      <div class="adventure-map" id="adventureMap"></div>
     </section>
 
     <section class="setup-panel">
@@ -495,6 +643,13 @@
         <button class="mode-btn" data-mode="duel">2 personas</button>
         <button class="mode-btn" data-mode="review">Repaso</button>
         <button class="mode-btn" data-mode="challenge">Reto</button>
+      </div>
+
+      <div class="section-title">Retos rapidos</div>
+      <div class="quest-row">
+        <button class="quest-btn" data-quest="daily"><b>Daily Challenge</b><span>20 preguntas con bonus</span></button>
+        <button class="quest-btn" data-quest="speed"><b>Speed Round</b><span>responde sin romper racha</span></button>
+        <button class="quest-btn" data-quest="boss"><b>Vocabulary Boss</b><span>mini jefe de nivel</span></button>
       </div>
 
       <div class="start-row">
@@ -522,14 +677,18 @@
     <section>
       <div class="hud">
         <div class="hud-item"><span>Puntos</span><b id="scoreOut">0</b></div>
-        <div class="hud-item"><span>Precision</span><b id="accuracyOut">0%</b></div>
+        <div class="hud-item"><span>Monedas</span><b id="coinsOut">0</b></div>
+        <div class="hud-item"><span>Energia</span><b id="energyOut">0</b></div>
         <div class="hud-item"><span>Racha</span><b id="streakOut">0</b></div>
-        <div class="hud-item"><span>Semana</span><b id="weekOut">0</b></div>
       </div>
       <article class="practice-card" id="practiceCard"></article>
     </section>
 
     <aside class="side-panel">
+      <section class="companion">
+        <div class="mascot">VQ</div>
+        <div><b id="mascotLine">Ready for a quest?</b><span>Gana monedas, estrellas y cofres al practicar.</span></div>
+      </section>
       <section>
         <h3 class="mini-title">Sesion</h3>
         <div class="goal-row">
@@ -546,6 +705,10 @@
       <section>
         <h3 class="mini-title">Objetivo de hoy</h3>
         <div class="goal-row"><b id="dailyGoal">0 / 20 correctas</b><br><span>La meta diaria se reinicia cada dia.</span></div>
+      </section>
+      <section>
+        <h3 class="mini-title">Tesoro</h3>
+        <div class="goal-row"><b id="treasureOut">0 estrellas | 0 cofres</b><br><span id="weekOut">0 correctas esta semana</span></div>
       </section>
       <section>
         <h3 class="mini-title">Palabras por reforzar</h3>
@@ -633,6 +796,21 @@ const TOPICS = {
 const LEVELS = {1:"Principiante",2:"Basico",3:"Intermedio",4:"Avanzado"};
 const MODES = {solo:"Practica individual",duel:"Multijugador local",review:"Repaso inteligente",challenge:"Reto de 20 preguntas"};
 const EX_TYPES = ["esToEn","enToEs","type","listening","sentence","wordSearch","crossword"];
+const QUESTS = {
+  daily: { mode: "challenge", levelBoost: 0, label: "Daily Challenge" },
+  speed: { mode: "challenge", levelBoost: 1, label: "Speed Round" },
+  boss: { mode: "challenge", levelBoost: 2, label: "Vocabulary Boss" }
+};
+const OK_MESSAGES = ["Great job!", "Nice!", "Excellent!", "You are on fire!", "Amazing streak!", "Keep going!", "Quest cleared!"];
+const BAD_MESSAGES = ["Try again!", "Almost there!", "Good attempt!", "Let's learn it together.", "That one is tricky.", "New word unlocked!"];
+const MINI_QUESTS = [
+  { q: "What is the opposite of hot?", options: ["cold", "tall", "fast"], answer: "cold" },
+  { q: "Which word means a place to sleep when traveling?", options: ["hotel", "office", "market"], answer: "hotel" },
+  { q: "Which one is food?", options: ["bread", "ticket", "screen"], answer: "bread" },
+  { q: "What do you use to open a door?", options: ["key", "chair", "cloud"], answer: "key" },
+  { q: "Which word is about work?", options: ["meeting", "beach", "soup"], answer: "meeting" },
+  { q: "Which one means very good?", options: ["excellent", "angry", "late"], answer: "excellent" }
+];
 const STORE_KEY = "vocabquest_plus_progress_v1";
 const DAY_MS = 86400000;
 
@@ -655,6 +833,7 @@ let app = {
   answered: false,
   player: 0,
   players: [{name:"Persona A",score:0,correct:0,attempts:0},{name:"Persona B",score:0,correct:0,attempts:0}],
+  activeQuest: null,
   pool: []
 };
 
@@ -664,7 +843,7 @@ let cloudReady = false;
 let syncing = false;
 
 function defaultProgress() {
-  return { days: {}, words: {}, mastered: {}, lastSeen: null };
+  return { days: {}, words: {}, mastered: {}, rewards: { coins: 40, energy: 10, stars: 0, chests: 0 }, quests: {}, lastSeen: null };
 }
 
 function loadProgress() {
@@ -673,6 +852,19 @@ function loadProgress() {
 }
 
 let progress = loadProgress();
+
+function normalizeProgress() {
+  progress.days ||= {};
+  progress.words ||= {};
+  progress.mastered ||= {};
+  progress.rewards ||= { coins: 40, energy: 10, stars: 0, chests: 0 };
+  progress.rewards.coins ??= 40;
+  progress.rewards.energy ??= 10;
+  progress.rewards.stars ??= 0;
+  progress.rewards.chests ??= 0;
+  progress.quests ||= {};
+}
+normalizeProgress();
 
 function saveProgress() {
   localStorage.setItem(STORE_KEY, JSON.stringify(progress));
@@ -739,7 +931,10 @@ function mergeProgress(remote) {
   progress.days = {...(remote.days || {}), ...(progress.days || {})};
   progress.words = {...(remote.words || {}), ...(progress.words || {})};
   progress.mastered = {...(remote.mastered || {}), ...(progress.mastered || {})};
+  progress.rewards = {...(remote.rewards || {}), ...(progress.rewards || {})};
+  progress.quests = {...(remote.quests || {}), ...(progress.quests || {})};
   progress.lastSeen = Math.max(remote.lastSeen || 0, progress.lastSeen || 0);
+  normalizeProgress();
 }
 
 async function pullCloudProgress() {
@@ -850,6 +1045,30 @@ function renderTopics() {
       <span class="topic-icon">${t.icon}</span>
       <span><strong>${t.name}</strong><small>${t.desc}</small></span>
     </button>`).join("");
+  renderAdventureMap();
+}
+
+function renderAdventureMap() {
+  const map = document.getElementById("adventureMap");
+  if (!map) return;
+  map.innerHTML = Object.entries(TOPICS).map(([id, t]) => {
+    const stars = topicStars(id);
+    const unlocked = id === "daily" || Object.keys(progress.mastered).length >= 3 || stars > 0;
+    return `<button class="world-card ${id === app.topic ? "selected" : ""}" data-topic="${id}" ${unlocked ? "" : "disabled"}>
+      <span class="world-code">${t.icon}</span>
+      <b>${t.name}</b>
+      <small>${unlocked ? t.desc : "desbloquea con 3 palabras dominadas"}</small>
+      <div class="world-stars">${"★".repeat(stars)}${"☆".repeat(3 - stars)}</div>
+    </button>`;
+  }).join("");
+}
+
+function topicStars(topic) {
+  const mastered = Object.values(progress.words).filter(w => w.topic === topic && progress.mastered[`${w.topic}:${w.level}:${w.en}`]).length;
+  if (mastered >= 12) return 3;
+  if (mastered >= 6) return 2;
+  if (mastered >= 2) return 1;
+  return 0;
 }
 
 function showView(id) {
@@ -862,6 +1081,7 @@ function showView(id) {
 }
 
 function startGame(placement = false) {
+  normalizeProgress();
   app.score = 0;
   app.streak = 0;
   app.attempts = 0;
@@ -1029,15 +1249,96 @@ function clearWordSearchSelection() {
 }
 
 function renderCrossword(words) {
-  app.current = { ...words[0], puzzleWords: words };
-  return `<h2 class="question">Mini crucigrama<small>Escribe cada palabra en ingles usando la pista en espanol.</small></h2>
+  app.current = { ...words[0], puzzleWords: words, revealedLetters: words.map(() => new Set()), letterQuest: null };
+  return `<h2 class="question">Mini crucigrama<small>Lee la pista en ingles. Usa la ayuda en espanol solo si la necesitas.</small></h2>
     <div class="crossword" id="crosswordBox">
       ${words.map((w, i) => `<label class="crossword-clue">
-        <span>${i + 1}. ${w.es} <small>(${w.en.length} letras)</small></span>
+        <span class="clue-copy">
+          <b>${i + 1}. ${englishClue(w)}</b>
+          <small>Help: ${w.es}. ${w.en.length} letters.</small>
+          <em class="letter-pattern" data-pattern-index="${i}">${letterPattern(w.en, app.current.revealedLetters[i])}</em>
+          <span class="clue-actions">
+            <button type="button" class="soft-btn" onclick="startLetterQuest(${i})">Reveal letter -2 coins</button>
+            <button type="button" class="soft-btn" onclick="showCrosswordExample(${i})">Example</button>
+          </span>
+        </span>
         <input data-answer="${escapeAttr(w.en.toLowerCase())}" autocomplete="off" spellcheck="false">
       </label>`).join("")}
     </div>
+    <div id="miniQuestBox"></div>
     <div class="nav-row"><button class="primary-btn" onclick="checkCrossword()">Revisar crucigrama</button></div>`;
+}
+
+function englishClue(word) {
+  const sentence = word.sentence || `This word means ${word.es}.`;
+  const clue = sentence.replace(new RegExp(`\\b${escapeRegExp(word.en)}\\b`, "i"), "_____");
+  if (clue.includes("_____")) return `Complete the sentence: ${clue}`;
+  return `Which word means "${word.es}" in this situation?`;
+}
+
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function letterPattern(answer, revealed) {
+  return [...answer].map((char, index) => {
+    if (char === " ") return "/";
+    return revealed.has(index) ? char.toUpperCase() : "_";
+  }).join(" ");
+}
+
+function updateCrosswordPatterns() {
+  app.current.puzzleWords.forEach((word, index) => {
+    const el = document.querySelector(`[data-pattern-index="${index}"]`);
+    if (el) el.textContent = letterPattern(word.en, app.current.revealedLetters[index]);
+  });
+}
+
+function startLetterQuest(index) {
+  if (app.answered) return;
+  const word = app.current.puzzleWords[index];
+  const hidden = [...word.en].map((char, i) => char === " " ? -1 : i).filter(i => i >= 0 && !app.current.revealedLetters[index].has(i));
+  if (!hidden.length) {
+    document.getElementById("miniQuestBox").innerHTML = `<div class="mini-quest">All letters are already revealed for this word.</div>`;
+    return;
+  }
+  const quest = randomItem(MINI_QUESTS);
+  app.current.letterQuest = { wordIndex: index, revealIndex: hidden[Math.floor(Math.random() * hidden.length)], quest };
+  document.getElementById("miniQuestBox").innerHTML = `<div class="mini-quest">
+    <b>Quick quest to reveal one letter</b>
+    <div>${quest.q}</div>
+    <div class="mini-quest-options">
+      ${shuffle(quest.options).map(option => `<button class="soft-btn" onclick="answerMiniQuest('${escapeAttr(option)}')">${option}</button>`).join("")}
+    </div>
+  </div>`;
+}
+
+function answerMiniQuest(option) {
+  const active = app.current.letterQuest;
+  if (!active) return;
+  const box = document.getElementById("miniQuestBox");
+  if (option === active.quest.answer) {
+    app.current.revealedLetters[active.wordIndex].add(active.revealIndex);
+    progress.rewards.coins = Math.max(0, progress.rewards.coins - 2);
+    localStorage.setItem(STORE_KEY, JSON.stringify(progress));
+    queueCloudSave();
+    updateCrosswordPatterns();
+    box.innerHTML = `<div class="mini-quest"><b>Letter revealed!</b> You spent 2 coins and earned the hint.</div>`;
+    updateHud();
+  } else {
+    progress.rewards.energy = Math.max(0, progress.rewards.energy - 1);
+    localStorage.setItem(STORE_KEY, JSON.stringify(progress));
+    queueCloudSave();
+    box.innerHTML = `<div class="mini-quest"><b>Try another quick quest.</b> Energy -1. Pick Reveal letter again when ready.</div>`;
+    updateHud();
+  }
+  app.current.letterQuest = null;
+}
+
+function showCrosswordExample(index) {
+  const word = app.current.puzzleWords[index];
+  const box = document.getElementById("miniQuestBox");
+  box.innerHTML = `<div class="mini-quest"><b>Example sentence</b><div>${word.sentence.replace(new RegExp(`\\b${escapeRegExp(word.en)}\\b`, "i"), `<strong>${word.en}</strong>`)}</div></div>`;
 }
 
 function attachCrosswordEvents() {
@@ -1060,7 +1361,7 @@ function checkCrossword() {
     mark(true, null);
   } else {
     document.getElementById("feedback").className = "feedback bad";
-    document.getElementById("feedback").textContent = `Tienes ${correct} de ${inputs.length}. Revisa las que faltan.`;
+    document.getElementById("feedback").innerHTML = `<strong>${randomItem(BAD_MESSAGES)}</strong><br>You solved ${correct} of ${inputs.length}. Use a quick quest if you need a letter.`;
   }
 }
 
@@ -1077,6 +1378,7 @@ function mark(correct, btn, skipped = false) {
   if (correct) app.correct++;
   app.streak = correct ? app.streak + 1 : 0;
   app.score += correct ? 10 + app.level * 4 + Math.min(app.streak, 5) : 0;
+  applyRewards(correct);
 
   if (app.mode === "duel") {
     const p = app.players[app.player];
@@ -1088,10 +1390,12 @@ function mark(correct, btn, skipped = false) {
   recordAnswer(app.current, correct);
   const feedback = document.getElementById("feedback");
   feedback.className = `feedback ${correct ? "ok" : "bad"}`;
+  const headline = correct ? randomItem(OK_MESSAGES) : randomItem(BAD_MESSAGES);
   feedback.innerHTML = correct
-    ? `Correcto: <strong>${app.current.en}</strong> - ${app.current.es}.`
-    : `${skipped ? "Sin problema." : "Casi."} Respuesta: <strong>${app.current.en}</strong> - ${app.current.es}. ${app.current.sentence}`;
+    ? `<strong>${headline}</strong> ${rewardLine()}<br>Correcto: <strong>${app.current.en}</strong> - ${app.current.es}.`
+    : `<strong>${headline}</strong><br>${skipped ? "Sin problema." : "Casi."} Respuesta: <strong>${app.current.en}</strong> - ${app.current.es}. ${app.current.sentence}`;
   if (correct) speakWord(app.current.en);
+  animatePracticeCard(correct);
 
   document.querySelectorAll(".option").forEach(o => {
     o.disabled = true;
@@ -1104,6 +1408,55 @@ function mark(correct, btn, skipped = false) {
   adaptLevel();
   updateHud();
   renderWeakMini();
+  renderAdventureMap();
+}
+
+function applyRewards(correct) {
+  normalizeProgress();
+  if (correct) {
+    const bonus = app.streak >= 5 ? 6 : app.streak >= 3 ? 3 : 0;
+    progress.rewards.coins += 5 + app.level + bonus;
+    progress.rewards.energy = Math.min(20, progress.rewards.energy + 1);
+    if (app.streak > 0 && app.streak % 5 === 0) {
+      progress.rewards.stars += 1;
+      popReward(`Streak bonus! +1 star, +${bonus} coins`);
+    }
+    if (app.correct > 0 && app.correct % 10 === 0) {
+      progress.rewards.chests += 1;
+      progress.rewards.coins += 20;
+      popReward("Treasure chest! +20 coins");
+    }
+  } else {
+    progress.rewards.energy = Math.max(0, progress.rewards.energy - 1);
+  }
+  localStorage.setItem(STORE_KEY, JSON.stringify(progress));
+  queueCloudSave();
+}
+
+function rewardLine() {
+  const bonus = app.streak >= 3 ? ` Racha x${app.streak}.` : "";
+  return `+${5 + app.level} coins.${bonus}`;
+}
+
+function randomItem(items) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function animatePracticeCard(correct) {
+  const card = document.getElementById("practiceCard");
+  card.classList.remove("flash-ok", "flash-bad");
+  void card.offsetWidth;
+  card.classList.add(correct ? "flash-ok" : "flash-bad");
+  const line = document.getElementById("mascotLine");
+  if (line) line.textContent = correct ? randomItem(OK_MESSAGES) : randomItem(BAD_MESSAGES);
+}
+
+function popReward(message) {
+  const el = document.createElement("div");
+  el.className = "reward-pop";
+  el.textContent = message;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2600);
 }
 
 function adaptLevel() {
@@ -1122,6 +1475,15 @@ function adaptLevel() {
 
 function showSummary() {
   const acc = app.attempts ? Math.round(app.correct / app.attempts * 100) : 0;
+  if (app.activeQuest) {
+    progress.quests[`${app.activeQuest}:${todayKey()}`] = { score: app.score, correct: app.correct, attempts: app.attempts };
+    if (acc >= 70) {
+      progress.rewards.chests += 1;
+      progress.rewards.coins += 25;
+      popReward(`${QUESTS[app.activeQuest]?.label || "Quest"} cleared! +1 chest`);
+    }
+    saveProgress();
+  }
   document.getElementById("practiceCard").innerHTML = `
     <div class="exercise-meta"><span class="badge">Reto terminado</span><span>20 preguntas</span></div>
     <h2 class="question">Resultado: ${app.score} puntos<small>Precision: ${acc}%. ${summaryAdvice(acc)}</small></h2>
@@ -1141,13 +1503,15 @@ function updateHud() {
   const acc = app.attempts ? Math.round(app.correct / app.attempts * 100) : 0;
   const week = getWeekKeys().reduce((sum, d) => sum + (progress.days[d]?.correct || 0), 0);
   document.getElementById("scoreOut").textContent = app.score;
-  document.getElementById("accuracyOut").textContent = `${acc}%`;
+  document.getElementById("coinsOut").textContent = progress.rewards.coins;
+  document.getElementById("energyOut").textContent = progress.rewards.energy;
   document.getElementById("streakOut").textContent = app.streak;
   document.getElementById("weekOut").textContent = week;
   document.getElementById("sessionName").textContent = `${TOPICS[app.topic].name} - ${LEVELS[app.level]}`;
   document.getElementById("sessionMode").textContent = MODES[app.mode];
   document.getElementById("progressFill").style.width = `${Math.min(100, app.questionCount * (app.mode === "challenge" ? 5 : 8))}%`;
   document.getElementById("dailyGoal").textContent = `${progress.days[todayKey()]?.correct || 0} / 20 correctas`;
+  document.getElementById("treasureOut").textContent = `${progress.rewards.stars} estrellas | ${progress.rewards.chests} cofres`;
   updatePlayers();
 }
 
@@ -1222,8 +1586,8 @@ function escapeAttr(value) {
 document.addEventListener("click", e => {
   const nav = e.target.closest(".nav-btn");
   if (nav) showView(nav.dataset.view);
-  const topic = e.target.closest(".topic-btn");
-  if (topic) {
+  const topic = e.target.closest(".topic-btn,.world-card");
+  if (topic && !topic.disabled) {
     app.topic = topic.dataset.topic;
     app.pool = [];
     renderTopics();
@@ -1236,13 +1600,28 @@ document.addEventListener("click", e => {
   const mode = e.target.closest(".mode-btn");
   if (mode) {
     app.mode = mode.dataset.mode;
+    app.activeQuest = null;
     document.querySelectorAll(".mode-btn").forEach(b => b.classList.toggle("selected", b === mode));
   }
+  const quest = e.target.closest(".quest-btn");
+  if (quest) startQuickQuest(quest.dataset.quest);
 });
 
-document.getElementById("startBtn").addEventListener("click", () => startGame());
+function startQuickQuest(id) {
+  const quest = QUESTS[id];
+  if (!quest) return;
+  app.activeQuest = id;
+  app.mode = quest.mode;
+  app.level = Math.min(4, app.level + quest.levelBoost);
+  document.querySelectorAll(".mode-btn").forEach(b => b.classList.toggle("selected", b.dataset.mode === app.mode));
+  popReward(`${quest.label} started`);
+  startGame(true);
+}
+
+document.getElementById("startBtn").addEventListener("click", () => { app.activeQuest = null; startGame(); });
 document.getElementById("placementBtn").addEventListener("click", () => {
   app.mode = "challenge";
+  app.activeQuest = "daily";
   app.pool = shuffle(allWords());
   startGame(true);
 });
