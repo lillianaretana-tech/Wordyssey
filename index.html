@@ -793,7 +793,7 @@
       </div>
       <p class="review-note" id="smartTip">Consejo: alterna entre elegir, escribir y escuchar. La memoria mejora cuando recuerdas la palabra de varias formas.</p>
       <div class="sync-panel">
-        <div class="sync-status" id="syncStatus">Progreso guardado en este dispositivo. Configura Supabase para sincronizar en linea.</div>
+        <div class="sync-status" id="syncStatus">Registrate con tu correo para guardar records y progreso en Supabase.</div>
         <div class="sync-row" id="syncLoginRow">
           <input id="emailInput" type="email" placeholder="Correo para guardar en linea">
           <button class="soft-btn" id="loginBtn">Enviar enlace</button>
@@ -1302,6 +1302,7 @@ const DAY_MS = 86400000;
 const SUPABASE_URL = "https://kotgtqihzctnqnsdlqqt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvdGd0cWloemN0bnFuc2RscXF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMzc5NDksImV4cCI6MjA5NjcxMzk0OX0.zNHh9R4wCKF_KVWAORcSf00S7ZutjtkMirBnDT8yCbU";
 const SUPABASE_TABLE = "vocabquest_progress";
+const REQUIRE_ACCOUNT_FOR_RECORDS = true;
 
 let app = {
   topic: "daily",
@@ -1401,9 +1402,10 @@ function closeAppModal() {
   document.getElementById("appModal").setAttribute("aria-hidden", "true");
 }
 
-function openAccountModal() {
+function openAccountModal(reason = "") {
+  const statusText = reason || (cloudReady ? `Sincronizado como ${currentUser.email || "usuario"}.` : "Registrate con tu correo para guardar tu avance y records en Supabase.");
   openAppModal("Cuenta y sincronizacion", `
-    <div class="sync-status" id="accountSyncStatus">${cloudReady ? `Sincronizado como ${currentUser.email || "usuario"}.` : "Entra con tu correo para guardar tu avance en Supabase."}</div>
+    <div class="sync-status" id="accountSyncStatus">${statusText}</div>
     <div class="field-grid">
       <input id="accountNameInput" placeholder="Nombre o apodo" value="${escapeAttr(progress.profile.displayName || "")}">
       <input id="accountEmailInput" type="email" placeholder="Correo" value="${escapeAttr(currentUser?.email || document.getElementById("emailInput")?.value || "")}">
@@ -1413,8 +1415,18 @@ function openAccountModal() {
       <button class="soft-btn" onclick="saveProfileName(); pullCloudProgress()">Sincronizar</button>
       <button class="danger-btn" onclick="logout()">Salir</button>
     </div>
-    <p class="review-note">El progreso se guarda localmente como respaldo y en Supabase cuando entras con tu correo.</p>
+    <p class="review-note">Primero abre el enlace que llega a tu correo. Despues de entrar, tus puntos, records y logros se sincronizan automaticamente.</p>
   `);
+}
+
+function requireCloudAccount(actionLabel = "guardar tu record") {
+  if (!REQUIRE_ACCOUNT_FOR_RECORDS || cloudReady) return true;
+  const message = supabaseClient
+    ? `Registrate o entra con tu correo para ${actionLabel} en Supabase.`
+    : "No se pudo cargar Supabase. Revisa la conexion y vuelve a intentar.";
+  setSyncStatus(message);
+  openAccountModal(message);
+  return false;
 }
 
 function openGameInfoModal() {
@@ -1436,6 +1448,7 @@ function saveProfileName() {
   if (input) {
     progress.profile.displayName = input.value.trim();
     saveProgress();
+    updateAccountButton();
   }
 }
 
@@ -1462,10 +1475,12 @@ async function handleSession(session, shouldPull) {
   document.getElementById("syncLoginRow")?.classList.toggle("hidden", cloudReady);
   document.getElementById("syncUserRow")?.classList.toggle("hidden", !cloudReady);
   if (!cloudReady) {
-    setSyncStatus(supabaseClient ? "Entra con tu correo para sincronizar en linea." : "Progreso guardado localmente.");
+    setSyncStatus(supabaseClient ? "Registrate con tu correo para sincronizar records en linea." : "Progreso guardado localmente.");
+    updateAccountButton();
     return;
   }
   setSyncStatus(`Sincronizado como ${currentUser.email || "usuario"}.`);
+  updateAccountButton();
   if (shouldPull) await pullCloudProgress();
 }
 
@@ -1479,6 +1494,9 @@ async function sendLoginLink() {
     setSyncStatus("Escribe un correo para enviar el enlace de acceso.");
     return;
   }
+  const mainEmail = document.getElementById("emailInput");
+  if (mainEmail) mainEmail.value = email;
+  saveProfileName();
   setSyncStatus("Enviando enlace de acceso...");
   const { error } = await supabaseClient.auth.signInWithOtp({
     email,
@@ -1531,8 +1549,8 @@ async function pullCloudProgress() {
   localStorage.setItem(STORE_KEY, JSON.stringify(progress));
   renderWeakMini();
   renderStats();
-  await pushCloudProgress();
   syncing = false;
+  await pushCloudProgress();
 }
 
 function queueCloudSave() {
@@ -1553,24 +1571,32 @@ async function pushCloudProgress() {
   const { error } = await supabaseClient
     .from(SUPABASE_TABLE)
     .upsert(payload, { onConflict: "user_id" });
-  if (!error) await pushStructuredProgress();
-  setSyncStatus(error ? `No se pudo guardar: ${error.message}` : `Progreso guardado en linea como ${currentUser.email || "usuario"}.`);
+  const structuredErrors = error ? [] : await pushStructuredProgress();
+  const okMessage = structuredErrors.length
+    ? `Progreso principal guardado. Faltan tablas auxiliares en Supabase: ${structuredErrors[0]}`
+    : `Progreso guardado en linea como ${currentUser.email || "usuario"}.`;
+  setSyncStatus(error ? `No se pudo guardar: ${error.message}` : okMessage);
   syncing = false;
 }
 
 async function pushStructuredProgress() {
-  if (!cloudReady || !supabaseClient) return;
+  if (!cloudReady || !supabaseClient) return [];
+  const errors = [];
+  const saveStructured = async (label, query) => {
+    const { error } = await query;
+    if (error) errors.push(`${label}: ${error.message}`);
+  };
   const week = getWeekKeys().reduce((sum, d) => sum + (progress.days[d]?.correct || 0), 0);
   const todayCorrect = progress.days[todayKey()]?.correct || 0;
   const unlockedWorlds = Object.keys(TOPICS).filter(topic => topic === "daily" || topicStars(topic) > 0);
-  await supabaseClient.from("vocabquest_profiles").upsert({
+  await saveStructured("vocabquest_profiles", supabaseClient.from("vocabquest_profiles").upsert({
     user_id: currentUser.id,
     email: currentUser.email || null,
     display_name: progress.profile.displayName || null,
     current_level: app.level || 1,
     updated_at: new Date().toISOString()
-  }, { onConflict: "user_id" });
-  await supabaseClient.from("vocabquest_user_progress").upsert({
+  }, { onConflict: "user_id" }));
+  await saveStructured("vocabquest_user_progress", supabaseClient.from("vocabquest_user_progress").upsert({
     user_id: currentUser.id,
     points: progress.records.totalPoints || 0,
     coins: progress.rewards.coins || 0,
@@ -1585,13 +1611,13 @@ async function pushStructuredProgress() {
     bruno: progress.bruno || {},
     last_activity_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
-  }, { onConflict: "user_id" });
+  }, { onConflict: "user_id" }));
   const achievementRows = Object.keys(progress.achievements || {}).map(id => ({
     user_id: currentUser.id,
     achievement_id: id,
     unlocked_at: new Date(progress.achievements[id].unlockedAt || Date.now()).toISOString()
   }));
-  if (achievementRows.length) await supabaseClient.from("vocabquest_user_achievements").upsert(achievementRows, { onConflict: "user_id,achievement_id" });
+  if (achievementRows.length) await saveStructured("vocabquest_user_achievements", supabaseClient.from("vocabquest_user_achievements").upsert(achievementRows, { onConflict: "user_id,achievement_id" }));
   const storyRows = Object.keys(progress.stories.completed || {}).map(id => ({
     user_id: currentUser.id,
     story_id: id,
@@ -1601,7 +1627,8 @@ async function pushStructuredProgress() {
     last_played_at: new Date(progress.stories.completed[id].completedAt || Date.now()).toISOString(),
     story_state: progress.stories.completed[id]
   }));
-  if (storyRows.length) await supabaseClient.from("vocabquest_user_story_progress").upsert(storyRows, { onConflict: "user_id,story_id" });
+  if (storyRows.length) await saveStructured("vocabquest_user_story_progress", supabaseClient.from("vocabquest_user_story_progress").upsert(storyRows, { onConflict: "user_id,story_id" }));
+  return errors;
 }
 
 function todayKey(offset = 0) {
@@ -1731,6 +1758,7 @@ function levelMatchesStory(storyLevel) {
 }
 
 function startStory(id) {
+  if (!requireCloudAccount("guardar tu avance de historias")) return;
   const story = STORY_SCENARIOS[id];
   if (!story) return;
   app.story = { id, index: 0, correct: 0 };
@@ -1795,6 +1823,7 @@ function completeStory() {
 }
 
 function startGame(placement = false) {
+  if (!requireCloudAccount("guardar tu progreso y record")) return;
   normalizeProgress();
   app.score = 0;
   app.streak = 0;
