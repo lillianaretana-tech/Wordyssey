@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#6c63ff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VocabQuest">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>VocabQuest — Aprende inglés jugando</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  :root {
+    --bg: #0d0f1a; --surface: #151827; --card: #1c2035; --border: #252a40;
+    --accent: #6c63ff; --accent2: #00e5a0; --accent3: #ff6b6b; --accent4: #ffd166;
+    --text: #e8eaf0; --muted: #7880a0;
+    --success: #00e5a0; --error: #ff6b6b; --warn: #ffd166;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; -webkit-tap-highlight-color: transparent; }
+  body { background: var(--bg); color: var(--text); font-family: 'Space Grotesk', sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+  /* SCREENS */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* WELCOME */
+  #welcome {
+    align-items: center; justify-content: center; padding: 2rem;
+    background: radial-gradient(ellipse at 30% 20%, #1a1545 0%, var(--bg) 60%),
+                radial-gradient(ellipse at 70% 80%, #0a1f1a 0%, transparent 50%);
+  }
+  .welcome-inner { max-width: 520px; width: 100%; text-align: center; }
+  .logo { font-size: 2.8rem; font-weight: 700; letter-spacing: -1px; margin-bottom: 0.2rem; }
+  .logo span { color: var(--accent2); }
+  .tagline { color: var(--muted); font-size: 1rem; margin-bottom: 0.5rem; }
+  .install-banner {
+    display: none; background: #12103a; border: 1px solid #2a2860;
+    border-radius: 10px; padding: 0.6rem 1rem; margin-bottom: 1.5rem;
+    font-size: 0.82rem; color: var(--accent); cursor: pointer;
+    align-items: center; gap: 0.5rem; justify-content: center;
+  }
+  .install-banner.show { display: flex; }
+  .section-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 0.8rem; margin-top: 1.2rem; }
+  .topic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; margin-bottom: 0.5rem; }
+  .topic-btn {
+    background: var(--card); border: 2px solid var(--border);
+    border-radius: 12px; padding: 1rem 0.8rem; cursor: pointer;
+    color: var(--text); font-family: inherit; font-size: 0.9rem; font-weight: 500;
+    transition: all 0.2s; text-align: left; display: flex; align-items: center; gap: 0.6rem;
+  }
+  .topic-btn:hover { border-color: var(--accent); background: #1e2140; }
+  .topic-btn.selected { border-color: var(--accent2); background: #0d1f1a; color: var(--accent2); }
+  .topic-icon { font-size: 1.4rem; }
+  .level-row { display: flex; gap: 0.5rem; margin-bottom: 1.2rem; justify-content: center; flex-wrap: wrap; }
+  .level-chip {
+    padding: 0.5rem 1rem; border-radius: 30px; cursor: pointer;
+    border: 2px solid var(--border); background: var(--card);
+    font-family: inherit; font-size: 0.82rem; font-weight: 600; color: var(--muted); transition: all 0.2s;
+  }
+  .level-chip:hover { border-color: var(--accent); color: var(--text); }
+  .level-chip.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-primary {
+    background: var(--accent); color: #fff; border: none;
+    padding: 1rem 2.5rem; border-radius: 12px; font-family: inherit;
+    font-size: 1rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s; width: 100%;
+  }
+  .btn-primary:hover { background: #5a52e0; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .review-btn-wrap { margin-top: 0.8rem; }
+  .btn-secondary {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    padding: 0.8rem 2rem; border-radius: 12px; font-family: inherit;
+    font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; width: 100%;
+  }
+  .btn-secondary:hover { border-color: var(--accent2); color: var(--accent2); }
+  .btn-secondary:disabled { opacity: 0.3; cursor: not-allowed; }
+  .failed-count {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+    color: var(--error); background: #1f0d0d; padding: 0.2rem 0.5rem;
+    border-radius: 5px; margin-left: 0.4rem;
+  }
+
+  /* GAME HEADER */
+  #game { flex-direction: column; background: var(--bg); }
+  .game-header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0.8rem 1.2rem; display: flex; align-items: center; gap: 0.8rem;
+  }
+  .hdr-left { display: flex; align-items: center; gap: 0.7rem; flex: 1; }
+  .back-btn {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    padding: 0.3rem 0.7rem; border-radius: 8px; cursor: pointer; font-size: 0.82rem;
+    transition: all 0.15s; font-family: inherit;
+  }
+  .back-btn:hover { border-color: var(--accent); color: var(--text); }
+  .topic-badge {
+    font-size: 0.72rem; font-weight: 600; color: var(--accent2);
+    background: #0d1f1a; padding: 0.22rem 0.6rem; border-radius: 6px; border: 1px solid #1a3d30;
+  }
+  .review-mode-badge {
+    font-size: 0.72rem; font-weight: 600; color: var(--error);
+    background: #1f0d0d; padding: 0.22rem 0.6rem; border-radius: 6px; border: 1px solid #3d1a1a;
+  }
+  .hdr-stats { display: flex; align-items: center; gap: 1rem; }
+  .streak-counter { display: flex; align-items: center; gap: 0.3rem; font-size: 0.85rem; font-weight: 700; color: var(--warn); }
+  .streak-count { font-family: 'JetBrains Mono', monospace; }
+  .score-display { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--muted); }
+  .score-display span { color: var(--accent2); font-weight: 600; }
+  .level-bar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0.45rem 1.2rem; display: flex; align-items: center; gap: 0.8rem;
+  }
+  .level-label { font-size: 0.72rem; font-weight: 700; color: var(--accent); min-width: 85px; }
+  .progress-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 3px; transition: width 0.4s ease; }
+  .progress-text { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--muted); min-width: 36px; text-align: right; }
+
+  /* EXERCISE ZONE */
+  .exercise-zone {
+    flex: 1; padding: 1.2rem; max-width: 700px; width: 100%; margin: 0 auto;
+    display: flex; flex-direction: column; gap: 1rem;
+  }
+  .ex-type-row { display: flex; justify-content: space-between; align-items: center; }
+  .ex-type-badge {
+    font-size: 0.68rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 0.22rem 0.6rem; border-radius: 6px; color: var(--accent); background: #12103a; border: 1px solid #2a2860;
+  }
+  .ex-num { font-size: 0.72rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .ex-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.4rem; display: flex; flex-direction: column; gap: 1rem;
+  }
+  .ex-card.correct { border-color: var(--success); background: #0d1f1a; }
+  .ex-card.wrong { border-color: var(--error); background: #1f0d0d; }
+  .ex-question { font-size: 1.05rem; font-weight: 500; line-height: 1.5; display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+  .ex-question .word-highlight { color: var(--accent2); font-weight: 700; }
+  .ex-question .blank { display: inline-block; min-width: 90px; border-bottom: 2px solid var(--accent); color: var(--accent); font-weight: 600; text-align: center; padding: 0 4px; }
+
+  /* AUDIO BUTTON */
+  .audio-btn {
+    background: #12103a; border: 1px solid #2a2860; color: var(--accent);
+    border-radius: 8px; padding: 0.3rem 0.7rem; cursor: pointer;
+    font-size: 0.85rem; transition: all 0.15s; display: inline-flex; align-items: center; gap: 0.3rem;
+    font-family: inherit; white-space: nowrap;
+  }
+  .audio-btn:hover { background: #1e1a5a; border-color: var(--accent); }
+  .audio-btn.playing { color: var(--accent2); border-color: var(--accent2); background: #0d1f1a; }
+  .audio-btn-large {
+    background: none; border: 2px solid var(--border); color: var(--muted);
+    border-radius: 50%; width: 44px; height: 44px; cursor: pointer;
+    font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s; flex-shrink: 0;
+  }
+  .audio-btn-large:hover { border-color: var(--accent); color: var(--accent); }
+  .audio-btn-large.playing { border-color: var(--accent2); color: var(--accent2); }
+
+  /* MCQ */
+  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; }
+  .option-btn {
+    background: var(--surface); border: 2px solid var(--border);
+    border-radius: 10px; padding: 0.75rem 0.9rem; cursor: pointer;
+    color: var(--text); font-family: inherit; font-size: 0.88rem; font-weight: 500;
+    transition: all 0.15s; text-align: left;
+  }
+  .option-btn:hover:not(:disabled) { border-color: var(--accent); background: #16183a; }
+  .option-btn.selected-correct { border-color: var(--success); background: #0d1f1a; color: var(--success); }
+  .option-btn.selected-wrong { border-color: var(--error); background: #1f0d0d; color: var(--error); }
+  .option-btn.reveal-correct { border-color: var(--success); }
+  .option-btn:disabled { cursor: default; }
+
+  /* TEXT INPUT */
+  .text-input-area { display: flex; gap: 0.55rem; }
+  .ex-input {
+    flex: 1; background: var(--surface); border: 2px solid var(--border);
+    border-radius: 10px; padding: 0.75rem 0.9rem; color: var(--text);
+    font-family: 'Space Grotesk', sans-serif; font-size: 1rem; outline: none; transition: border-color 0.15s;
+  }
+  .ex-input:focus { border-color: var(--accent); }
+  .ex-input.correct { border-color: var(--success); }
+  .ex-input.wrong { border-color: var(--error); }
+  .submit-btn {
+    background: var(--accent); border: none; border-radius: 10px;
+    padding: 0.75rem 1.1rem; color: #fff; cursor: pointer; font-size: 1rem; transition: all 0.15s;
+  }
+  .submit-btn:hover { background: #5a52e0; }
+
+  /* FEEDBACK */
+  .feedback-row { display: flex; align-items: flex-start; gap: 0.6rem; min-height: 24px; flex-wrap: wrap; }
+  .feedback-msg { font-size: 0.88rem; font-weight: 600; }
+  .feedback-msg.ok { color: var(--success); }
+  .feedback-msg.bad { color: var(--error); }
+  .feedback-hint { font-size: 0.8rem; color: var(--muted); }
+
+  /* NAV ROW */
+  .nav-row { display: flex; gap: 0.55rem; justify-content: flex-end; margin-top: 0.2rem; }
+  .btn-next {
+    background: var(--accent2); color: #000; font-weight: 700;
+    border: none; padding: 0.65rem 1.4rem; border-radius: 10px; cursor: pointer;
+    font-family: inherit; font-size: 0.88rem; transition: all 0.15s;
+  }
+  .btn-next:hover { background: #00cc8a; }
+  .btn-skip {
+    background: none; color: var(--muted); border: 1px solid var(--border);
+    padding: 0.65rem 0.9rem; border-radius: 10px; cursor: pointer;
+    font-family: inherit; font-size: 0.82rem; transition: all 0.15s;
+  }
+  .btn-skip:hover { color: var(--text); border-color: var(--accent); }
+  .hidden { display: none !important; }
+
+  /* WORD SEARCH */
+  .word-search-wrap { display: flex; flex-direction: column; gap: 0.8rem; }
+  .word-list { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .word-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 600;
+    padding: 0.28rem 0.6rem; border-radius: 6px;
+    background: var(--surface); border: 1px solid var(--border); color: var(--muted); transition: all 0.2s;
+  }
+  .word-tag.found { background: #0d1f1a; border-color: var(--success); color: var(--success); text-decoration: line-through; }
+  .ws-grid-wrap { overflow-x: auto; }
+  .ws-grid { display: inline-grid; gap: 2px; user-select: none; }
+  .ws-cell {
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; font-weight: 600;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+    cursor: pointer; transition: all 0.08s; text-transform: uppercase; color: var(--text);
+  }
+  .ws-cell:hover { background: #1e2140; }
+  .ws-cell.selecting { background: #1a1645; border-color: var(--accent); color: var(--accent); }
+  .ws-cell.found-cell { background: #0d1f1a; border-color: var(--success); color: var(--success); }
+
+  /* REVIEW SCREEN */
+  #review { flex-direction: column; background: var(--bg); }
+  .review-header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 1rem 1.2rem; display: flex; align-items: center; justify-content: space-between;
+  }
+  .review-header h2 { font-size: 1.1rem; font-weight: 700; }
+  .review-header .back-btn { font-size: 0.82rem; }
+  .review-list { flex: 1; padding: 1.2rem; max-width: 700px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 0.7rem; }
+  .review-empty { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+  .review-empty .review-empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+  .review-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1rem 1.2rem;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  }
+  .review-card-info { flex: 1; }
+  .review-word-en { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+  .review-word-es { font-size: 0.85rem; color: var(--muted); margin-top: 0.1rem; }
+  .review-meta { font-size: 0.72rem; color: var(--error); margin-top: 0.2rem; font-family: 'JetBrains Mono', monospace; }
+  .review-card-actions { display: flex; gap: 0.5rem; align-items: center; }
+  .review-clear-btn {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    padding: 0.3rem 0.6rem; border-radius: 7px; cursor: pointer; font-size: 0.75rem;
+    transition: all 0.15s; font-family: inherit;
+  }
+  .review-clear-btn:hover { border-color: var(--error); color: var(--error); }
+  .review-practice-btn {
+    background: var(--accent); color: #fff; border: none;
+    padding: 0.7rem 1.5rem; border-radius: 10px; cursor: pointer;
+    font-family: inherit; font-size: 0.9rem; font-weight: 600; transition: all 0.15s;
+    width: 100%; margin-top: 0.5rem;
+  }
+  .review-practice-btn:hover { background: #5a52e0; }
+
+  /* LEVEL UP OVERLAY */
+  #levelup-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85); z-index: 100; align-items: center; justify-content: center;
+  }
+  #levelup-overlay.show { display: flex; }
+  .levelup-card {
+    background: var(--card); border: 2px solid var(--accent2);
+    border-radius: 20px; padding: 2.2rem; max-width: 380px; width: 90%; text-align: center;
+  }
+  .levelup-icon { font-size: 2.8rem; margin-bottom: 0.4rem; }
+  .levelup-title { font-size: 1.7rem; font-weight: 700; color: var(--accent2); margin-bottom: 0.3rem; }
+  .levelup-sub { color: var(--muted); margin-bottom: 1.4rem; font-size: 0.95rem; }
+  .levelup-btns { display: flex; flex-direction: column; gap: 0.6rem; }
+  .btn-levelup-confirm {
+    background: var(--accent2); color: #000; border: none; padding: 0.85rem;
+    border-radius: 10px; cursor: pointer; font-family: inherit; font-size: 0.95rem; font-weight: 700;
+  }
+  .btn-levelup-confirm:hover { background: #00cc8a; }
+  .btn-levelup-stay {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    padding: 0.7rem; border-radius: 10px; cursor: pointer; font-family: inherit; font-size: 0.88rem;
+  }
+  .btn-levelup-stay:hover { border-color: var(--accent); color: var(--text); }
+
+  /* PLACEMENT */
+  #placement { align-items: center; justify-content: center; padding: 1.5rem; background: var(--bg); }
+  .placement-inner { max-width: 540px; width: 100%; }
+  .placement-inner h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .placement-inner p { color: var(--muted); margin-bottom: 1.2rem; font-size: 0.88rem; }
+  .placement-progress { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.2rem; }
+  .placement-bar { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .placement-fill { height: 100%; background: var(--warn); border-radius: 3px; transition: width 0.3s; }
+  .placement-q-count { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--muted); }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(60px);
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 0.65rem 1.3rem; font-size: 0.88rem; font-weight: 600;
+    transition: transform 0.25s ease, opacity 0.25s ease; opacity: 0; z-index: 200;
+    pointer-events: none; white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .toast.success { border-color: var(--success); color: var(--success); }
+  .toast.info { border-color: var(--accent); color: var(--accent); }
+  .toast.warn { border-color: var(--warn); color: var(--warn); }
+  .toast.error { border-color: var(--error); color: var(--error); }
+
+  @media (max-width: 480px) {
+    .options-grid { grid-template-columns: 1fr; }
+    .ws-cell { width: 27px; height: 27px; font-size: 0.72rem; }
+    .hdr-stats { gap: 0.7rem; }
+    .logo { font-size: 2.2rem; }
+    .topic-grid { grid-template-columns: 1fr; }
+    .level-row { gap: 0.4rem; }
+    .level-chip { font-size: 0.75rem; padding: 0.45rem 0.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- WELCOME -->
+<div id="welcome" class="screen active">
+  <div class="welcome-inner">
+    <div class="logo">Vocab<span>Quest</span></div>
+    <div class="tagline">Aprende vocabulario en inglés jugando</div>
+    <div class="install-banner" id="install-banner" onclick="installPWA()">
+      📲 Instalar app en tu celular — funciona sin internet
+    </div>
+
+    <div class="section-label">Tema a practicar</div>
+    <div class="topic-grid" id="topic-grid">
+      <button class="topic-btn" data-topic="daily"><span class="topic-icon">🏠</span>Vida cotidiana</button>
+      <button class="topic-btn" data-topic="food"><span class="topic-icon">🍕</span>Comida y bebida</button>
+      <button class="topic-btn" data-topic="work"><span class="topic-icon">💼</span>Trabajo y negocios</button>
+      <button class="topic-btn" data-topic="travel"><span class="topic-icon">✈️</span>Viajes y lugares</button>
+      <button class="topic-btn" data-topic="body"><span class="topic-icon">🧍</span>Cuerpo y salud</button>
+      <button class="topic-btn" data-topic="tech"><span class="topic-icon">💻</span>Tecnología</button>
+    </div>
+
+    <div class="section-label">Nivel de inicio</div>
+    <div class="level-row" id="level-row">
+      <button class="level-chip" data-level="1">Principiante</button>
+      <button class="level-chip" data-level="2">Básico</button>
+      <button class="level-chip" data-level="3">Intermedio</button>
+      <button class="level-chip" data-level="4">Avanzado</button>
+      <button class="level-chip" data-level="0">Evaluar</button>
+    </div>
+
+    <button class="btn-primary" id="start-btn" disabled>Empezar →</button>
+
+    <div class="review-btn-wrap">
+      <button class="btn-secondary" id="review-btn" disabled onclick="showReviewScreen()">
+        📋 Repasar palabras fallidas <span class="failed-count hidden" id="failed-count">0</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- PLACEMENT -->
+<div id="placement" class="screen">
+  <div class="placement-inner">
+    <h2>Evaluación de nivel</h2>
+    <p>Responde estas preguntas para colocarte en el nivel correcto. Sin penalización por error.</p>
+    <div class="placement-progress">
+      <div class="placement-bar"><div class="placement-fill" id="placement-fill" style="width:0%"></div></div>
+      <div class="placement-q-count" id="placement-q-count">0/10</div>
+    </div>
+    <div id="placement-exercise"></div>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="game" class="screen">
+  <div class="game-header">
+    <div class="hdr-left">
+      <button class="back-btn" id="back-btn">← Menú</button>
+      <div class="topic-badge" id="topic-label">Daily Life</div>
+      <div class="review-mode-badge hidden" id="review-mode-badge">🔁 Repaso</div>
+    </div>
+    <div class="hdr-stats">
+      <div class="streak-counter">🔥 <span class="streak-count" id="streak-count">0</span></div>
+      <div class="score-display"><span id="score-display">0</span></div>
+    </div>
+  </div>
+  <div class="level-bar">
+    <div class="level-label" id="level-label">Nivel 1</div>
+    <div class="progress-track"><div class="progress-fill" id="level-progress" style="width:0%"></div></div>
+    <div class="progress-text" id="progress-text">0/5</div>
+  </div>
+  <div class="exercise-zone" id="exercise-zone"></div>
+</div>
+
+<!-- REVIEW SCREEN -->
+<div id="review" class="screen">
+  <div class="review-header">
+    <h2>📋 Palabras para repasar</h2>
+    <button class="back-btn" onclick="backToMenu()">← Menú</button>
+  </div>
+  <div class="review-list" id="review-list"></div>
+</div>
+
+<!-- LEVEL UP OVERLAY -->
+<div id="levelup-overlay">
+  <div class="levelup-card">
+    <div class="levelup-icon">🎉</div>
+    <div class="levelup-title" id="levelup-title">¡Subiste de nivel!</div>
+    <div class="levelup-sub" id="levelup-sub">Nivel 2 — Básico</div>
+    <div class="levelup-btns">
+      <button class="btn-levelup-confirm" id="levelup-confirm">Continuar al siguiente nivel</button>
+      <button class="btn-levelup-stay" id="levelup-stay">Practicar más aquí</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// PWA INSTALL
+// ═══════════════════════════════════════════════
+let deferredInstall = null;
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstall = e;
+  document.getElementById('install-banner').classList.add('show');
+});
+window.addEventListener('appinstalled', () => {
+  document.getElementById('install-banner').classList.remove('show');
+  deferredInstall = null;
+});
+function installPWA() {
+  if (!deferredInstall) return;
+  deferredInstall.prompt();
+  deferredInstall.userChoice.then(() => { deferredInstall = null; });
+}
+
+// ═══════════════════════════════════════════════
+// SPEECH / AUDIO
+// ═══════════════════════════════════════════════
+function speak(text, btn) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'en-US'; utt.rate = 0.85; utt.pitch = 1;
+  // Try to get a native English voice
+  const voices = window.speechSynthesis.getVoices();
+  const enVoice = voices.find(v => v.lang.startsWith('en') && v.localService) ||
+                  voices.find(v => v.lang.startsWith('en'));
+  if (enVoice) utt.voice = enVoice;
+
+  if (btn) {
+    btn.classList.add('playing');
+    utt.onend = () => btn.classList.remove('playing');
+    utt.onerror = () => btn.classList.remove('playing');
+  }
+  window.speechSynthesis.speak(utt);
+}
+// Preload voices
+if (window.speechSynthesis) {
+  window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+}
+
+// ═══════════════════════════════════════════════
+// VOCAB DATABASE
+// ═══════════════════════════════════════════════
+const VOCAB = {
+  daily: {
+    1: [
+      {en:"house",es:"casa",hint:"Where you live"},{en:"door",es:"puerta",hint:"You open and close it"},
+      {en:"window",es:"ventana",hint:"You see through it"},{en:"table",es:"mesa",hint:"You eat at it"},
+      {en:"chair",es:"silla",hint:"You sit on it"},{en:"bed",es:"cama",hint:"You sleep in it"},
+      {en:"water",es:"agua",hint:"You drink it"},{en:"book",es:"libro",hint:"You read it"},
+      {en:"car",es:"carro",hint:"A vehicle"},{en:"phone",es:"teléfono",hint:"You call people with it"},
+    ],
+    2: [
+      {en:"kitchen",es:"cocina",hint:"Room where you cook"},{en:"bathroom",es:"baño",hint:"Room with a shower"},
+      {en:"bedroom",es:"cuarto",hint:"Room where you sleep"},{en:"neighbor",es:"vecino",hint:"Person next to you"},
+      {en:"schedule",es:"horario",hint:"Plan of activities"},{en:"grocery",es:"supermercado",hint:"Where you buy food"},
+      {en:"laundry",es:"lavandería",hint:"Where you wash clothes"},{en:"exercise",es:"ejercicio",hint:"Physical activity"},
+      {en:"weekend",es:"fin de semana",hint:"Saturday and Sunday"},{en:"routine",es:"rutina",hint:"Daily habits"},
+    ],
+    3: [
+      {en:"appliance",es:"electrodoméstico",hint:"Electrical home device"},{en:"mortgage",es:"hipoteca",hint:"Loan to buy a house"},
+      {en:"furniture",es:"muebles",hint:"Tables, chairs, sofas"},{en:"utilities",es:"servicios públicos",hint:"Electricity, water bills"},
+      {en:"commute",es:"trayecto al trabajo",hint:"Daily travel to work"},{en:"household",es:"hogar",hint:"People living together"},
+      {en:"chores",es:"quehaceres",hint:"Cleaning, cooking tasks"},{en:"neighborhood",es:"vecindario",hint:"Area where you live"},
+      {en:"landlord",es:"arrendador",hint:"Owner of rental property"},{en:"renovation",es:"renovación",hint:"Remodeling a space"},
+    ],
+    4: [
+      {en:"acquaintance",es:"conocido",hint:"Someone you know slightly"},{en:"ambiance",es:"ambiente",hint:"Mood of a place"},
+      {en:"dwelling",es:"morada",hint:"A place where someone lives"},{en:"infrastructure",es:"infraestructura",hint:"Basic systems of a city"},
+      {en:"etiquette",es:"etiqueta",hint:"Rules of polite behavior"},{en:"nuisance",es:"molestia",hint:"Something annoying"},
+      {en:"predicament",es:"dilema",hint:"Difficult situation"},{en:"livelihood",es:"sustento",hint:"Means of supporting oneself"},
+      {en:"subsistence",es:"subsistencia",hint:"Minimum to survive"},{en:"tenure",es:"tenencia",hint:"Period of holding a position"},
+    ]
+  },
+  food: {
+    1: [
+      {en:"apple",es:"manzana",hint:"Red or green fruit"},{en:"bread",es:"pan",hint:"Made from flour, baked"},
+      {en:"milk",es:"leche",hint:"White drink from cows"},{en:"egg",es:"huevo",hint:"Chickens lay them"},
+      {en:"rice",es:"arroz",hint:"Common Latin staple"},{en:"chicken",es:"pollo",hint:"Common bird we eat"},
+      {en:"orange",es:"naranja",hint:"Citrus fruit"},{en:"coffee",es:"café",hint:"Hot morning drink"},
+      {en:"sugar",es:"azúcar",hint:"Makes things sweet"},{en:"salt",es:"sal",hint:"Makes things salty"},
+    ],
+    2: [
+      {en:"breakfast",es:"desayuno",hint:"First meal of the day"},{en:"vegetable",es:"vegetal",hint:"Healthy plant food"},
+      {en:"dessert",es:"postre",hint:"Sweet after meal"},{en:"ingredient",es:"ingrediente",hint:"Part of a recipe"},
+      {en:"portion",es:"porción",hint:"Amount of food served"},{en:"beverage",es:"bebida",hint:"Something you drink"},
+      {en:"seafood",es:"mariscos",hint:"Fish and shellfish"},{en:"spicy",es:"picante",hint:"Hot and flavorful"},
+      {en:"grilled",es:"a la parrilla",hint:"Cooked on a grill"},{en:"frozen",es:"congelado",hint:"Kept very cold"},
+    ],
+    3: [
+      {en:"cuisine",es:"gastronomía",hint:"Style of cooking"},{en:"marinate",es:"marinar",hint:"Soak in seasoning"},
+      {en:"garnish",es:"decorar el plato",hint:"Decorative addition to food"},{en:"sauté",es:"saltear",hint:"Fry in a little oil"},
+      {en:"fermented",es:"fermentado",hint:"Made with bacteria/yeast"},{en:"dietary",es:"dietético",hint:"Related to diet"},
+      {en:"wholesome",es:"nutritivo",hint:"Good and healthy food"},{en:"palate",es:"paladar",hint:"Ability to taste"},
+      {en:"catering",es:"servicio de comidas",hint:"Providing food for events"},{en:"staple",es:"alimento básico",hint:"Main food in a diet"},
+    ],
+    4: [
+      {en:"gastronomy",es:"gastronomía alta",hint:"Art of good eating"},{en:"umami",es:"umami",hint:"The fifth basic taste"},
+      {en:"provenance",es:"procedencia",hint:"Origin of ingredients"},{en:"artisanal",es:"artesanal",hint:"Made by hand"},
+      {en:"dehydrate",es:"deshidratar",hint:"Remove water from food"},{en:"emulsify",es:"emulsionar",hint:"Blend two liquids"},
+      {en:"macerate",es:"macerar",hint:"Soften food in liquid"},{en:"julienne",es:"corte juliana",hint:"Cut into thin strips"},
+      {en:"blanch",es:"blanquear",hint:"Briefly boil then cool"},{en:"braise",es:"brasear",hint:"Slow cook in liquid"},
+    ]
+  },
+  work: {
+    1: [
+      {en:"office",es:"oficina",hint:"Place where you work"},{en:"boss",es:"jefe",hint:"Person in charge"},
+      {en:"meeting",es:"reunión",hint:"Group discussion"},{en:"email",es:"correo",hint:"Electronic message"},
+      {en:"salary",es:"salario",hint:"Monthly pay"},{en:"team",es:"equipo",hint:"Group of coworkers"},
+      {en:"job",es:"trabajo",hint:"Your employment"},{en:"task",es:"tarea",hint:"Something to do"},
+      {en:"report",es:"informe",hint:"Written summary"},{en:"deadline",es:"fecha límite",hint:"When it must be done"},
+    ],
+    2: [
+      {en:"colleague",es:"colega",hint:"A coworker"},{en:"project",es:"proyecto",hint:"Planned piece of work"},
+      {en:"budget",es:"presupuesto",hint:"Available money"},{en:"proposal",es:"propuesta",hint:"Plan suggestion"},
+      {en:"training",es:"capacitación",hint:"Learning new skills"},{en:"feedback",es:"retroalimentación",hint:"Comments on work"},
+      {en:"client",es:"cliente",hint:"Person you work for"},{en:"contract",es:"contrato",hint:"Legal agreement"},
+      {en:"promotion",es:"ascenso",hint:"Moving higher"},{en:"overtime",es:"tiempo extra",hint:"Working extra hours"},
+    ],
+    3: [
+      {en:"productivity",es:"productividad",hint:"How much you accomplish"},{en:"stakeholder",es:"parte interesada",hint:"Affected by project"},
+      {en:"benchmark",es:"punto de referencia",hint:"Standard for comparison"},{en:"delegation",es:"delegación",hint:"Assigning tasks"},
+      {en:"accountability",es:"responsabilidad",hint:"Answerable for results"},{en:"incentive",es:"incentivo",hint:"Reward for performance"},
+      {en:"workforce",es:"fuerza laboral",hint:"All workers"},{en:"compliance",es:"cumplimiento",hint:"Following rules"},
+      {en:"outsource",es:"subcontratar",hint:"Hire external company"},{en:"revenue",es:"ingresos",hint:"Money company earns"},
+    ],
+    4: [
+      {en:"synergy",es:"sinergia",hint:"Combined efforts more effective"},{en:"scalability",es:"escalabilidad",hint:"Ability to grow"},
+      {en:"leverage",es:"apalancar",hint:"Use resources for advantage"},{en:"fiduciary",es:"fiduciario",hint:"Manage others' assets"},
+      {en:"arbitration",es:"arbitraje",hint:"Resolving disputes"},{en:"procurement",es:"adquisición",hint:"Obtaining supplies"},
+      {en:"liability",es:"responsabilidad legal",hint:"Legal obligation"},{en:"equity",es:"capital",hint:"Ownership in a company"},
+      {en:"mitigation",es:"mitigación",hint:"Reducing risk"},{en:"incumbent",es:"titular",hint:"Current holder of position"},
+    ]
+  },
+  travel: {
+    1: [
+      {en:"airport",es:"aeropuerto",hint:"Where planes take off"},{en:"hotel",es:"hotel",hint:"Where you sleep traveling"},
+      {en:"ticket",es:"boleto",hint:"Document to travel"},{en:"passport",es:"pasaporte",hint:"Travel ID document"},
+      {en:"map",es:"mapa",hint:"Shows you where to go"},{en:"beach",es:"playa",hint:"Sand and ocean"},
+      {en:"mountain",es:"montaña",hint:"Very tall landform"},{en:"city",es:"ciudad",hint:"Large urban area"},
+      {en:"bus",es:"autobús",hint:"Public transport"},{en:"tour",es:"tour",hint:"Guided visit"},
+    ],
+    2: [
+      {en:"boarding pass",es:"tarjeta de embarque",hint:"Document to board a plane"},{en:"luggage",es:"equipaje",hint:"Bags when traveling"},
+      {en:"reservation",es:"reservación",hint:"Booking in advance"},{en:"customs",es:"aduana",hint:"Border control"},
+      {en:"currency",es:"moneda",hint:"Money of a country"},{en:"destination",es:"destino",hint:"Where you are going"},
+      {en:"itinerary",es:"itinerario",hint:"Travel plan"},{en:"layover",es:"escala",hint:"Stop between flights"},
+      {en:"souvenir",es:"recuerdo",hint:"Item from a place"},{en:"hostel",es:"hostal",hint:"Cheap accommodation"},
+    ],
+    3: [
+      {en:"expedition",es:"expedición",hint:"Journey to explore"},{en:"excursion",es:"excursión",hint:"Short trip"},
+      {en:"landmark",es:"punto de referencia",hint:"Famous feature"},{en:"embark",es:"embarcarse",hint:"Begin a journey"},
+      {en:"depart",es:"partir",hint:"Leave a place"},{en:"accommodation",es:"alojamiento",hint:"Where you stay"},
+      {en:"immigration",es:"inmigración",hint:"Official entry process"},{en:"transit",es:"tránsito",hint:"Passing through"},
+      {en:"valid",es:"vigente",hint:"Still in effect"},{en:"domestic",es:"nacional",hint:"Within your country"},
+    ],
+    4: [
+      {en:"nomadic",es:"nómada",hint:"Moving place to place"},{en:"expatriate",es:"expatriado",hint:"Living abroad"},
+      {en:"pilgrimage",es:"peregrinaje",hint:"Journey to sacred place"},{en:"circumnavigate",es:"circunnavegar",hint:"Travel all the way around"},
+      {en:"indigenous",es:"indígena",hint:"Originally from region"},{en:"diaspora",es:"diáspora",hint:"Scattered population"},
+      {en:"traverse",es:"atravesar",hint:"Cross or travel across"},{en:"remote",es:"remoto",hint:"Far from populated areas"},
+      {en:"sovereignty",es:"soberanía",hint:"Independent territory control"},{en:"antiquity",es:"antigüedad",hint:"Very ancient times"},
+    ]
+  },
+  body: {
+    1: [
+      {en:"head",es:"cabeza",hint:"Top of your body"},{en:"hand",es:"mano",hint:"End of your arm"},
+      {en:"eye",es:"ojo",hint:"You see with it"},{en:"ear",es:"oreja",hint:"You hear with it"},
+      {en:"mouth",es:"boca",hint:"You eat and speak with it"},{en:"foot",es:"pie",hint:"You walk with it"},
+      {en:"heart",es:"corazón",hint:"Pumps blood"},{en:"back",es:"espalda",hint:"Rear of your torso"},
+      {en:"knee",es:"rodilla",hint:"Joint in your leg"},{en:"teeth",es:"dientes",hint:"You chew with them"},
+    ],
+    2: [
+      {en:"shoulder",es:"hombro",hint:"Top of your arm"},{en:"stomach",es:"estómago",hint:"Where food is digested"},
+      {en:"wrist",es:"muñeca",hint:"Between hand and arm"},{en:"ankle",es:"tobillo",hint:"Between foot and leg"},
+      {en:"elbow",es:"codo",hint:"Middle joint of arm"},{en:"forehead",es:"frente",hint:"Above your eyes"},
+      {en:"thumb",es:"pulgar",hint:"Biggest finger"},{en:"spine",es:"columna",hint:"Backbone"},
+      {en:"lungs",es:"pulmones",hint:"You breathe with them"},{en:"liver",es:"hígado",hint:"Filters blood"},
+    ],
+    3: [
+      {en:"immune system",es:"sistema inmune",hint:"Body's defense"},{en:"cardiovascular",es:"cardiovascular",hint:"Heart and blood vessels"},
+      {en:"metabolism",es:"metabolismo",hint:"Food to energy"},{en:"symptom",es:"síntoma",hint:"Sign of illness"},
+      {en:"diagnosis",es:"diagnóstico",hint:"Identifying illness"},{en:"prescription",es:"receta médica",hint:"Doctor's medicine order"},
+      {en:"fracture",es:"fractura",hint:"Broken bone"},{en:"inflammation",es:"inflamación",hint:"Redness and swelling"},
+      {en:"allergy",es:"alergia",hint:"Reaction to substance"},{en:"rehabilitation",es:"rehabilitación",hint:"Recovery after injury"},
+    ],
+    4: [
+      {en:"physiology",es:"fisiología",hint:"Study of body functions"},{en:"neurological",es:"neurológico",hint:"Nervous system"},
+      {en:"pathogen",es:"patógeno",hint:"Disease-causing organism"},{en:"antibody",es:"anticuerpo",hint:"Fights infection"},
+      {en:"chronic",es:"crónico",hint:"Long-lasting condition"},{en:"prognosis",es:"pronóstico",hint:"Predicted outcome"},
+      {en:"hypertension",es:"hipertensión",hint:"High blood pressure"},{en:"malignant",es:"maligno",hint:"Dangerous, likely to spread"},
+      {en:"benign",es:"benigno",hint:"Not harmful"},{en:"platelet",es:"plaqueta",hint:"Blood clotting cell"},
+    ]
+  },
+  tech: {
+    1: [
+      {en:"computer",es:"computadora",hint:"Electronic machine"},{en:"screen",es:"pantalla",hint:"You look at it"},
+      {en:"keyboard",es:"teclado",hint:"You type on it"},{en:"mouse",es:"ratón",hint:"You click with it"},
+      {en:"file",es:"archivo",hint:"Document stored digitally"},{en:"folder",es:"carpeta",hint:"Contains files"},
+      {en:"password",es:"contraseña",hint:"Secret access code"},{en:"internet",es:"internet",hint:"Global network"},
+      {en:"battery",es:"batería",hint:"Powers your device"},{en:"charger",es:"cargador",hint:"Refills battery"},
+    ],
+    2: [
+      {en:"software",es:"software",hint:"Programs and apps"},{en:"database",es:"base de datos",hint:"Organized data storage"},
+      {en:"network",es:"red",hint:"Connected computers"},{en:"update",es:"actualización",hint:"New software version"},
+      {en:"download",es:"descargar",hint:"Get data from internet"},{en:"upload",es:"subir",hint:"Send data to internet"},
+      {en:"backup",es:"respaldo",hint:"Copy of your data"},{en:"firewall",es:"cortafuegos",hint:"Security barrier"},
+      {en:"bandwidth",es:"ancho de banda",hint:"Internet speed capacity"},{en:"browser",es:"navegador",hint:"App to visit websites"},
+    ],
+    3: [
+      {en:"algorithm",es:"algoritmo",hint:"Step-by-step instructions"},{en:"encryption",es:"cifrado",hint:"Securing with code"},
+      {en:"deployment",es:"despliegue",hint:"Publishing an application"},{en:"repository",es:"repositorio",hint:"Stored code collection"},
+      {en:"API",es:"API",hint:"Interface connecting software"},{en:"authentication",es:"autenticación",hint:"Verifying identity"},
+      {en:"server",es:"servidor",hint:"Computer providing services"},{en:"framework",es:"marco de trabajo",hint:"Base structure for apps"},
+      {en:"debugging",es:"depuración",hint:"Finding and fixing errors"},{en:"latency",es:"latencia",hint:"Delay in data transfer"},
+    ],
+    4: [
+      {en:"abstraction",es:"abstracción",hint:"Hiding complexity"},{en:"scalability",es:"escalabilidad",hint:"Handle growth"},
+      {en:"concurrency",es:"concurrencia",hint:"Multiple tasks at once"},{en:"middleware",es:"middleware",hint:"Connecting components"},
+      {en:"containerization",es:"contenedorización",hint:"Packaging in containers"},{en:"microservices",es:"microservicios",hint:"Small independent services"},
+      {en:"orchestration",es:"orquestación",hint:"Managing services"},{en:"throughput",es:"rendimiento",hint:"Amount processed per time"},
+      {en:"idempotent",es:"idempotente",hint:"Same result regardless of calls"},{en:"deprecation",es:"obsolescencia",hint:"Phasing out old features"},
+    ]
+  }
+};
+
+const LEVEL_NAMES = ['','Principiante','Básico','Intermedio','Avanzado'];
+const TOPIC_NAMES = {daily:'Vida Diaria',food:'Comida',work:'Trabajo',travel:'Viajes',body:'Cuerpo & Salud',tech:'Tecnología'};
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let state = {
+  topic: null, level: 1, streak: 0, score: 0,
+  levelProgress: 0, usedWords: new Set(), exNum: 0, answered: false, currentWord: null,
+  isReviewMode: false, reviewQueue: []
+};
+
+// Failed words stored in localStorage
+function getFailedWords() {
+  try { return JSON.parse(localStorage.getItem('vq_failed') || '[]'); } catch { return []; }
+}
+function saveFailedWords(arr) {
+  try { localStorage.setItem('vq_failed', JSON.stringify(arr)); } catch {}
+}
+function addFailedWord(word, topic, level) {
+  const arr = getFailedWords();
+  const key = word.en;
+  if (!arr.find(w => w.en === key)) {
+    arr.push({...word, topic, level, failCount: 1, ts: Date.now()});
+  } else {
+    const w = arr.find(w => w.en === key);
+    w.failCount = (w.failCount || 1) + 1;
+    w.ts = Date.now();
+  }
+  saveFailedWords(arr);
+  updateFailedBadge();
+}
+function removeFailedWord(en) {
+  const arr = getFailedWords().filter(w => w.en !== en);
+  saveFailedWords(arr);
+  updateFailedBadge();
+}
+function updateFailedBadge() {
+  const arr = getFailedWords();
+  const cnt = document.getElementById('failed-count');
+  const btn = document.getElementById('review-btn');
+  if (arr.length > 0) {
+    cnt.textContent = arr.length;
+    cnt.classList.remove('hidden');
+    btn.disabled = false;
+  } else {
+    cnt.classList.add('hidden');
+    btn.disabled = true;
+  }
+}
+
+// ═══════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════
+function shuffle(arr) { return [...arr].sort(() => Math.random()-0.5); }
+function getWords(topic, level) { return VOCAB[topic]?.[level] || []; }
+
+function pickWord(topic, level) {
+  const pool = getWords(topic, level);
+  const available = pool.filter(w => !state.usedWords.has(w.en));
+  if (available.length === 0) { state.usedWords.clear(); return pickWord(topic, level); }
+  const w = available[Math.floor(Math.random() * available.length)];
+  state.usedWords.add(w.en);
+  return w;
+}
+
+function pickWrongOptions(topic, level, correctEn, count=3) {
+  const pool = [];
+  [1,2,3,4].forEach(l => { if (VOCAB[topic]?.[l]) pool.push(...VOCAB[topic][l].filter(w => w.en !== correctEn)); });
+  return shuffle(pool).slice(0, count);
+}
+
+function showToast(msg, type='info', dur=1800) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast show ${type}`;
+  setTimeout(() => { t.className = 'toast'; }, dur);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function updateHUD() {
+  document.getElementById('streak-count').textContent = state.streak;
+  document.getElementById('score-display').textContent = state.score + ' pts';
+  document.getElementById('level-label').textContent = `Nivel ${state.level} — ${LEVEL_NAMES[state.level]}`;
+  const pct = Math.min((state.levelProgress / 5) * 100, 100);
+  document.getElementById('level-progress').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `${Math.min(state.levelProgress,5)}/5`;
+  document.getElementById('topic-label').textContent = TOPIC_NAMES[state.topic] || '';
+  const reviewBadge = document.getElementById('review-mode-badge');
+  if (state.isReviewMode) reviewBadge.classList.remove('hidden');
+  else reviewBadge.classList.add('hidden');
+}
+
+// ═══════════════════════════════════════════════
+// EXERCISE ENGINE
+// ═══════════════════════════════════════════════
+function pickExerciseType() {
+  const types = ['mcq_es_to_en','mcq_en_to_es','fill_blank','type_word'];
+  if (state.level >= 2) types.push('fill_blank','type_word');
+  if (state.level >= 3) types.push('word_search');
+  return types[Math.floor(Math.random() * types.length)];
+}
+
+function renderExercise() {
+  const zone = document.getElementById('exercise-zone');
+
+  // Review mode: pick from review queue
+  let word;
+  if (state.isReviewMode) {
+    if (state.reviewQueue.length === 0) {
+      zone.innerHTML = `
+        <div class="ex-card" style="text-align:center;padding:2rem">
+          <div style="font-size:2rem;margin-bottom:0.5rem">🎓</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--accent2)">¡Repaso completado!</div>
+          <div style="color:var(--muted);margin:0.5rem 0 1.2rem">Practicaste todas las palabras fallidas.</div>
+          <button class="btn-next" onclick="backToMenu()">← Volver al menú</button>
+        </div>`;
+      return;
+    }
+    word = state.reviewQueue.shift();
+  } else {
+    word = pickWord(state.topic, state.level);
+  }
+
+  state.currentWord = word;
+  state.answered = false;
+  state.exNum++;
+
+  const type = state.isReviewMode ? shuffle(['mcq_es_to_en','mcq_en_to_es','type_word'])[0] : pickExerciseType();
+
+  if (type === 'word_search' && !state.isReviewMode) {
+    return renderWordSearch(zone);
+  }
+
+  let html = `
+    <div class="ex-type-row">
+      <span class="ex-type-badge">${exTypeLabel(type)}</span>
+      <span class="ex-num">#${state.exNum}</span>
+    </div>
+    <div class="ex-card" id="ex-card">
+  `;
+
+  if (type === 'mcq_es_to_en') {
+    const wrongs = pickWrongOptions(state.topic || word.topic, state.level, word.en);
+    const options = shuffle([word, ...wrongs]);
+    html += `
+      <div class="ex-question">
+        ¿Cómo se dice <span class="word-highlight">"${word.es}"</span> en inglés?
+        <button class="audio-btn" onclick="speak('${word.en.replace(/'/g,"\\'")}', this)" title="Escuchar pronunciación">🔊 Escuchar</button>
+      </div>
+      <div class="options-grid" id="options-grid">
+        ${options.map(o => `<button class="option-btn" data-val="${o.en}">${o.en}</button>`).join('')}
+      </div>`;
+  } else if (type === 'mcq_en_to_es') {
+    const wrongs = pickWrongOptions(state.topic || word.topic, state.level, word.en);
+    const options = shuffle([word, ...wrongs]);
+    html += `
+      <div class="ex-question">
+        ¿Qué significa <span class="word-highlight">"${word.en}"</span>?
+        <button class="audio-btn" onclick="speak('${word.en.replace(/'/g,"\\'")}', this)" title="Escuchar">🔊</button>
+      </div>
+      <div class="options-grid" id="options-grid">
+        ${options.map(o => `<button class="option-btn" data-val="${o.en}">${o.es}</button>`).join('')}
+      </div>`;
+  } else if (type === 'fill_blank') {
+    const sentence = makeSentence(word);
+    html += `
+      <div class="ex-question">${sentence.display}</div>
+      <div style="font-size:0.8rem;color:var(--muted)">Pista: ${word.hint}</div>
+      <div class="text-input-area">
+        <input type="text" id="fill-input" class="ex-input" placeholder="Escribe la palabra..." autocomplete="off" autocorrect="off" spellcheck="false">
+        <button class="submit-btn" id="submit-fill">→</button>
+        <button class="audio-btn-large" onclick="speak('${word.en.replace(/'/g,"\\'")}', this)" title="Pronunciar">🔊</button>
+      </div>`;
+  } else if (type === 'type_word') {
+    html += `
+      <div class="ex-question">
+        Escribe en inglés: <span class="word-highlight">"${word.es}"</span>
+      </div>
+      <div style="font-size:0.8rem;color:var(--muted);margin-top:-0.3rem">Pista: ${word.hint}</div>
+      <div class="text-input-area">
+        <input type="text" id="fill-input" class="ex-input" placeholder="Type in English..." autocomplete="off" autocorrect="off" spellcheck="false">
+        <button class="submit-btn" id="submit-fill">→</button>
+        <button class="audio-btn-large" onclick="speak('${word.en.replace(/'/g,"\\'")}', this)" title="Pronunciar">🔊</button>
+      </div>`;
+  }
+
+  html += `
+      <div class="feedback-row" id="feedback-row"></div>
+      <div class="nav-row hidden" id="nav-row">
+        <button class="btn-skip" id="skip-btn">Saltar</button>
+        <button class="btn-next" id="next-btn">Siguiente →</button>
+      </div>
+    </div>`;
+
+  zone.innerHTML = html;
+  updateHUD();
+
+  // Attach events
+  if (type === 'mcq_es_to_en' || type === 'mcq_en_to_es') {
+    document.querySelectorAll('.option-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (state.answered) return;
+        handleAnswer(btn.dataset.val === word.en, word, btn, document.querySelectorAll('.option-btn'));
+      });
+    });
+  } else {
+    const inp = document.getElementById('fill-input');
+    const sub = document.getElementById('submit-fill');
+    const check = () => {
+      if (state.answered) return;
+      const val = inp.value.trim().toLowerCase();
+      const correct = val === word.en.toLowerCase();
+      inp.classList.add(correct ? 'correct' : 'wrong');
+      handleAnswer(correct, word, null, null);
+    };
+    sub.addEventListener('click', check);
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+    setTimeout(() => inp.focus(), 80);
+  }
+
+  document.getElementById('skip-btn')?.addEventListener('click', () => renderExercise());
+  document.getElementById('next-btn')?.addEventListener('click', () => renderExercise());
+}
+
+function exTypeLabel(t) {
+  return {
+    mcq_es_to_en:'Elige en inglés', mcq_en_to_es:'Elige la traducción',
+    fill_blank:'Completa la oración', type_word:'Escribe la palabra', word_search:'Sopa de letras'
+  }[t] || t;
+}
+
+function makeSentence(word) {
+  const templates = [
+    `The <span class="blank">___</span> is very important.`,
+    `I need to buy a <span class="blank">___</span>.`,
+    `She has a nice <span class="blank">___</span>.`,
+    `Can you see the <span class="blank">___</span>?`,
+    `We use a <span class="blank">___</span> every day.`,
+    `There is a <span class="blank">___</span> near here.`,
+  ];
+  return { answer: word.en, display: templates[Math.floor(Math.random() * templates.length)] };
+}
+
+function handleAnswer(correct, word, clickedBtn, allBtns) {
+  state.answered = true;
+  const card = document.getElementById('ex-card');
+  const fb = document.getElementById('feedback-row');
+
+  if (correct) {
+    state.streak++;
+    state.score += (10 + state.level * 5);
+    state.levelProgress++;
+    card.classList.add('correct');
+    speak(word.en);
+    fb.innerHTML = `<span class="feedback-msg ok">✓ ¡Correcto!</span>
+      <button class="audio-btn" onclick="speak('${word.en.replace(/'/g,"\\'")}', this)">🔊 ${word.en}</button>`;
+    if (clickedBtn) clickedBtn.classList.add('selected-correct');
+    // Remove from failed if was there
+    removeFailedWord(word.en);
+    if (state.levelProgress >= 5 && state.level < 4 && !state.isReviewMode) {
+      setTimeout(showLevelUp, 700);
+    }
+  } else {
+    state.streak = 0;
+    state.levelProgress = Math.max(0, state.levelProgress - 1);
+    card.classList.add('wrong');
+    addFailedWord(word, state.isReviewMode ? (word.topic || state.topic) : state.topic, state.level);
+    fb.innerHTML = `<span class="feedback-msg bad">✗ Incorrecto.</span>
+      <span class="feedback-hint">Respuesta: <strong>${word.en}</strong> — ${word.es}</span>
+      <button class="audio-btn" onclick="speak('${word.en.replace(/'/g,"\\'")}', this)">🔊 Escuchar</button>`;
+    if (clickedBtn) {
+      clickedBtn.classList.add('selected-wrong');
+      if (allBtns) { allBtns.forEach(b => { if(b.dataset.val===word.en) b.classList.add('reveal-correct'); b.disabled=true; }); }
+    }
+  }
+
+  document.getElementById('nav-row').classList.remove('hidden');
+  updateHUD();
+}
+
+// ═══════════════════════════════════════════════
+// WORD SEARCH
+// ═══════════════════════════════════════════════
+let wsState = {};
+
+function renderWordSearch(zone) {
+  const wordPool = getWords(state.topic, state.level);
+  const selected = shuffle(wordPool).slice(0, Math.min(5 + state.level, 8));
+  const words = selected.map(w => w.en.toUpperCase().replace(/\s/g,''));
+  const gridSize = state.level <= 2 ? 10 : 12;
+  const grid = buildWSGrid(words, gridSize);
+  wsState = {grid, words, found:[], selected};
+
+  let html = `
+    <div class="ex-type-row">
+      <span class="ex-type-badge">Sopa de letras</span>
+      <span class="ex-num">#${state.exNum}</span>
+    </div>
+    <div class="ex-card" id="ex-card">
+      <div class="ex-question">Encuentra estas palabras:</div>
+      <div class="word-search-wrap">
+        <div class="word-list" id="ws-word-list">
+          ${selected.map(w=>`<div class="word-tag" id="tag-${w.en.replace(/[\s]/g,'_')}">${w.en}</div>`).join('')}
+        </div>
+        <div class="ws-grid-wrap">
+          <div class="ws-grid" id="ws-grid" style="grid-template-columns: repeat(${gridSize}, 32px);">
+            ${grid.map((row,r)=>row.map((cell,c)=>`<div class="ws-cell" data-r="${r}" data-c="${c}">${cell}</div>`).join('')).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="feedback-row" id="feedback-row"></div>
+      <div class="nav-row hidden" id="nav-row">
+        <button class="btn-skip" id="skip-btn">Saltar</button>
+        <button class="btn-next" id="next-btn">Siguiente →</button>
+      </div>
+    </div>`;
+  zone.innerHTML = html;
+  updateHUD();
+  attachWSEvents(words, selected, gridSize);
+  document.getElementById('skip-btn')?.addEventListener('click', ()=>renderExercise());
+  document.getElementById('next-btn')?.addEventListener('click', ()=>renderExercise());
+}
+
+function buildWSGrid(words, size) {
+  const grid = Array.from({length:size}, ()=>Array(size).fill(''));
+  const dirs = [[0,1],[1,0],[1,1],[0,-1],[-1,0],[-1,-1],[1,-1],[-1,1]];
+  for (const word of words) {
+    let tries = 0;
+    while (tries++ < 120) {
+      const dir = dirs[Math.floor(Math.random()*dirs.length)];
+      const r = Math.floor(Math.random()*size), c = Math.floor(Math.random()*size);
+      if (canPlace(grid, word, r, c, dir, size)) { placeWord(grid, word, r, c, dir); break; }
+    }
+  }
+  const letters = 'ABCDEFGHIJKLMNOPRSTUVWXY';
+  for (let r=0;r<size;r++) for (let c=0;c<size;c++) if (!grid[r][c]) grid[r][c]=letters[Math.floor(Math.random()*letters.length)];
+  return grid;
+}
+function canPlace(grid, word, r, c, [dr,dc], size) {
+  for (let i=0;i<word.length;i++) {
+    const nr=r+dr*i, nc=c+dc*i;
+    if (nr<0||nr>=size||nc<0||nc>=size) return false;
+    if (grid[nr][nc] && grid[nr][nc]!==word[i]) return false;
+  }
+  return true;
+}
+function placeWord(grid, word, r, c, [dr,dc]) {
+  for (let i=0;i<word.length;i++) grid[r+dr*i][c+dc*i]=word[i];
+}
+
+function attachWSEvents(words, selected, gridSize) {
+  const gridEl = document.getElementById('ws-grid');
+  let selecting=false, startR=-1, startC=-1, highlighted=[];
+
+  function getLine(r1,c1,r2,c2) {
+    if (r1===r2&&c1===c2) return [[r1,c1]];
+    const dr=Math.sign(r2-r1), dc=Math.sign(c2-c1);
+    const line=[]; let r=r1,c=c1, steps=0;
+    while(steps++<gridSize*2) { line.push([r,c]); if(r===r2&&c===c2) break; r+=dr; c+=dc; }
+    return line;
+  }
+  function clearHL() {
+    highlighted.forEach(([r,c])=>{ const el=gridEl.querySelector(`[data-r="${r}"][data-c="${c}"]`); if(el&&!wsState.found.some(f=>f.cells.some(([fr,fc])=>fr===r&&fc===c))) el.classList.remove('selecting'); });
+    highlighted=[];
+  }
+  function hl(line) {
+    clearHL();
+    line.forEach(([r,c])=>{ const el=gridEl.querySelector(`[data-r="${r}"][data-c="${c}"]`); if(el){el.classList.add('selecting');highlighted.push([r,c]);} });
+  }
+  function checkWord(line) {
+    const str=line.map(([r,c])=>wsState.grid[r][c]).join('');
+    return words.find(w=>w===str||w===str.split('').reverse().join(''))||null;
+  }
+  function markFound(found, line) {
+    const origWord = selected.find(w=>w.en.toUpperCase().replace(/\s/g,'')=== found);
+    if (!origWord||wsState.found.some(f=>f.word===found)) return;
+    wsState.found.push({word:found, cells:line});
+    line.forEach(([fr,fc])=>{ const fcell=gridEl.querySelector(`[data-r="${fr}"][data-c="${fc}"]`); if(fcell){fcell.classList.remove('selecting');fcell.classList.add('found-cell');} });
+    const tag=document.getElementById(`tag-${origWord.en.replace(/[\s]/g,'_')}`);
+    if(tag) tag.classList.add('found');
+    speak(origWord.en);
+    state.score+=(8+state.level*3); state.streak++; state.levelProgress=Math.min(state.levelProgress+0.5,5);
+    updateHUD();
+    showToast(`✓ "${origWord.en}" encontrado!`,'success');
+    if(wsState.found.length===words.length) {
+      state.score+=20; state.levelProgress=Math.min(5,state.levelProgress+1);
+      document.getElementById('feedback-row').innerHTML=`<span class="feedback-msg ok">🎉 ¡Todas encontradas! +20 pts</span>`;
+      document.getElementById('nav-row').classList.remove('hidden');
+      state.answered=true; updateHUD();
+      if(state.levelProgress>=5&&state.level<4) setTimeout(showLevelUp,600);
+    }
+  }
+
+  gridEl.addEventListener('mousedown',e=>{ const cell=e.target.closest('.ws-cell'); if(!cell)return; selecting=true; startR=+cell.dataset.r;startC=+cell.dataset.c; hl([[startR,startC]]); });
+  gridEl.addEventListener('mousemove',e=>{ if(!selecting)return; const cell=e.target.closest('.ws-cell'); if(!cell)return; hl(getLine(startR,startC,+cell.dataset.r,+cell.dataset.c)); });
+  gridEl.addEventListener('mouseup',e=>{ if(!selecting)return; selecting=false; const cell=e.target.closest('.ws-cell'); if(!cell){clearHL();return;} const line=getLine(startR,startC,+cell.dataset.r,+cell.dataset.c); const found=checkWord(line); if(found) markFound(found,line); else clearHL(); });
+
+  const tc=(e)=>{ e.preventDefault(); const t=e.touches[0]||e.changedTouches[0]; return document.elementFromPoint(t.clientX,t.clientY)?.closest('.ws-cell'); };
+  gridEl.addEventListener('touchstart',e=>{const cell=tc(e);if(!cell)return;selecting=true;startR=+cell.dataset.r;startC=+cell.dataset.c;hl([[startR,startC]]);},{passive:false});
+  gridEl.addEventListener('touchmove',e=>{if(!selecting)return;const cell=tc(e);if(!cell)return;hl(getLine(startR,startC,+cell.dataset.r,+cell.dataset.c));},{passive:false});
+  gridEl.addEventListener('touchend',e=>{if(!selecting)return;selecting=false;const cell=tc(e);if(!cell){clearHL();return;}const line=getLine(startR,startC,+cell.dataset.r,+cell.dataset.c);const found=checkWord(line);if(found)markFound(found,line);else clearHL();},{passive:false});
+}
+
+// ═══════════════════════════════════════════════
+// LEVEL UP
+// ═══════════════════════════════════════════════
+function showLevelUp() {
+  document.getElementById('levelup-title').textContent = '¡Subiste de nivel!';
+  document.getElementById('levelup-sub').textContent = `${LEVEL_NAMES[state.level]} → ${LEVEL_NAMES[Math.min(4,state.level+1)]}`;
+  document.getElementById('levelup-overlay').classList.add('show');
+}
+document.getElementById('levelup-confirm').addEventListener('click',()=>{
+  state.level=Math.min(4,state.level+1); state.levelProgress=0; state.usedWords.clear();
+  document.getElementById('levelup-overlay').classList.remove('show');
+  showToast(`🆙 Nivel ${state.level} — ${LEVEL_NAMES[state.level]}`,'info',2200);
+  renderExercise();
+});
+document.getElementById('levelup-stay').addEventListener('click',()=>{
+  state.levelProgress=4;
+  document.getElementById('levelup-overlay').classList.remove('show');
+  renderExercise();
+});
+
+// ═══════════════════════════════════════════════
+// REVIEW SCREEN
+// ═══════════════════════════════════════════════
+function showReviewScreen() {
+  const arr = getFailedWords();
+  const list = document.getElementById('review-list');
+  if (arr.length === 0) {
+    list.innerHTML = `<div class="review-empty"><div class="review-empty-icon">🎉</div><div>No hay palabras para repasar.</div><div style="font-size:0.85rem;color:var(--muted);margin-top:0.3rem">¡Sigue practicando!</div></div>`;
+  } else {
+    const sorted = [...arr].sort((a,b)=>b.failCount-a.failCount);
+    list.innerHTML = sorted.map(w=>`
+      <div class="review-card" id="rcard-${w.en.replace(/\s/g,'_')}">
+        <div class="review-card-info">
+          <div class="review-word-en">${w.en}
+            <button class="audio-btn" style="margin-left:0.4rem" onclick="speak('${w.en.replace(/'/g,"\\'")}',this)">🔊</button>
+          </div>
+          <div class="review-word-es">${w.es}</div>
+          <div class="review-meta">Fallada ${w.failCount}x · ${TOPIC_NAMES[w.topic]||w.topic} · Nivel ${w.level}</div>
+        </div>
+        <div class="review-card-actions">
+          <button class="review-clear-btn" onclick="removeReviewCard('${w.en.replace(/'/g,"\\'")}')">✕</button>
+        </div>
+      </div>`).join('') +
+      `<button class="review-practice-btn" onclick="startReviewMode()">🔁 Practicar todas estas palabras</button>`;
+  }
+  showScreen('review');
+}
+
+function removeReviewCard(en) {
+  removeFailedWord(en);
+  const card = document.getElementById(`rcard-${en.replace(/\s/g,'_')}`);
+  if (card) card.remove();
+  const arr = getFailedWords();
+  if (arr.length === 0) showReviewScreen();
+}
+
+function startReviewMode() {
+  const arr = getFailedWords();
+  if (arr.length === 0) return;
+  state.isReviewMode = true;
+  state.reviewQueue = shuffle([...arr]);
+  state.streak = 0; state.score = 0; state.levelProgress = 0; state.exNum = 0;
+  state.topic = arr[0].topic || 'daily';
+  state.level = arr[0].level || 1;
+  showScreen('game');
+  renderExercise();
+}
+
+// ═══════════════════════════════════════════════
+// PLACEMENT TEST
+// ═══════════════════════════════════════════════
+const PLACEMENT_POOL = [];
+[1,2,3,4].forEach(l=>{ Object.keys(VOCAB).forEach(topic=>{ VOCAB[topic][l].slice(0,2).forEach(w=>PLACEMENT_POOL.push({...w,level:l,topic})); }); });
+
+let placementQ=[],placementIdx=0,placementCorrect=0;
+
+function startPlacement(topic) {
+  placementIdx=0; placementCorrect=0;
+  const pool=PLACEMENT_POOL.filter(w=>w.topic===topic);
+  placementQ=shuffle(pool).slice(0,10);
+  showScreen('placement'); renderPlacementQ();
+}
+
+function renderPlacementQ() {
+  const zone=document.getElementById('placement-exercise');
+  document.getElementById('placement-fill').style.width=(placementIdx/placementQ.length*100)+'%';
+  document.getElementById('placement-q-count').textContent=`${placementIdx}/${placementQ.length}`;
+  if(placementIdx>=placementQ.length) {
+    const pct=placementCorrect/placementQ.length;
+    state.level = pct>=0.8?4:pct>=0.6?3:pct>=0.4?2:1;
+    showToast(`Nivel asignado: ${LEVEL_NAMES[state.level]}`,'info',2500);
+    setTimeout(()=>startGame(),900); return;
+  }
+  const word=placementQ[placementIdx];
+  const wrongs=shuffle(PLACEMENT_POOL.filter(w=>w.en!==word.en&&w.topic===word.topic)).slice(0,3);
+  const opts=shuffle([word,...wrongs]);
+  zone.innerHTML=`
+    <div class="ex-card">
+      <div class="ex-question">¿Cómo se dice <span class="word-highlight">"${word.es}"</span> en inglés?</div>
+      <div class="options-grid">
+        ${opts.map(o=>`<button class="option-btn placement-opt" data-val="${o.en}">${o.en}</button>`).join('')}
+      </div>
+    </div>`;
+  document.querySelectorAll('.placement-opt').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      if(btn.dataset.val===word.en){placementCorrect++;btn.classList.add('selected-correct');}
+      else btn.classList.add('selected-wrong');
+      document.querySelectorAll('.placement-opt').forEach(b=>{b.disabled=true;if(b.dataset.val===word.en)b.classList.add('reveal-correct');});
+      placementIdx++; setTimeout(renderPlacementQ,650);
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════
+// WELCOME SCREEN
+// ═══════════════════════════════════════════════
+document.getElementById('topic-grid').addEventListener('click',e=>{
+  const btn=e.target.closest('.topic-btn'); if(!btn)return;
+  document.querySelectorAll('.topic-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected'); state.topic=btn.dataset.topic; checkStartReady();
+});
+document.getElementById('level-row').addEventListener('click',e=>{
+  const btn=e.target.closest('.level-chip'); if(!btn)return;
+  document.querySelectorAll('.level-chip').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected'); state.level=+btn.dataset.level; checkStartReady();
+});
+function checkStartReady() {
+  const ok=document.querySelector('.topic-btn.selected')&&document.querySelector('.level-chip.selected');
+  document.getElementById('start-btn').disabled=!ok;
+}
+document.getElementById('start-btn').addEventListener('click',()=>{
+  if(!state.topic)return;
+  if(state.level===0) startPlacement(state.topic); else startGame();
+});
+document.getElementById('back-btn').addEventListener('click',backToMenu);
+
+function backToMenu() {
+  state.isReviewMode=false; state.reviewQueue=[];
+  state.streak=0;state.score=0;state.levelProgress=0;state.usedWords.clear();state.exNum=0;
+  document.querySelectorAll('.topic-btn,.level-chip').forEach(b=>b.classList.remove('selected'));
+  state.topic=null; state.level=1;
+  document.getElementById('start-btn').disabled=true;
+  updateFailedBadge();
+  showScreen('welcome');
+}
+
+function startGame() {
+  state.isReviewMode=false; state.streak=0;state.score=0;state.levelProgress=0;state.usedWords.clear();state.exNum=0;
+  showScreen('game'); renderExercise();
+}
+
+// Init
+updateFailedBadge();
+</script>
+</body>
+</html>
