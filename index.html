@@ -22,6 +22,10 @@
     --gold: #f5c542;
     --blue: #55b6ff;
     --ink: #080a12;
+    --passport: #fff6e8;
+    --passport-ink: #1e2b30;
+    --passport-muted: #5a6b70;
+    --coral: #ff7a59;
   }
 
   * { box-sizing: border-box; }
@@ -254,6 +258,28 @@
     gap: 12px;
   }
 
+  .story-guide {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 14px 0 18px;
+  }
+  .story-guide-face {
+    font-size: 2.7rem;
+    line-height: 1;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,.25));
+  }
+  .story-guide-bubble {
+    flex: 1;
+    background: var(--passport);
+    color: var(--passport-ink);
+    border-radius: 16px;
+    border-bottom-left-radius: 4px;
+    padding: 13px 15px;
+    box-shadow: 0 12px 28px rgba(0,0,0,.24);
+    line-height: 1.45;
+  }
+
   .story-card, .achievement-card {
     border: 1px solid var(--border);
     background: linear-gradient(145deg, rgba(85,182,255,.12), rgba(28,33,53,.88));
@@ -261,8 +287,66 @@
     padding: 14px;
   }
 
+  .story-card {
+    position: relative;
+    min-height: 212px;
+    border: 0;
+    border-radius: 18px;
+    background: var(--passport);
+    color: var(--passport-ink);
+    box-shadow: 0 14px 32px rgba(0,0,0,.28);
+    overflow: hidden;
+    text-align: left;
+    transition: transform .14s ease, box-shadow .14s ease;
+  }
+  .story-card:hover { transform: translateY(-2px); box-shadow: 0 18px 42px rgba(0,0,0,.34); }
+  .story-card::before, .story-card::after {
+    content: "";
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    top: 50%;
+    background: #111626;
+    transform: translateY(-50%);
+  }
+  .story-card::before { left: -11px; }
+  .story-card::after { right: -11px; }
+  .boarding-route {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-family: "JetBrains Mono", monospace;
+    color: var(--passport-ink);
+    font-weight: 900;
+    letter-spacing: .08em;
+    margin-bottom: 10px;
+  }
+  .boarding-route .plane { color: var(--coral); font-size: 1.1rem; letter-spacing: 0; }
+  .boarding-route .code { font-size: 1rem; }
+  .boarding-perf {
+    border-top: 2px dashed rgba(30,43,48,.24);
+    margin: 10px 0;
+  }
+  .story-stamp {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    transform: rotate(8deg);
+    border: 2px solid var(--mint);
+    color: #147f66;
+    border-radius: 8px;
+    padding: 3px 8px;
+    font-size: .68rem;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
   .story-card b, .achievement-card b { display: block; margin-bottom: 5px; }
+  .story-card b { color: var(--passport-ink); font-size: 1.06rem; }
   .story-card span, .achievement-card span { color: var(--muted); font-size: .86rem; line-height: 1.4; }
+  .story-card span { color: var(--passport-muted); }
   .story-visual {
     display: grid;
     place-items: center;
@@ -278,23 +362,32 @@
   }
   .story-visual .scene-emoji { font-size: 2.15rem; line-height: 1; }
   .story-visual img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .story-card.airport { background: linear-gradient(145deg, rgba(85,182,255,.22), rgba(28,33,53,.9)); }
-  .story-card.hotel { background: linear-gradient(145deg, rgba(108,99,255,.22), rgba(28,33,53,.9)); }
-  .story-card.restaurant { background: linear-gradient(145deg, rgba(255,102,128,.2), rgba(28,33,53,.9)); }
-  .story-card.shopping { background: linear-gradient(145deg, rgba(0,215,167,.18), rgba(28,33,53,.9)); }
-  .story-card.work { background: linear-gradient(145deg, rgba(245,197,66,.18), rgba(28,33,53,.9)); }
-  .story-card.health { background: linear-gradient(145deg, rgba(255,102,128,.18), rgba(28,33,53,.9)); }
-  .story-card.daily { background: linear-gradient(145deg, rgba(255,255,255,.12), rgba(28,33,53,.9)); }
-  .story-card.travel { background: linear-gradient(145deg, rgba(85,182,255,.16), rgba(108,99,255,.16)); }
-  .story-card.friends { background: linear-gradient(145deg, rgba(0,215,167,.14), rgba(245,197,66,.14)); }
-  .story-card.emergency { background: linear-gradient(145deg, rgba(255,102,128,.24), rgba(28,33,53,.92)); }
-  .achievement-card.unlocked { border-color: var(--gold); background: linear-gradient(145deg, rgba(245,197,66,.14), rgba(28,33,53,.9)); }
-  .story-stage {
-    border: 1px solid var(--border);
-    background: rgba(28,33,53,.84);
+  .story-card.airport { background: linear-gradient(145deg, #fff6e8, #d9f2ff); }
+  .story-card.hotel { background: linear-gradient(145deg, #fff6e8, #ece7ff); }
+  .story-card.restaurant { background: linear-gradient(145deg, #fff6e8, #ffe0d8); }
+  .story-card.shopping { background: linear-gradient(145deg, #fff6e8, #ddfaef); }
+  .story-card.work { background: linear-gradient(145deg, #fff6e8, #fff0c8); }
+  .story-card.health { background: linear-gradient(145deg, #fff6e8, #ffe1e6); }
+  .story-card.daily { background: linear-gradient(145deg, #fff6e8, #edf0f5); }
+  .story-card.travel { background: linear-gradient(145deg, #fff6e8, #ddedff); }
+  .story-card.friends { background: linear-gradient(145deg, #fff6e8, #e6f8d8); }
+  .story-card.emergency { background: linear-gradient(145deg, #fff6e8, #ffd6dc); }
+  .achievement-card {
+    border: 2px solid rgba(245,197,66,.35);
     border-radius: 12px;
-    padding: 18px;
+    background: rgba(14,17,31,.62);
+    transform: rotate(-1deg);
+  }
+  .achievement-card:nth-child(even) { transform: rotate(1.5deg); }
+  .achievement-card.unlocked { border-color: var(--gold); color: var(--gold); background: rgba(245,197,66,.10); box-shadow: 0 0 18px rgba(245,197,66,.12); }
+  .story-stage {
+    border: 0;
+    background: var(--passport);
+    color: var(--passport-ink);
+    border-radius: 18px;
+    padding: 20px;
     margin-top: 18px;
+    box-shadow: 0 18px 46px rgba(0,0,0,.34);
   }
 
   .story-scene {
@@ -303,31 +396,47 @@
     margin: 12px 0 16px;
   }
   .story-speaker {
-    color: var(--gold);
+    color: var(--coral);
     font-weight: 800;
     margin-top: 10px;
   }
   .story-context, .bruno-line, .mini-challenge {
-    border: 1px solid rgba(255,255,255,.08);
-    background: rgba(255,255,255,.055);
+    border: 1px solid rgba(30,43,48,.10);
+    background: rgba(30,43,48,.045);
     border-radius: 8px;
     padding: 10px 12px;
-    color: var(--muted);
+    color: var(--passport-muted);
     line-height: 1.45;
     margin-top: 10px;
   }
   .bruno-line {
-    border-color: rgba(0,215,167,.22);
-    color: #dffbf5;
+    border-color: rgba(0,145,115,.22);
+    background: #ecfff9;
+    color: #145d50;
+    border-bottom-left-radius: 2px;
   }
   .mini-challenge {
-    border-color: rgba(245,197,66,.22);
-    color: #f8e7ad;
+    border-color: rgba(245,197,66,.52);
+    background: #fff3cf;
+    color: #684c07;
   }
   .story-stage .story-visual {
     width: 86px;
     height: 86px;
     font-size: 1.35rem;
+  }
+  .story-stage .options { grid-template-columns: 1fr; }
+  .story-stage .option {
+    background: #fffdf8;
+    color: var(--passport-ink);
+    border: 2px solid rgba(30,43,48,.12);
+    border-radius: 14px;
+    box-shadow: 0 4px 0 rgba(30,43,48,.16);
+    text-align: left;
+  }
+  .story-stage .option:hover, .story-stage .option:focus {
+    border-color: var(--coral);
+    outline: none;
   }
 
   .setup-panel {
@@ -834,6 +943,10 @@
   <div class="shell" style="padding:24px 0 40px">
     <h2>Historias interactivas</h2>
     <p style="color:var(--muted);line-height:1.55">Elige decisiones en ingles y avanza por escenas cortas. Cada historia premia contexto, memoria y comprension.</p>
+    <section class="story-guide" id="storyGuide">
+      <div class="story-guide-face">🐶</div>
+      <div class="story-guide-bubble" id="storyGuideBubble">Bruno found a new adventure for you. Pick a boarding pass and I will guide you.</div>
+    </section>
     <div class="story-grid" id="storyGrid"></div>
     <div class="story-stage hidden" id="storyStage"></div>
   </div>
@@ -1997,14 +2110,28 @@ function renderStories() {
   normalizeProgress();
   const grid = document.getElementById("storyGrid");
   const recommended = getNextStoryForUser();
+  const guide = document.getElementById("storyGuideBubble");
+  if (guide && STORY_SCENARIOS[recommended]) {
+    guide.innerHTML = `Bruno found your next route: <b>${STORY_SCENARIOS[recommended].title}</b>. Pick the boarding pass when you are ready.`;
+  }
   grid.innerHTML = getOrderedStories().map(([id, story]) => {
     const done = !!progress.stories.completed[id];
-    return `<button class="story-card ${story.theme || ""} ${done ? "achievement-card unlocked" : ""}" data-story="${id}">
+    const [from, to] = storyRouteCodes(id, story);
+    return `<button class="story-card ${story.theme || ""} ${done ? "unlocked" : ""}" data-story="${id}">
+      ${done ? `<span class="story-stamp">Completed</span>` : ""}
+      <div class="boarding-route"><span class="code">${from}</span><span class="plane">✈</span><span class="code">${to}</span></div>
+      <div class="boarding-perf"></div>
       ${storyVisual(story)}
       <b>${id === recommended ? "Recommended: " : ""}${story.title}</b>
       <span>${story.intro}<br>${story.character} | ${story.level} | ${story.scenes.length} steps<br>${done ? "Completed" : `Reward: ${story.reward} coins`}</span>
+      <div class="boarding-perf"></div>
     </button>`;
   }).join("");
+}
+
+function storyRouteCodes(id, story) {
+  const themeCodes = { airport: ["SJO", "GATE"], hotel: ["LOBBY", "ROOM"], restaurant: ["MENU", "BILL"], shopping: ["SHOP", "BAG"], work: ["DESK", "BOSS"], health: ["CLINIC", "CARE"], emergency: ["SOS", "SAFE"], travel: ["MAP", "GO"], friends: ["HI", "PAL"], daily: ["HOME", "DAY"] };
+  return themeCodes[story.theme] || [id.slice(0, 3).toUpperCase(), "ADV"];
 }
 
 function getOrderedStories() {
