@@ -1763,6 +1763,7 @@ function defaultProgress() {
     achievements: {},
     bruno: { xp: 0, level: 1, energy: 10, accessories: {}, equipped: null },
     profile: { displayName: "" },
+    vocab: { recent: [], introduced: {} },
     records: { survivalBest: 0, totalPoints: 0 },
     lastSeen: null
   };
@@ -1797,6 +1798,9 @@ function normalizeProgress() {
   progress.bruno.equipped ??= null;
   progress.profile ||= { displayName: "" };
   progress.profile.displayName ??= "";
+  progress.vocab ||= { recent: [], introduced: {} };
+  progress.vocab.recent ||= [];
+  progress.vocab.introduced ||= {};
   progress.records ||= { survivalBest: 0, totalPoints: 0 };
   progress.records.survivalBest ??= 0;
   progress.records.totalPoints ??= 0;
@@ -1953,6 +1957,10 @@ function mergeProgress(remote) {
   progress.bruno = {...(remote.bruno || {}), ...(progress.bruno || {})};
   progress.bruno.accessories = {...(remote.bruno?.accessories || {}), ...(progress.bruno?.accessories || {})};
   progress.profile = {...(remote.profile || {}), ...(progress.profile || {})};
+  progress.vocab = {
+    introduced: {...(remote.vocab?.introduced || {}), ...(progress.vocab?.introduced || {})},
+    recent: [...new Set([...(progress.vocab?.recent || []), ...(remote.vocab?.recent || [])])].slice(0, 24)
+  };
   progress.records = {...(remote.records || {}), ...(progress.records || {})};
   progress.lastSeen = Math.max(remote.lastSeen || 0, progress.lastSeen || 0);
   normalizeProgress();
@@ -2021,15 +2029,21 @@ function recordAnswer(word, correct) {
   progress.days[day].attempts++;
   if (correct) progress.days[day].correct++;
 
-  const id = `${word.topic}:${word.level}:${word.en}`;
+  const id = wordId(word);
   progress.words[id] ||= { en: word.en, es: word.es, topic: word.topic, level: word.level, attempts: 0, correct: 0, wrong: 0, last: null };
   progress.words[id].attempts++;
   progress.words[id].last = Date.now();
   if (correct) progress.words[id].correct++; else progress.words[id].wrong++;
   if (progress.words[id].correct >= 3 && progress.words[id].wrong <= 1) progress.mastered[id] = true;
   if (!correct) delete progress.mastered[id];
+  progress.vocab.introduced[id] = progress.vocab.introduced[id] || Date.now();
+  progress.vocab.recent = [id, ...(progress.vocab.recent || []).filter(item => item !== id)].slice(0, 24);
   progress.lastSeen = Date.now();
   saveProgress();
+}
+
+function wordId(word) {
+  return `${word.topic}:${word.level}:${word.en}`;
 }
 
 function flattenWords(topic = app.topic, level = app.level) {
@@ -2051,16 +2065,75 @@ function shuffle(items) {
   return [...items].sort(() => Math.random() - .5);
 }
 
+function unlockedTopicsForPractice() {
+  const masteredCount = Object.keys(progress.mastered || {}).length;
+  return Object.keys(TOPICS).filter(topic => (
+    topic === app.topic ||
+    topic === "daily" ||
+    topicStars(topic) > 0 ||
+    masteredCount >= 6
+  ));
+}
+
+function practiceCandidates() {
+  const levels = Array.from({ length: Math.min(4, app.level + 1) }, (_, i) => i + 1);
+  const topics = app.mode === "solo" ? unlockedTopicsForPractice() : Object.keys(TOPICS);
+  return topics.flatMap(topic => levels.flatMap(level => flattenWords(topic, level)));
+}
+
+function scoreWordForPractice(word) {
+  const id = wordId(word);
+  const meta = progress.words[id];
+  const recentIndex = (progress.vocab.recent || []).indexOf(id);
+  const ratio = meta?.attempts ? meta.correct / meta.attempts : 0;
+  let score = Math.random() * 12;
+  if (!meta) score += 90;
+  if (word.topic === app.topic) score += 22;
+  if (word.level === app.level) score += 18;
+  if (word.level === app.level + 1) score += 12;
+  if (meta?.wrong > 0 || (meta?.attempts > 0 && ratio < .7)) score += 55;
+  if (meta?.attempts >= 2 && ratio >= .85) score -= 35;
+  if (progress.mastered[id]) score -= 45;
+  if (recentIndex >= 0) score -= 90 - Math.min(recentIndex, 12) * 6;
+  if (app.current && wordId(app.current) === id) score -= 120;
+  return score;
+}
+
+function chooseWeightedWord(candidates) {
+  const unique = [...new Map(candidates.map(word => [wordId(word), word])).values()];
+  const recent = new Set((progress.vocab.recent || []).slice(0, Math.min(10, Math.floor(unique.length / 2))));
+  const freshEnough = unique.filter(word => !recent.has(wordId(word)));
+  const pool = freshEnough.length >= 4 ? freshEnough : unique;
+  const ranked = pool
+    .map(word => ({ word, score: scoreWordForPractice(word) }))
+    .sort((a, b) => b.score - a.score);
+  const shortlist = ranked.slice(0, Math.min(8, ranked.length));
+  return shortlist[Math.floor(Math.random() * shortlist.length)]?.word || shuffle(unique).pop();
+}
+
+function buildSessionPool(sourceWords = practiceCandidates(), limit = 80) {
+  const sessionRecent = new Set((progress.vocab.recent || []).slice(0, 12));
+  const ranked = [...new Map(sourceWords.map(word => [wordId(word), word])).values()]
+    .map(word => ({ word, score: scoreWordForPractice(word) + (sessionRecent.has(wordId(word)) ? -70 : 0) }))
+    .sort((a, b) => b.score - a.score);
+  const ordered = [];
+  ranked.forEach(item => {
+    if (!ordered.some(word => wordId(word) === wordId(item.word))) ordered.push(item.word);
+  });
+  return shuffle(ordered.slice(0, Math.min(limit, ordered.length)));
+}
+
 function pickWord() {
   if (app.mode === "review") {
     const weak = weakWords();
     if (weak.length) {
-      const picked = weak[Math.floor(Math.random() * weak.length)];
+      const notRecent = weak.filter(word => !(progress.vocab.recent || []).slice(0, 8).includes(wordId(word)));
+      const source = notRecent.length ? notRecent : weak;
+      const picked = source[Math.floor(Math.random() * source.length)];
       return {...picked};
     }
   }
-  if (!app.pool.length) app.pool = shuffle(flattenWords());
-  return app.pool.pop();
+  return chooseWeightedWord(practiceCandidates());
 }
 
 function renderTopics() {
@@ -2255,7 +2328,7 @@ function startGame(placement = false) {
   app.player = 0;
   app.lives = app.mode === "survival" ? 3 : app.lives;
   app.players = [{name:"Persona A",score:0,correct:0,attempts:0},{name:"Persona B",score:0,correct:0,attempts:0}];
-  app.pool = placement ? shuffle(allWords()) : shuffle(flattenWords());
+  app.pool = placement ? buildSessionPool(allWords(), 90) : buildSessionPool(practiceCandidates(), 70);
   app.current = { starting: true };
   document.getElementById("playersBox").classList.toggle("hidden", app.mode !== "duel");
   showView("game");
@@ -2273,7 +2346,7 @@ function nextQuestion() {
   }
   app.answered = false;
   app.questionCount++;
-  const word = (app.mode === "challenge" || app.mode === "survival") ? (app.pool.pop() || shuffle(allWords()).pop()) : pickWord();
+  const word = (app.mode === "challenge" || app.mode === "survival") ? (app.pool.pop() || chooseWeightedWord(allWords())) : pickWord();
   app.current = word;
   const unlockedTypes = ["esToEn","enToEs","type","listening","wordSearch"];
   if (app.level >= 2) unlockedTypes.push("sentence");
@@ -2693,12 +2766,12 @@ function adaptLevel() {
   if (app.mode === "review") return;
   if (app.correct >= 8 && app.attempts >= 10 && app.correct / app.attempts >= .85 && app.level < 4) {
     app.level++;
-    app.pool = shuffle(flattenWords());
+    app.pool = buildSessionPool(practiceCandidates(), 70);
     toast(`Subiste a ${LEVELS[app.level]}`);
   }
   if (app.attempts >= 8 && app.correct / app.attempts < .45 && app.level > 1) {
     app.level--;
-    app.pool = shuffle(flattenWords());
+    app.pool = buildSessionPool(practiceCandidates(), 70);
     toast(`Bajamos a ${LEVELS[app.level]} para reforzar bases`);
   }
 }
